@@ -1,4 +1,5 @@
 import { config as loadEnv } from "dotenv";
+import { homedir } from "node:os";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -21,14 +22,16 @@ function readPort(value: string | undefined): number {
 }
 
 export function readConfig(environment: NodeJS.ProcessEnv = process.env): ApiConfig {
+  const appDataDirectory = process.platform === "win32"
+    ? environment.LOCALAPPDATA ?? resolve(homedir(), "AppData", "Local")
+    : environment.XDG_DATA_HOME ?? resolve(homedir(), ".local", "share");
+  const databasePath = environment.DATABASE_PATH
+    ? resolve(dirname(fileURLToPath(import.meta.url)), "../", environment.DATABASE_PATH)
+    : resolve(appDataDirectory, "PointNemo", "point-nemo.sqlite");
   return {
     port: readPort(environment.API_PORT),
-    databasePath: resolve(
-      dirname(fileURLToPath(import.meta.url)),
-      "../",
-      environment.DATABASE_PATH ?? "data/point-nemo.sqlite",
-    ),
+    databasePath,
     ollamaBaseUrl: (environment.OLLAMA_BASE_URL ?? "http://localhost:11434").replace(/\/$/, ""),
-    ollamaModel: environment.OLLAMA_MODEL ?? "qwen3:4b",
+    ollamaModel: environment.OLLAMA_MODEL ?? "qwen2.5:1.5b",
   };
 }

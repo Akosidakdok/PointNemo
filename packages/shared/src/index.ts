@@ -2,7 +2,12 @@ export {
   GeneratedQuestionSchema,
   GeneratedQuestionResponseSchema,
   GeneratedQuestionsSchema,
+  MvpQuestionDraftSchema,
+  MvpQuestionSetDraftSchema,
+  MvpTopicDraftSchema,
   ProgressSchema,
+  CreateRunRequestSchema,
+  SubmitAnswerRequestSchema,
   StudyContentSchema,
   SubjectSchema,
   TopicSchema,
@@ -10,6 +15,9 @@ export {
 
 export type {
   GeneratedQuestion,
+  MvpQuestionDraft,
+  MvpQuestionSetDraft,
+  MvpTopicDraft,
   Progress,
   StudyContent,
   Subject,

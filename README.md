@@ -11,17 +11,27 @@ Point Nemo is a local-first study expedition. Students travel from Point Nemo th
 
 From the repository root:
 
-```powershell
+```cmd
 npm install
-Copy-Item .env.example .env
+copy .env.example .env
 npm run dev
 ```
 
-Open [http://127.0.0.1:5173](http://127.0.0.1:5173). The Express API listens on port `3001`; Vite proxies `/api` requests to it. The API initializes SQLite on first start at `apps/api/data/point-nemo.sqlite`.
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173). The Express API listens on port `3001`; Vite proxies `/api` requests to it. By default, SQLite is initialized in the user's local app-data directory. Set `DATABASE_PATH` in `.env` only to override that location.
+
+### UI playground
+
+For isolated UI mockups that do not need the API, open Command Prompt at the repository root and run:
+
+```cmd
+npm run dev:playground --workspace=@point-nemo/web
+```
+
+Then open [http://127.0.0.1:5174](http://127.0.0.1:5174). The starter page previews the five MVP screens; PDF extraction, Ollama, game scoring, and SQLite are not connected. See [`apps/web/ui-playground/README.md`](apps/web/ui-playground/README.md) for details. Stop the server with `Ctrl+C`.
 
 For a production build and TypeScript checks:
 
-```powershell
+```cmd
 npm run typecheck
 npm run build
 ```
@@ -32,24 +42,24 @@ The checked-in `.env.example` contains local defaults:
 
 ```dotenv
 API_PORT=3001
-DATABASE_PATH=./data/point-nemo.sqlite
+# DATABASE_PATH=./data/point-nemo.sqlite
 OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=qwen3:4b
+OLLAMA_MODEL=qwen2.5:1.5b
 ```
 
-Change `OLLAMA_BASE_URL` or `OLLAMA_MODEL` in your ignored `.env` as needed. `qwen3:4b` is only a starting candidate from the project proposal; benchmark candidate models on the team's hardware before settling on one. The app's Local Intelligence card and `GET /api/ai/status` report whether Ollama is reachable and what to check when it is unavailable.
+Change `OLLAMA_BASE_URL` or `OLLAMA_MODEL` in your ignored `.env` as needed. The API reports whether Ollama and the configured model are ready at `GET /api/ai/status`.
 
 ## What is included
 
 - A responsive React/CSS expedition map with Point Nemo, lesson waypoints, an iceberg hazard, an anglerfish encounter, and a locked lesson-boss waypoint.
 - A deterministic turn-based battle example. Activate the encounter node, then use Sonar pulse; the enemy responds automatically. The sample battle is local frontend state and does not save progress.
-- An Express health endpoint at `GET /api/health` and an Ollama status endpoint at `GET /api/ai/status`.
-- SQLite initialization for subjects, topics, study materials, questions, attempts, and progress.
-- Shared Zod schemas for study content, progress, and generated multiple-choice questions. The Ollama service validates generated question data before returning it.
-- A document-extraction interface for PDF, DOCX, or PPTX files, ready for parser libraries to be connected.
+- Express endpoints for PDF admission, extraction/generation jobs, cancellation/retry, local document listing/deletion, run resume, and answer scoring. Route contracts are documented in [`docs/api/LOCAL_API.md`](docs/api/LOCAL_API.md).
+- SQLite storage for extracted pages, validated question sets, job state, run slots, attempts, feedback, scores, and badges, alongside the existing starter tables.
+- Local PDF text extraction and Ollama generation for exactly nine source-grounded questions, with bounded repair and evidence checks.
+- Shared Zod schemas for existing study content and the nine-question MVP set.
 - An image asset generator and bundled artwork for the explorer, deep-sea creatures, and ocean map.
 
-The first slice does not yet accept uploads, extract documents, expose an AI question-generation endpoint, or persist lesson and battle progress. Those are extension points for the next implementation phase. The bundled artwork is stored under `assets/`; the current map and creature UI still use CSS shapes and symbols, while the battle uses prepared sprite effects for attacks. Track asset sources and licenses when illustrations are added.
+The API modules are available for local integration, but the main web app still shows the earlier expedition shell and does not yet use the new endpoints. The isolated [`apps/web/ui-playground`](apps/web/ui-playground/README.md) previews the MVP screens with sample content. End-to-end flow, scoring, persistence, offline behavior, and model quality still need implementation evidence. The bundled artwork is stored under `assets/`; the current map and creature UI still use CSS shapes and symbols, while the battle uses prepared sprite effects for attacks. Track asset sources and licenses when illustrations are added.
 
 ## Art and asset generation
 

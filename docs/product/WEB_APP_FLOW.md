@@ -12,7 +12,27 @@
 - Persist validated source material, generated questions, attempts, and run progression in local SQLite. The source PDF itself is handled in memory during extraction and is not retained by default.
 - The only study experience in scope is the three-zone descent followed by its boss review. Expedition maps, standalone review or flashcard modes, leaderboards, and broad dashboard routing are deferred.
 
+## Product module map
+
+The wider web app places a title screen and then a login/signup page before this experience. This flow and the UI playground start after those entry screens, at Module 1: Local Library. The title and login/signup screens are not represented in the playground. Login, signup, account state, and authentication remain outside the functional hackathon MVP; they are not part of the local study flow.
+
+| Module | Screens and responsibilities | Leads to |
+| --- | --- | --- |
+| **1. Local Library & Document Intake** | Upload and validate one PDF; show saved local materials, active run, and attempts | Module 2 after a document is accepted |
+| **2. Sonar / Local AI Processing** | Show extraction, question generation, validation, bounded repair, and actionable failures | Module 3 only after all 9 questions pass validation |
+| **3. Ocean Descent** | Run Surface, Twilight, and Midnight encounters; handle answers, HP, XP, and source-backed feedback | Module 4 after passing all three zones; Module 5 after a failed zone |
+| **4. Point Nemo Boss Review** | Replay the same 9 questions in the saved shuffled order and check the 8/9 threshold | Module 5 on pass or fail |
+| **5. Results & Saved Progress** | Show outcome, mistakes, retry, and resume state persisted locally in SQLite | Module 1 or resume the saved run |
+
+These are learner-facing product modules. They describe screen ownership and transitions, not required source-code package boundaries.
+
+## Additional playground previews outside MVP
+
+The frontend playground also has standalone Profile and Leaderboard pages for visual review. They use sample data and are not part of the functional five-module MVP: Profile is a top-bar shortcut, and Leaderboard is an extra preview tab. Neither page implies authentication, cloud data, or an online leaderboard. The MVP exclusions above remain in force unless product scope is deliberately revised.
+
 ## Linear user journey
+
+The diagram starts at the MVP entry point, after any wider-app login/signup page.
 
 ```mermaid
 flowchart LR
@@ -111,14 +131,14 @@ Save the run and progression locally in SQLite, including the validated question
 
 ## MVP screen inventory
 
-| Screen/state | Required content and actions |
+| Module / screen state | Required content and actions |
 | --- | --- |
-| Local library | Upload PDF; show admission limits; list saved materials/question sets, active run, and attempt history; resume or retry |
-| Sonar loading | Actual Extraction → Generation → Validation states, elapsed time, cancel, and specific failure/retry feedback |
-| Zone encounter | Zone/enemy, difficulty, question count, HP, XP, accessible answer choices, and answer resolution |
-| Answer feedback | Correctness; for a miss, correct answer, explanation, exact quote, and PDF page; Continue action |
-| Boss review | Megalodon, mixed-topic label, saved shuffled nine-question order, score toward 8/9 |
-| Results | Pass/fail, badge if earned, stage/boss scores, mistakes and sources, retry, library, and resume when applicable |
+| **Module 1 · Local library** | Upload PDF; show admission limits; list saved materials/question sets, active run, and attempt history; resume or retry |
+| **Module 2 · Sonar loading** | Actual Extraction → Generation → Validation states, elapsed time, cancel, and specific failure/retry feedback |
+| **Module 3 · Zone encounter** | Zone/enemy, difficulty, question count, HP, XP, accessible answer choices, and answer resolution |
+| **Module 3 · Answer feedback** | Correctness; for a miss, correct answer, explanation, exact quote, and PDF page; Continue action |
+| **Module 4 · Boss review** | Megalodon, mixed-topic label, saved shuffled nine-question order, score toward 8/9 |
+| **Module 5 · Results** | Pass/fail, badge if earned, stage/boss scores, mistakes and sources, retry, library, and resume when applicable |
 
 ## Local-first behavior and handoff boundaries
 
