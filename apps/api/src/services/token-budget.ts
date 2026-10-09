@@ -38,12 +38,12 @@ export class QwenTokenCounter implements TokenCounter {
 
   constructor() {
     // src/services and dist/services both resolve to this repository-local asset.
-    const bytes = readFileSync(fileURLToPath(new URL("../../../../assets/tokenizer/qwen2.5-tokenizer.json", import.meta.url)));
-    const config = readFileSync(fileURLToPath(new URL("../../../../assets/tokenizer/tokenizer_config.json", import.meta.url)));
+    const bytes = readFileSync(fileURLToPath(new URL("../../../../assets/tokenizer/qwen2.5-tokenizer.json", import.meta.url)), "utf8").replace(/\r\n/g, "\n");
+    const config = readFileSync(fileURLToPath(new URL("../../../../assets/tokenizer/tokenizer_config.json", import.meta.url)), "utf8").replace(/\r\n/g, "\n");
     if (createHash("sha256").update(bytes).digest("hex") !== TOKENIZER_HASH || createHash("sha256").update(config).digest("hex") !== CONFIG_HASH) {
       throw new ServiceUnavailableError("TOKENIZER_INVALID", "The pinned local Qwen tokenizer assets are missing or changed. Restore assets/tokenizer before generating.");
     }
-    const asset = JSON.parse(bytes.toString("utf8")) as TokenizerAsset;
+    const asset = JSON.parse(bytes) as TokenizerAsset;
     if (asset.normalizer.type !== "NFC" || asset.model.type !== "BPE") throw new Error("Unsupported tokenizer format.");
     this.vocab = asset.model.vocab;
     asset.model.merges.forEach((pair, rank) => this.ranks.set(pair, rank));

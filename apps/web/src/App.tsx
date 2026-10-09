@@ -1,28 +1,12 @@
-<<<<<<< HEAD
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   ApiRequestError, getAppStatus, getQuestionSet, createRun, getRun, submitRunAnswer,
   fetchLibrary, deleteDocument, cancelGenerationJob, toDescentRun,
   type AppStatus, type DescentRun, type QuestionSet, type RunDetail,
   type GenerationJob, type LibraryDocument, type AnswerSubmitResponse,
-=======
-import { useState, useEffect, useCallback, useMemo } from "react";
-import {
-  type DescentRun,
-  type QuestionSet,
-} from "@point-nemo/shared";
-import {
-  getAppStatus,
-  uploadDocument,
-  getGenerationJob,
-  getQuestionSet,
-  fetchRuns,
-  type AppStatus,
->>>>>>> origin/main
 } from "./api";
 import { GenerationSession, GenerationFailureError, type ProcessingStage } from "./processing";
 import { loadAssetBundle, type AssetBundle } from "./game/sprites";
-<<<<<<< HEAD
 import { OceanCanvas } from "./game/OceanCanvas";
 import { LocalLibrary } from "./components/LocalLibrary";
 import { UploadDialog } from "./components/UploadDialog";
@@ -33,36 +17,19 @@ import { SettingsModal } from "./components/SettingsModal";
 import { SonarPreloader } from "./components/ui/SonarPreloader";
 import { AuthPage } from "./components/auth/AuthPage";
 import { type LocalExplorer } from "./components/auth/auth.types";
-=======
-import { questionSetToLessonRecord, type LessonRecord } from "./game/lessonCatalog";
-import { SettingsModal } from "./components/SettingsModal";
-import { SonarPreloader } from "./components/ui/SonarPreloader";
-import { AuthPage } from "./components/auth/AuthPage";
-import { type AuthenticatedUser } from "./components/auth/auth.types";
-import { AppHeader, type AppNavScreen } from "./components/navigation/AppHeader";
-import { LibraryHubView } from "./components/library/LibraryHubView";
-import { DocumentIntakeModule } from "./components/intake/DocumentIntakeModule";
-import { GameplayModule } from "./components/gameplay/GameplayModule";
-import { ProfileView } from "./components/profile/ProfileView";
-import { LeaderboardView } from "./components/leaderboard/LeaderboardView";
->>>>>>> origin/main
 
 const initialStatus: AppStatus = {
   api: { available: false, message: "Checking local API…" },
   ai: { available: false, message: "Checking Ollama…" },
 };
-<<<<<<< HEAD
 type AppView = "library" | "processing" | "encounter" | "results";
 const messageOf = (error: unknown) => error instanceof Error ? error.message : "The local request could not be completed.";
-=======
->>>>>>> origin/main
 
 export function App() {
   const [bundle, setBundle] = useState<AssetBundle | null>(null);
   const [preloadProgress, setPreloadProgress] = useState(0);
   const [preloadTotal, setPreloadTotal] = useState(8);
   const [preloadError, setPreloadError] = useState<string | null>(null);
-<<<<<<< HEAD
   const [view, setView] = useState<AppView>("library");
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -78,46 +45,6 @@ export function App() {
   const [processingFile, setProcessingFile] = useState<File | null>(null);
   const [processingStage, setProcessingStage] = useState<ProcessingStage>("uploading");
   const [processingJob, setProcessingJob] = useState<GenerationJob | null>(null);
-=======
-
-  // App Navigation Screen
-  const [currentScreen, setCurrentScreen] = useState<AppNavScreen>("library");
-  const [navKey, setNavKey] = useState(0);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [activeInstanceId, setActiveInstanceId] = useState<string | null>("PN-001");
-  const [bossUnlocked, setBossUnlocked] = useState(false);
-
-  const handleNavigate = useCallback(
-    (screen: AppNavScreen) => {
-      setCurrentScreen(screen);
-      setNavKey((k) => k + 1);
-      if (screen === "boss") {
-        setBossUnlocked(true);
-      }
-      if (screen === "descent" && !activeInstanceId) {
-        setActiveInstanceId("PN-001");
-      }
-    },
-    [activeInstanceId]
-  );
-
-  // Theme State
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
-
-  // App & Run Data from SQLite
-  const [status, setStatus] = useState<AppStatus>(initialStatus);
-  const [, setRuns] = useState<DescentRun[]>([]);
-  const [questionSets, setQuestionSets] = useState<QuestionSet[]>([]);
-
-  // Sonar Processing Stage State for Real Document Upload
-  const [extractionStatus, setExtractionStatus] = useState<"waiting" | "active" | "complete" | "failed">("waiting");
-  const [generationStatus, setGenerationStatus] = useState<"waiting" | "active" | "complete" | "failed">("waiting");
-  const [validationStatus, setValidationStatus] = useState<"waiting" | "active" | "complete" | "failed">("waiting");
->>>>>>> origin/main
   const [processingError, setProcessingError] = useState<string | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
   const sessionRef = useRef<GenerationSession | null>(null);
@@ -139,15 +66,9 @@ export function App() {
   const handleExplorer = useCallback((user: LocalExplorer) => {
     setCurrentUser(user);
     try {
-<<<<<<< HEAD
       if (user.remembered) localStorage.setItem("point_nemo_explorer", JSON.stringify(user));
       else localStorage.removeItem("point_nemo_explorer");
     } catch { /* Study records live in the server database. */ }
-=======
-      localStorage.removeItem("point_nemo_explorer");
-    } catch {}
-    setCurrentScreen("library");
->>>>>>> origin/main
   }, []);
 
   const loadAssets = useCallback(async () => {
@@ -162,7 +83,6 @@ export function App() {
   useEffect(() => { void loadAssets(); }, [loadAssets]);
 
   const refreshLibraryData = useCallback(async () => {
-<<<<<<< HEAD
     const version = ++libraryVersion.current;
     const [appStatus, library] = await Promise.allSettled([getAppStatus(), fetchLibrary()]);
     if (version !== libraryVersion.current) return;
@@ -178,19 +98,6 @@ export function App() {
     libraryVersion.current += 1;
     const session = sessionRef.current;
     if (session) void session.cancel().catch(() => { /* Library exposes unconfirmed jobs on next load. */ });
-=======
-    try {
-      const [appStat, libraryData] = await Promise.all([
-        getAppStatus().catch(() => initialStatus),
-        fetchRuns().catch(() => ({ runs: [], questionSets: [] })),
-      ]);
-      setStatus(appStat);
-      setRuns(libraryData.runs);
-      setQuestionSets(libraryData.questionSets);
-    } catch (err) {
-      console.warn("Failed to refresh library data:", err);
-    }
->>>>>>> origin/main
   }, []);
 
   function showRun(detail: RunDetail, questions: QuestionSet) {
@@ -293,7 +200,6 @@ export function App() {
     setProcessingFile(null);
     setView("library");
     void refreshLibraryData();
-<<<<<<< HEAD
   }
 
   async function handleRetryProcessing() {
@@ -379,236 +285,6 @@ export function App() {
       <UploadDialog isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} onConfirmFile={(file) => void handleStartProcessing(file)} />
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} status={status} reducedMotion={reducedMotion} onToggleReducedMotion={() => setReducedMotion((motion) => !motion)} />
     </main>
-=======
-  }, [refreshLibraryData]);
-
-  // Handler: Start Sonar Processing for Uploaded File via Authoritative Backend
-  const handleStartProcessing = useCallback(
-    async (file: File): Promise<QuestionSet | void> => {
-      setExtractionStatus("active");
-      setGenerationStatus("waiting");
-      setValidationStatus("waiting");
-      setProcessingError(null);
-      setIsOllamaOffline(false);
-
-      try {
-        // 1. Upload to /api/documents
-        const uploadResult = await uploadDocument(file);
-        const jobId = uploadResult.jobId;
-
-        // 2. Poll /api/jobs/:id
-        let job = await getGenerationJob(jobId);
-        while (job.state === "extracting" || job.state === "generating" || job.state === "validating") {
-          if (job.state === "extracting") {
-            setExtractionStatus("active");
-            setGenerationStatus("waiting");
-            setValidationStatus("waiting");
-          } else if (job.state === "generating") {
-            setExtractionStatus("complete");
-            setGenerationStatus("active");
-            setValidationStatus("waiting");
-          } else if (job.state === "validating") {
-            setExtractionStatus("complete");
-            setGenerationStatus("complete");
-            setValidationStatus("active");
-          }
-          await new Promise((resolve) => setTimeout(resolve, 800));
-          job = await getGenerationJob(jobId);
-        }
-
-        if (job.state === "failed") {
-          const errMessage = job.errorCode || "Document processing failed.";
-          throw new Error(errMessage);
-        }
-
-        if (job.state === "ready" && job.questionSetId) {
-          setExtractionStatus("complete");
-          setGenerationStatus("complete");
-          setValidationStatus("complete");
-
-          // 3. Load question set
-          const qSet = await getQuestionSet(job.questionSetId);
-          await refreshLibraryData();
-          return qSet;
-        }
-      } catch (err: any) {
-        const msg = err?.message || "Document processing failed.";
-        console.error("Processing error:", err);
-        setProcessingError(msg);
-
-        if (extractionStatus === "active") {
-          setExtractionStatus("failed");
-        } else {
-          setGenerationStatus("failed");
-          setValidationStatus("failed");
-        }
-
-        if (msg.includes("Ollama") || msg.includes("local AI") || err?.code === "OLLAMA_UNAVAILABLE") {
-          setIsOllamaOffline(true);
-        }
-        throw err;
-      }
-    },
-    [extractionStatus, refreshLibraryData]
-  );
-
-  // Convert real SQLite questionSets into playable LessonRecords
-  const customLessonRecords = useMemo<LessonRecord[]>(() => {
-    return questionSets.map((qs) => questionSetToLessonRecord(qs));
-  }, [questionSets]);
-
-  // Preloading View
-  if (!bundle) {
-    return (
-      <main className="pointnemo-app">
-        <SonarPreloader
-          progress={preloadProgress}
-          total={preloadTotal}
-          error={preloadError}
-          onRetry={loadAssets}
-        />
-      </main>
-    );
-  }
-
-  // RPG Title & Authentication Gateway (Before Login)
-  if (!currentUser) {
-    return (
-      <main
-        className="pointnemo-app auth-gateway-app"
-        role="application"
-        aria-label="Point Nemo Authentication Gateway"
-      >
-        <AuthPage
-          onAuthSuccess={handleAuthSuccess}
-          onGuestAccess={handleGuestAccess}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-          reducedMotion={reducedMotion}
-          onToggleReducedMotion={() => setReducedMotion((m) => !m)}
-        />
-
-        {/* Settings Modal */}
-        <SettingsModal
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-          status={status}
-          reducedMotion={reducedMotion}
-          onToggleReducedMotion={() => setReducedMotion((m) => !m)}
-        />
-      </main>
-    );
-  }
-
-  // Main Integrated Post-Login Application Shell
-  return (
-    <div
-      className="playground-shell"
-      role="application"
-      aria-label="Point Nemo Educational Descent"
-    >
-      <div className="app-frame">
-        {/* Top Header Navigation */}
-        <AppHeader
-          currentScreen={currentScreen}
-          onNavigate={handleNavigate}
-          currentUser={currentUser}
-          onLogout={handleLogout}
-          onOpenSettings={() => setIsSettingsOpen(true)}
-          theme={theme}
-          onToggleTheme={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
-          activeInstanceId={activeInstanceId}
-          bossUnlocked={bossUnlocked}
-        />
-
-        {/* Active Screen Content */}
-        <main className="playground-main">
-          {/* Module 1: Local Library Hub */}
-          {currentScreen === "library" && (
-            <LibraryHubView
-              questionSets={questionSets}
-              activeInstanceId={activeInstanceId}
-              onOpenUpload={() => handleNavigate("upload")}
-              onGoToSeas={() => handleNavigate("seas")}
-              bundle={bundle}
-              reducedMotion={reducedMotion}
-            />
-          )}
-
-          {/* Module 2: Document Intake & Sonar Processing */}
-          {(currentScreen === "upload" || currentScreen === "sonar") && (
-            <DocumentIntakeModule
-              onStartRealProcessing={handleStartProcessing}
-              onProcessingFinished={(newQSet) => {
-                if (newQSet) {
-                  setQuestionSets((prev) => [newQSet, ...prev]);
-                }
-                handleNavigate("seas");
-              }}
-              onCancel={() => handleNavigate("library")}
-              realExtractionStatus={extractionStatus}
-              realGenerationStatus={generationStatus}
-              realValidationStatus={validationStatus}
-              realError={processingError}
-              isOllamaOffline={isOllamaOffline}
-            />
-          )}
-
-          {/* Module 3: Gameplay Module (Choose Sea, WASD Map, Combat, Boss, Results) */}
-          {(currentScreen === "seas" ||
-            currentScreen === "descent" ||
-            currentScreen === "boss" ||
-            currentScreen === "results") && (
-            <GameplayModule
-              bundle={bundle}
-              customLessons={customLessonRecords}
-              navKey={navKey}
-              initialSubscreen={
-                currentScreen === "seas"
-                  ? "seas"
-                  : currentScreen === "descent"
-                  ? "descent"
-                  : currentScreen === "boss"
-                  ? "boss"
-                  : "results"
-              }
-              onNavigateScreen={(screen) => handleNavigate(screen)}
-              onUploadNewPdf={() => handleNavigate("upload")}
-              reducedMotion={reducedMotion}
-              onUpdateActiveInstanceId={(id) => setActiveInstanceId(id)}
-            />
-          )}
-
-          {/* Standalone Extra: Diver Profile */}
-          {currentScreen === "profile" && (
-            <ProfileView
-              currentUser={currentUser}
-              bundle={bundle}
-              reducedMotion={reducedMotion}
-            />
-          )}
-
-          {/* Standalone Extra: Leaderboard */}
-          {currentScreen === "leaderboard" && (
-            <LeaderboardView currentUser={currentUser} />
-          )}
-        </main>
-
-        <footer className="playground-footer">
-          <span>POINT NEMO · OCEAN EXPEDITION</span>
-          <span>LOCAL FIRST · OFFLINE PWA</span>
-        </footer>
-      </div>
-
-      {/* Settings Modal */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        status={status}
-        reducedMotion={reducedMotion}
-        onToggleReducedMotion={() => setReducedMotion((m) => !m)}
-      />
-    </div>
->>>>>>> origin/main
   );
 }
 
