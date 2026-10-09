@@ -1,0 +1,13 @@
+node_modules/
+dist/
+**/dist/
+*.tsbuildinfo
+coverage/
+.env
+.env.*
+!.env.example
+apps/api/data/
+*.sqlite
+*.sqlite3
+*.db
+.superpowers/sdd/
