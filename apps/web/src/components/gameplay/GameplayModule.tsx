@@ -198,14 +198,10 @@ export function GameplayModule({
       });
     });
 
-    if (currentInstance.routeNode < 3) {
-      setSubscreen("descent");
-      onNavigateScreen("descent");
-    } else {
-      setSubscreen("boss");
-      onNavigateScreen("boss");
-    }
-  }, [activeInstanceId, currentInstance.routeNode, onNavigateScreen]);
+    // Always return to the descent map so player swims to the next marker (including the final boss at node 4)
+    setSubscreen("descent");
+    onNavigateScreen("descent");
+  }, [activeInstanceId, onNavigateScreen]);
 
   const handleFinishBoss = useCallback(
     (score: number) => {

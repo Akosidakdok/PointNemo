@@ -101,22 +101,21 @@ export function LessonBossView({
 
   return (
     <section className="lesson-boss-view" aria-labelledby="boss-title">
-      <div className="eyebrow">MODULE 04 · LESSON BOSS REVIEW</div>
+      <div className="eyebrow">FINAL CHALLENGE · MASTER REVIEW QUIZ</div>
 
       <div className="boss-hero panel">
         <div className="boss-copy">
-          <h1 id="boss-title">Apex Challenge</h1>
+          <h1 id="boss-title">Final Review Quiz</h1>
           <p>
-            The Hadal Apex Goblin Shark guards the Point Nemo boundary. Prove mastery across all
-            lesson concepts to conquer the expedition.
+            Test your knowledge across all topics to complete this study lesson!
           </p>
 
           <div className="boss-stats">
             <span>
-              <b>09</b> TARGET QUESTIONS
+              <b>09</b> TOTAL QUESTIONS
             </span>
             <span>
-              <b>08</b> REQUIRED TO PASS
+              <b>08</b> PASSING SCORE
             </span>
           </div>
 
@@ -127,33 +126,33 @@ export function LessonBossView({
                 className="secondary-button"
                 onClick={onReturnToDescent}
               >
-                ← Return to descent
+                ← Return to Study Map
               </button>
               <button
                 type="button"
                 className="primary-button"
                 onClick={() => setInReview(true)}
               >
-                Engage Boss Review <span>→</span>
+                Start Final Quiz <span>→</span>
               </button>
             </div>
           ) : (
             <span className="eyebrow" style={{ color: "var(--accent)" }}>
-              COMBAT REVIEW IN PROGRESS: {currentQIndex + 1} / {totalQuestions}
+              QUIZ IN PROGRESS: Question {currentQIndex + 1} of {totalQuestions}
             </span>
           )}
         </div>
 
         <div className="boss-visual">
           <canvas ref={canvasRef} width={420} height={340} className="pixel-scene" />
-          <span>GOBLIN SHARK · APEX BOSS SPRITE</span>
+          <span>FINAL CHALLENGE GUARDIAN</span>
         </div>
       </div>
 
       {inReview && currentQuestion && (
         <div className="panel question-panel" style={{ marginTop: "18px" }}>
           <div className="question-meta">
-            <span>{`BOSS REVIEW QUESTION ${currentQIndex + 1} OF ${totalQuestions}`}</span>
+            <span>{`QUESTION ${currentQIndex + 1} OF ${totalQuestions}`}</span>
             <span>SCORE: {correctCount} / {currentQIndex} CORRECT</span>
           </div>
 
@@ -191,10 +190,10 @@ export function LessonBossView({
               style={{ marginTop: "16px" }}
             >
               {selectedOption === currentQuestion.correct ? (
-                <>✓ <b>Direct hit!</b> Concept confirmed.</>
+                <>✓ <b>Correct!</b> Excellent work.</>
               ) : (
                 <>
-                  ✕ <b>Deflection!</b> Correct answer: <b>{currentQuestion.answer}</b>.
+                  ✕ <b>Incorrect.</b> The correct answer was <b>{currentQuestion.answer}</b>.
                   <p style={{ margin: "6px 0 0", fontSize: "12px", color: "var(--muted)" }}>
                     {currentQuestion.explanation}
                   </p>

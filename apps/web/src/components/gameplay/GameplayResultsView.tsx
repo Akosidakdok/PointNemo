@@ -21,7 +21,7 @@ export function GameplayResultsView({
 
   return (
     <section className="gameplay-results-view" aria-labelledby="results-title">
-      <div className="eyebrow">MODULE 05 · EXPEDITION SUMMARY</div>
+      <div className="eyebrow">STEP 05 · QUIZ RESULTS</div>
 
       <div className="panel results-panel">
         <div className="badge-mark" aria-hidden="true">
@@ -29,29 +29,29 @@ export function GameplayResultsView({
         </div>
 
         <p className="eyebrow center-eyebrow">
-          {passed ? "DESCENT COMPLETE · APEX CONQUERED" : "DESCENT CONCLUDED · RETRY SUGGESTED"}
+          {passed ? "LESSON COMPLETE · GREAT JOB!" : "QUIZ FINISHED · TRY AGAIN TO IMPROVE"}
         </p>
 
-        <h1 id="results-title">{passed ? "Point Nemo Reached!" : "Submersible Returned"}</h1>
+        <h1 id="results-title">{passed ? "Lesson Mastered!" : "Lesson Complete"}</h1>
 
         <p className="muted" style={{ margin: "10px auto 0", maxWidth: "420px" }}>
           {passed
-            ? "Outstanding navigation, explorer. You mastered all lesson concepts through the abyssal trench."
-            : "The Hadal apex proved formidable. Review source notes and dive again to claim complete clearance."}
+            ? "Congratulations! You mastered all topics in this study lesson."
+            : "Good effort! Review your notes and try the quiz again to improve your score."}
         </p>
 
         <div className="score-grid">
           <div>
             <b>{partsCleared} / 3</b>
-            <span>LESSON PARTS</span>
+            <span>TOPICS CLEARED</span>
           </div>
           <div>
             <b>{bossScore} / {totalBossQuestions}</b>
-            <span>FINAL REVIEW</span>
+            <span>FINAL SCORE</span>
           </div>
           <div>
             <b>+{earnedXP}</b>
-            <span>EXPEDITION XP</span>
+            <span>POINTS EARNED</span>
           </div>
         </div>
 
@@ -68,7 +68,7 @@ export function GameplayResultsView({
             className="secondary-button"
             onClick={onChooseSea}
           >
-            Choose Sea
+            Choose Lesson
           </button>
           <button
             type="button"

@@ -6,11 +6,13 @@ interface ProfileViewProps {
   currentUser: AuthenticatedUser | null;
   bundle: AssetBundle | null;
   reducedMotion?: boolean;
+  onBack?: () => void;
 }
 
 export function ProfileView({
   currentUser,
   bundle,
+  onBack,
 }: ProfileViewProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -24,15 +26,19 @@ export function ProfileView({
     ctx.imageSmoothingEnabled = false;
 
     // Diver avatar centered
-    const pScale = speciesScale(bundle, "explorer", 72);
-    drawFrame(
-      ctx,
-      bundle,
-      "explorer.idle.down",
-      Math.round(canvas.width / 2),
-      Math.round(canvas.height * 0.58),
-      pScale
-    );
+    try {
+      const pScale = speciesScale(bundle, "explorer", 72);
+      drawFrame(
+        ctx,
+        bundle,
+        "explorer.down.0",
+        Math.round(canvas.width / 2),
+        Math.round(canvas.height * 0.58),
+        pScale
+      );
+    } catch (err) {
+      console.warn("Failed to render explorer avatar on profile canvas:", err);
+    }
   }, [bundle]);
 
   const displayName = currentUser?.displayName || "Deep Diver";
@@ -40,12 +46,22 @@ export function ProfileView({
 
   return (
     <section className="profile-view" aria-labelledby="profile-title">
-      <div className="eyebrow">EXPLORER DOSSIER</div>
-      <div className="page-heading">
+      <div className="eyebrow">LEARNER PROFILE</div>
+      <div className="page-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
-          <h1 id="profile-title">Profile</h1>
-          <p>Local expedition credentials, diving experience, and milestone achievements.</p>
+          <h1 id="profile-title">My Profile</h1>
+          <p>Your study progress, quiz scores, and achievements.</p>
         </div>
+        {onBack && (
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={onBack}
+            style={{ alignSelf: "center", padding: "8px 14px", fontSize: "12px" }}
+          >
+            ← Back to Library
+          </button>
+        )}
       </div>
 
       <section className="profile-hero panel">
@@ -53,7 +69,7 @@ export function ProfileView({
           <canvas ref={canvasRef} width={112} height={112} className="pixel-scene" />
         </div>
         <div className="profile-identity">
-          <p className="eyebrow">ACTIVE DIVER</p>
+          <p className="eyebrow">STUDENT EXPLORER</p>
           <h2>{displayName}</h2>
           <p>
             Level 04 <span>·</span> 640 / 1,000 XP <span>·</span> {email}
@@ -66,28 +82,28 @@ export function ProfileView({
 
       <div className="profile-stats">
         <section className="panel profile-stat">
-          <span>COMPLETED DESCENTS</span>
+          <span>COMPLETED LESSONS</span>
           <b>03</b>
         </section>
         <section className="panel profile-stat">
-          <span>BEST FINAL REVIEW</span>
+          <span>BEST QUIZ SCORE</span>
           <b>9 / 9</b>
         </section>
         <section className="panel profile-stat">
-          <span>TOTAL XP ACCRUED</span>
+          <span>TOTAL POINTS EARNED</span>
           <b>640</b>
         </section>
       </div>
 
       <section className="panel profile-badges">
-        <h2>Expedition Milestones</h2>
+        <h2>Study Milestones</h2>
         <div className="milestone-row">
           <span className="milestone-icon" aria-hidden="true">
             ✦
           </span>
           <span>
-            <b>Descent Complete</b>
-            <small>Reach Point Nemo and conquer the final review challenge</small>
+            <b>Lesson Master</b>
+            <small>Complete all 3 topics and pass the final review quiz</small>
           </span>
           <span className="milestone-state">EARNED</span>
         </div>
@@ -96,8 +112,8 @@ export function ProfileView({
             ◉
           </span>
           <span>
-            <b>Benthic Scholar</b>
-            <small>Extract 3 local documents using offline Ollama</small>
+            <b>Document Scholar</b>
+            <small>Turn 3 study documents into practice quiz lessons</small>
           </span>
           <span className="milestone-state">EARNED</span>
         </div>
