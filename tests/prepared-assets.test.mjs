@@ -7,8 +7,8 @@ const manifest = JSON.parse(await readFile(new URL('manifest.json', base), 'utf8
 const bundle = { manifest, images: {} };
 
 test('all atlas dimensions and frame coordinates match shipped PNGs', async () => {
-  assert.equal(Object.keys(manifest.frames).length, 89);
-  assert.equal(Object.keys(manifest.animations).length, 25);
+  assert.equal(Object.keys(manifest.frames).length, 113);
+  assert.equal(Object.keys(manifest.animations).length, 28);
   for (const [name, atlas] of Object.entries(manifest.atlases)) {
     const png = await readFile(new URL(atlas.image, base));
     assert.equal(png.readUInt32BE(16), atlas.width, name);

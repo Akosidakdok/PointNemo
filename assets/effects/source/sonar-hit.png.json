@@ -1,0 +1,8 @@
+{
+  "generator": "built-in imagegen",
+  "generatedOn": "2026-10-09",
+  "promptFile": "sonar-hit.prompt.txt",
+  "styleReferences": ["assets/prepared/runtime/barreleye.png", "assets/prepared/runtime/explorer.png"],
+  "grid": { "columns": 4, "rows": 2 },
+  "reviewRequired": true
+}
