@@ -13,7 +13,8 @@
     "typecheck": "npm run build --workspace=@point-nemo/shared && npm run typecheck --workspaces --if-present",
     "assets": "node --env-file-if-exists=.env tools/generate-asset.mjs",
     "test": "node --test",
-    "preview:assets": "node tools/preview-assets.mjs"
+    "preview:assets": "node tools/preview-assets.mjs",
+    "prepare:vfx": "node tools/merge-vfx.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",

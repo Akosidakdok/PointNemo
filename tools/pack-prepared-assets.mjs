@@ -3,6 +3,7 @@ import { createRequire } from 'node:module';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
+import { mergeVfxRuntime } from './merge-vfx.mjs';
 const require = createRequire(import.meta.url);
 const sharp = require(process.env.ASSET_SHARP_MODULE || 'sharp');
 const directory = fileURLToPath(new URL('../assets/prepared/', import.meta.url));
@@ -69,3 +70,4 @@ await writeFile(join(runtimeDir, 'water.png'), await readFile(join(directory, 'w
 runtime.atlases.water = { ...source.atlases.water, image: 'water.png' };
 await writeFile(join(runtimeDir, 'manifest.json'), `${JSON.stringify(runtime, null, 2)}\n`);
 console.log(`Packed ${Object.keys(runtime.frames).length} aligned frames into ${groups.size} transparent atlases.`);
+await mergeVfxRuntime();

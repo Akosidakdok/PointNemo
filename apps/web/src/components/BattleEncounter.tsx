@@ -204,8 +204,13 @@ export function BattleEncounter({ bundle, onClose }: BattleEncounterProps) {
           size="md"
           disabled={!finished && battle.turn !== "player"}
           onClick={() => {
-            if (finished) dispatch({ type: "battle/reset" });
-            else if (battle.turn === "player") dispatch({ type: "player/attack" });
+            if (finished) {
+              effectsRef.current?.clear();
+              dispatch({ type: "battle/reset" });
+            } else if (battle.turn === "player") {
+              effectsRef.current?.play("effects.sonar-cast", "player", "behind-actors");
+              dispatch({ type: "player/attack-start" });
+            }
           }}
           className="battle-action-btn"
         >
