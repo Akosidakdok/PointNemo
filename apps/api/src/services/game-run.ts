@@ -78,6 +78,13 @@ function shuffleArray<T>(items: T[]): T[] {
 export class GameRunService {
   constructor(private readonly database: SqliteDatabase) {}
 
+  listRuns(): RunDetail[] {
+    const rows = this.database.prepare(`
+      SELECT id FROM runs ORDER BY created_at DESC
+    `).all() as Array<{ id: string }>;
+    return rows.map((r) => this.getRun(r.id));
+  }
+
   createRun(questionSetId: string): RunDetail {
     const questionSet = this.database.prepare(`
       SELECT id FROM question_sets WHERE id = ?

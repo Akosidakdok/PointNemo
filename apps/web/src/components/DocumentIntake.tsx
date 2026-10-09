@@ -99,7 +99,7 @@ function DocumentIntake({ onStartRun, activeRunId }: DocumentIntakeProps = {}) {
       {questionSet && (
         <div className="question-set-preview">
           <span className="eyebrow">QUESTION SET LOADED</span>
-          <div>{questionSet.topics.map((topic) => topic.name).join(" · ")}</div>
+          <div>{questionSet.topics.map((topic: any) => typeof topic === "string" ? topic : topic.name).join(" · ")}</div>
           <small>18 fixed encounter slots ready in the expedition route.</small>
           {onStartRun && (
             <button

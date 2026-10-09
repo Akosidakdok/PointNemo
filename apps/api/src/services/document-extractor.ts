@@ -5,7 +5,8 @@ import { BadRequestError } from "../errors.js";
 export interface UploadedDocument {
   originalName: string;
   mimeType: string;
-  buffer: Uint8Array;
+  buffer: Buffer;
+  size?: number;
 }
 
 export interface ExtractedDocument {
@@ -72,9 +73,6 @@ export class LocalPdfExtractor implements DocumentExtractor {
     }
 
     // 6. Return Structured Output
-    // For P0, we map the entire document to a single chunk on page 1
-    // to simplify evidence mapping since pdf-parse doesn't strictly provide
-    // per-page bounding boxes by default without a custom page renderer.
     return {
       sha256: hash,
       pageCount: data.total,

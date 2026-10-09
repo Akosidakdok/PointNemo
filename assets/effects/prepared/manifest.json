@@ -1,0 +1,562 @@
+{
+  "version": 1,
+  "atlases": {
+    "effects": {
+      "image": "effects.png",
+      "width": 1024,
+      "height": 384,
+      "cellWidth": 128,
+      "cellHeight": 128
+    }
+  },
+  "frames": {
+    "effects.sonar-hit.0": {
+      "atlas": "effects",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 0,
+        "y": 0,
+        "width": 444,
+        "height": 444
+      }
+    },
+    "effects.sonar-hit.1": {
+      "atlas": "effects",
+      "rect": {
+        "x": 128,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 444,
+        "y": 0,
+        "width": 443,
+        "height": 444
+      }
+    },
+    "effects.sonar-hit.2": {
+      "atlas": "effects",
+      "rect": {
+        "x": 256,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 887,
+        "y": 0,
+        "width": 443,
+        "height": 444
+      }
+    },
+    "effects.sonar-hit.3": {
+      "atlas": "effects",
+      "rect": {
+        "x": 384,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 1330,
+        "y": 0,
+        "width": 444,
+        "height": 444
+      }
+    },
+    "effects.sonar-hit.4": {
+      "atlas": "effects",
+      "rect": {
+        "x": 512,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 0,
+        "y": 444,
+        "width": 444,
+        "height": 443
+      }
+    },
+    "effects.sonar-hit.5": {
+      "atlas": "effects",
+      "rect": {
+        "x": 640,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 444,
+        "y": 444,
+        "width": 443,
+        "height": 443
+      }
+    },
+    "effects.sonar-hit.6": {
+      "atlas": "effects",
+      "rect": {
+        "x": 768,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 887,
+        "y": 444,
+        "width": 443,
+        "height": 443
+      }
+    },
+    "effects.sonar-hit.7": {
+      "atlas": "effects",
+      "rect": {
+        "x": 896,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 1330,
+        "y": 444,
+        "width": 444,
+        "height": 443
+      }
+    },
+    "effects.hull-hit.0": {
+      "atlas": "effects",
+      "rect": {
+        "x": 0,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 0,
+        "y": 0,
+        "width": 444,
+        "height": 444
+      }
+    },
+    "effects.hull-hit.1": {
+      "atlas": "effects",
+      "rect": {
+        "x": 128,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 444,
+        "y": 0,
+        "width": 443,
+        "height": 444
+      }
+    },
+    "effects.hull-hit.2": {
+      "atlas": "effects",
+      "rect": {
+        "x": 256,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 887,
+        "y": 0,
+        "width": 443,
+        "height": 444
+      }
+    },
+    "effects.hull-hit.3": {
+      "atlas": "effects",
+      "rect": {
+        "x": 384,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 1330,
+        "y": 0,
+        "width": 444,
+        "height": 444
+      }
+    },
+    "effects.hull-hit.4": {
+      "atlas": "effects",
+      "rect": {
+        "x": 512,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 0,
+        "y": 444,
+        "width": 444,
+        "height": 443
+      }
+    },
+    "effects.hull-hit.5": {
+      "atlas": "effects",
+      "rect": {
+        "x": 640,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 444,
+        "y": 444,
+        "width": 443,
+        "height": 443
+      }
+    },
+    "effects.hull-hit.6": {
+      "atlas": "effects",
+      "rect": {
+        "x": 768,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 887,
+        "y": 444,
+        "width": 443,
+        "height": 443
+      }
+    },
+    "effects.hull-hit.7": {
+      "atlas": "effects",
+      "rect": {
+        "x": 896,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 1330,
+        "y": 444,
+        "width": 444,
+        "height": 443
+      }
+    },
+    "effects.sonar-cast.0": {
+      "atlas": "effects",
+      "rect": {
+        "x": 0,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 0,
+        "y": 0,
+        "width": 444,
+        "height": 444
+      }
+    },
+    "effects.sonar-cast.1": {
+      "atlas": "effects",
+      "rect": {
+        "x": 128,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 444,
+        "y": 0,
+        "width": 443,
+        "height": 444
+      }
+    },
+    "effects.sonar-cast.2": {
+      "atlas": "effects",
+      "rect": {
+        "x": 256,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 887,
+        "y": 0,
+        "width": 443,
+        "height": 444
+      }
+    },
+    "effects.sonar-cast.3": {
+      "atlas": "effects",
+      "rect": {
+        "x": 384,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 1330,
+        "y": 0,
+        "width": 444,
+        "height": 444
+      }
+    },
+    "effects.sonar-cast.4": {
+      "atlas": "effects",
+      "rect": {
+        "x": 512,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 0,
+        "y": 444,
+        "width": 444,
+        "height": 443
+      }
+    },
+    "effects.sonar-cast.5": {
+      "atlas": "effects",
+      "rect": {
+        "x": 640,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 444,
+        "y": 444,
+        "width": 443,
+        "height": 443
+      }
+    },
+    "effects.sonar-cast.6": {
+      "atlas": "effects",
+      "rect": {
+        "x": 768,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 887,
+        "y": 444,
+        "width": 443,
+        "height": 443
+      }
+    },
+    "effects.sonar-cast.7": {
+      "atlas": "effects",
+      "rect": {
+        "x": 896,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 1330,
+        "y": 444,
+        "width": 444,
+        "height": 443
+      }
+    }
+  },
+  "animations": {
+    "effects.sonar-hit": {
+      "frames": [
+        "effects.sonar-hit.0",
+        "effects.sonar-hit.1",
+        "effects.sonar-hit.2",
+        "effects.sonar-hit.3",
+        "effects.sonar-hit.4",
+        "effects.sonar-hit.5",
+        "effects.sonar-hit.6",
+        "effects.sonar-hit.7"
+      ],
+      "fps": 16,
+      "loop": false
+    },
+    "effects.hull-hit": {
+      "frames": [
+        "effects.hull-hit.0",
+        "effects.hull-hit.1",
+        "effects.hull-hit.2",
+        "effects.hull-hit.3",
+        "effects.hull-hit.4",
+        "effects.hull-hit.5",
+        "effects.hull-hit.6",
+        "effects.hull-hit.7"
+      ],
+      "fps": 16,
+      "loop": false
+    },
+    "effects.sonar-cast": {
+      "frames": [
+        "effects.sonar-cast.0",
+        "effects.sonar-cast.1",
+        "effects.sonar-cast.2",
+        "effects.sonar-cast.3",
+        "effects.sonar-cast.4",
+        "effects.sonar-cast.5",
+        "effects.sonar-cast.6",
+        "effects.sonar-cast.7"
+      ],
+      "fps": 20,
+      "loop": false
+    }
+  }
+}

@@ -16,7 +16,8 @@
     "test:assets": "node --test tests/*.test.mjs",
     "test:api": "npm run test --workspace=@point-nemo/api",
     "test:smoke": "tsx scripts/smoke-test.ts",
-    "preview:assets": "node tools/preview-assets.mjs"
+    "preview:assets": "node tools/preview-assets.mjs",
+    "prepare:vfx": "node tools/merge-vfx.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",

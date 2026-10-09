@@ -16,7 +16,7 @@ export function createApp(
   ollama = new OllamaService(config),
 ) {
   const app = express();
-  app.use(express.json({ limit: "1mb" }));
+  app.use(express.json({ limit: "5mb" }));
   app.use("/api/health", healthRouter);
   app.use("/api/ai/status", createAiStatusRouter(ollama));
   const jobs = new GenerationJobService(database, config, undefined, ollama);
@@ -41,9 +41,14 @@ export function createApp(
       });
       return;
     }
+    console.error("[API Error]", error);
     response.status(500).json({
       success: false,
-      error: { code: "INTERNAL_ERROR", message: "An unexpected server error occurred.", retryable: true },
+      error: {
+        code: "INTERNAL_ERROR",
+        message: error instanceof Error ? error.message : "An unexpected server error occurred.",
+        retryable: true,
+      },
     });
   };
   app.use(errorHandler);

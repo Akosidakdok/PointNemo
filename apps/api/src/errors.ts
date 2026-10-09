@@ -16,6 +16,13 @@ export class BadRequestError extends ApiError {
   }
 }
 
+export class ValidationError extends ApiError {
+  constructor(message: string, code: string = "VALIDATION_ERROR") {
+    super(400, code, message);
+    this.name = "ValidationError";
+  }
+}
+
 export class NotFoundError extends ApiError {
   constructor(code: string, message: string) {
     super(404, code, message);

@@ -81,14 +81,15 @@ export const AIQuestionSetOutputSchema = z.object({
 });
 export type AIQuestionSetOutput = z.infer<typeof AIQuestionSetOutputSchema>;
 
-export const QuestionSetSchema = z.object({
+export const BackendQuestionSetSchema = z.object({
   id: z.string().uuid(),
   documentId: z.string().uuid(),
   topics: z.array(TopicSchema).length(3),
   questions: z.array(QuestionSchema).length(9),
   createdAt: z.string().datetime(),
 });
-export type QuestionSet = z.infer<typeof QuestionSetSchema>;
+export type BackendQuestionSet = z.infer<typeof BackendQuestionSetSchema>;
+
 
 // Game state engine
 export const RunStateSchema = z.enum(["active", "completed", "failed"]);
@@ -211,3 +212,132 @@ export const ApiErrorSchema = z.object({
   retryable: z.boolean(),
 });
 export type ApiError = z.infer<typeof ApiErrorSchema>;
+
+// ============================================================================
+// EXTENDED UI COMPATIBILITY SCHEMAS (from front_end)
+// ============================================================================
+
+export const ExtractedPageSchema = z.object({
+  pageNumber: z.number().int().min(1),
+  text: z.string(),
+});
+
+export const ExtractedDocumentSchema = z.object({
+  filename: z.string().min(1),
+  fileSize: z.number().int().min(1),
+  pageCount: z.number().int().min(1),
+  totalCharacters: z.number().int().min(300),
+  pages: z.array(ExtractedPageSchema).min(1),
+  normalizedText: z.string().min(300),
+});
+
+export const PointNemoQuestionSchema = z.object({
+  id: z.string().min(1),
+  topic: z.string().min(1),
+  difficulty: z.enum(["easy", "medium", "hard"]),
+  prompt: z.string().min(5),
+  options: z.tuple([
+    z.string().min(1),
+    z.string().min(1),
+    z.string().min(1),
+    z.string().min(1),
+  ]),
+  answerIndex: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]),
+  explanation: z.string().min(5),
+  sourceQuote: z.string().min(3),
+  sourcePage: z.number().int().min(1),
+});
+
+export const FrontendQuestionSetSchema = z.object({
+  id: z.string().min(1),
+  documentName: z.string().min(1),
+  topics: z.tuple([z.string().min(1), z.string().min(1), z.string().min(1)]),
+  questions: z.array(PointNemoQuestionSchema).length(9),
+  extractedPages: z.array(ExtractedPageSchema).default([]),
+  createdAt: z.string(),
+});
+export type FrontendQuestionSet = z.infer<typeof FrontendQuestionSetSchema>;
+
+export const QuestionSetSchema = z.union([BackendQuestionSetSchema, FrontendQuestionSetSchema]);
+export type QuestionSet = z.infer<typeof QuestionSetSchema>;
+
+export const DescentZoneEnum = z.enum(["surface", "twilight", "midnight", "boss", "results"]);
+export const RunStatusEnum = z.enum(["active", "completed", "failed"]);
+
+export const QuestionAttemptSchema = z.object({
+  questionId: z.string(),
+  slotIndex: z.number().int().min(0).max(18),
+  zone: DescentZoneEnum,
+  selectedAnswer: z.number().int().min(0).max(3),
+  isCorrect: z.boolean(),
+  answeredAt: z.string(),
+});
+
+export const DescentRunSchema = z.object({
+  id: z.string().min(1),
+  questionSetId: z.string().min(1),
+  documentName: z.string().min(1),
+  stage: DescentZoneEnum,
+  status: RunStatusEnum,
+  currentQuestionIndex: z.number().int().min(0),
+  playerHp: z.number().int().min(0).max(100),
+  enemyHp: z.number().int().min(0).max(100),
+  xp: z.number().int().min(0),
+  shuffledBossOrder: z.array(z.string()).length(9),
+  attempts: z.array(QuestionAttemptSchema),
+  zoneScores: z.object({
+    surface: z.number().int().min(0).max(3).default(0),
+    twilight: z.number().int().min(0).max(3).default(0),
+    midnight: z.number().int().min(0).max(3).default(0),
+    boss: z.number().int().min(0).max(9).optional(),
+  }),
+  failureReason: z.string().optional(),
+  completedAt: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type ExtractedPage = z.infer<typeof ExtractedPageSchema>;
+export type ExtractedDocument = z.infer<typeof ExtractedDocumentSchema>;
+export type PointNemoQuestion = z.infer<typeof PointNemoQuestionSchema>;
+export type DescentZone = z.infer<typeof DescentZoneEnum>;
+export type RunStatus = z.infer<typeof RunStatusEnum>;
+export type QuestionAttempt = z.infer<typeof QuestionAttemptSchema>;
+export type DescentRun = z.infer<typeof DescentRunSchema>;
+
+export const SubjectSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().trim().min(1),
+  description: z.string().default(""),
+});
+export type Subject = z.infer<typeof SubjectSchema>;
+
+export const ProgressSchema = z.object({
+  id: z.string().uuid(),
+  topicId: z.string().uuid(),
+  status: z.enum(["not-started", "in-progress", "completed"]),
+  completedLessons: z.number().int().min(0),
+  updatedAt: z.string(),
+});
+export type Progress = z.infer<typeof ProgressSchema>;
+
+export const StudyContentSchema = z.object({
+  subject: SubjectSchema,
+  topic: TopicSchema,
+  content: z.string().trim().min(1),
+});
+export type StudyContent = z.infer<typeof StudyContentSchema>;
+
+export const GeneratedQuestionSchema = z.object({
+  id: z.string().uuid(),
+  prompt: z.string().trim().min(1),
+  options: z.array(z.string().trim().min(1)).min(2),
+  answerIndex: z.number().int().min(0),
+  explanation: z.string().default(""),
+});
+export type GeneratedQuestion = z.infer<typeof GeneratedQuestionSchema>;
+
+export const GeneratedQuestionsSchema = z.array(GeneratedQuestionSchema);
+export const GeneratedQuestionResponseSchema = z.object({
+  questions: GeneratedQuestionsSchema,
+});

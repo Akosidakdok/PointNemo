@@ -30,7 +30,7 @@ Command: `npm run typecheck`
 
 ### B. Unit & Service Tests
 Command: `npm test`
-- **Asset Tests:** 22/22 passed.
+- **Asset & Schema Tests:** 25/25 passed.
 - **API & Game Run Tests:** 14/14 passed:
   1. `run creation from a ready question set`: Creates run with 18 fixed slots, HP 100/100, XP 0, combo 0, and masked active question (no leaked answer, explanation, or evidence).
   2. `fixed 18-slot ordering`: Verifies exact structure (3 easy in Surface, 3 medium in Twilight, 3 hard in Midnight, 9 boss review questions in saved order).

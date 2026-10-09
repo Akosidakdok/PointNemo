@@ -26,7 +26,7 @@
     <p>Transparent sprites, aligned anchors, swimming loops and ability sequences.</p>
     <div id="controls">
       <button id="pause" type="button">Pause</button>
-      <button id="replay" type="button">Replay abilities</button>
+      <button id="replay" type="button">Replay abilities and effects</button>
       <label>Background <select id="background"><option value="water">Ocean</option><option value="checker">Checkerboard</option><option value="white">White</option></select></label>
       <label><input type="checkbox" id="anchors" checked> Show anchors</label>
     </div>
@@ -48,13 +48,15 @@
         ['Gulper • jaw expansion','gulper.expand'],['Goblin • overhead','goblin.swim'],
         ['Goblin • jaw lunge','goblin.lunge'],['Fringehead • swimming','fringehead.swim'],
         ['Fringehead • flare','fringehead.flare'],
+        ['VFX • sonar hit','effects.sonar-hit'],['VFX • hull hit','effects.hull-hit'],
+        ['VFX • sonar cast','effects.sonar-cast'],
       ];
       const cards=choices.map(([label,name])=>{
         const article=document.createElement('article');const heading=document.createElement('h2');heading.textContent=label;
         const canvas=document.createElement('canvas');canvas.width=256;canvas.height=220;canvas.setAttribute('aria-label',label);
         const info=document.createElement('small');article.append(heading,canvas,info);document.querySelector('#grid').append(article);
         const player=new SpriteAnimation(bundle,name);const species=name.split('.')[0];
-        return {canvas,info,player,scale:speciesScale(bundle,species,species==='gulper'?140:100)};
+        return {canvas,info,player,scale:species==='effects'?1:speciesScale(bundle,species,species==='gulper'?140:100)};
       });
       // Every environmental asset/variant is visible separately; no animation implied.
       for(const name of Object.keys(bundle.manifest.aliases)){
