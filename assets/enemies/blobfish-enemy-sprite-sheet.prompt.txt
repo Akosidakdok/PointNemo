@@ -1,0 +1,11 @@
+Generated using the built-in image generation tool.
+Layout: 4 columns by 2 rows. Top: four overhead poses. Bottom: two left-facing and two right-facing profile poses.
+Draft sheet: exact cell alignment and animation loop continuity have not been technically verified.
+
+Use case: stylized-concept
+Asset type: 2D pixel-art aquatic enemy sprite sheet for a retro ocean game.
+Primary request: An original blobfish aquatic monster with a signature droopy pink face, sad eyes, slimy texture, and jagged deep-sea fins. Show top-down and side-profile views, isolated on a solid pure white background.
+Style/medium: 16-bit arcade video game pixel art, crisp square pixel clusters, bold dark plum pixel outline, distinct highly readable silhouette, restricted palette of pale blush pink, salmon pink, dusty rose, and dark plum shadows. Convey the slimy surface using a few hard-edged pale highlight pixels, no smooth gradients. The creature is grotesque but appealing: sagging bulbous nose, drooping cheeks, sad heavy-lidded eyes, downturned mouth, squat gelatinous body, and angular jagged fins.
+Layout: exactly eight full-body sprites in a clean uniform four-column by two-row grid with generous solid white spacing. Top row: four top-down overhead swimming poses of the same monster facing downward, subtle body squish and fin movement through the cycle. Bottom row: two left-facing side-profile swimming poses followed by two right-facing side-profile swimming poses. Keep the pink face, distinctive sagging nose, anatomy, fins, palette, pixel scale, and body size consistent. Every sprite entirely visible, centered in its own cell, no overlap.
+Background: solid opaque pure white #FFFFFF, completely uniform.
+Constraints: clean game sprite sheet, no water, no scenery, no bubbles, no detached objects, no floor shadows, no text, no labels, no numbers, no grid lines, no border, no watermark. Avoid photorealism, 3D rendering, soft shading, blur, anti-aliasing, excessive tiny details, and changing species between views.

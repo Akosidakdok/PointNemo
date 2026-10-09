@@ -1,0 +1,12 @@
+{
+  "id": "barreleye-fish",
+  "health": 45,
+  "movementSpeed": 42,
+  "detectionRadius": 180,
+  "alertRadius": 300,
+  "pulseInterval": 3,
+  "idleDuration": 2,
+  "scanDuration": 4,
+  "scanInterval": 0.15,
+  "alarmMemoryDuration": 5
+}

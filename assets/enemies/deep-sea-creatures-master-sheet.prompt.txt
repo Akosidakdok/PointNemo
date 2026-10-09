@@ -1,0 +1,43 @@
+Created using the built-in image generation tool.
+Master reference sheet on white. Frame bounds, consistent scale, loops, and tile seams require preparation/verification before gameplay.
+Quadrants: upper-left Barreleye; upper-right Gulper Eel; lower-left Goblin Shark; lower-right Sarcastic Fringehead.
+
+INITIAL PROMPT
+Use case: stylized-concept
+Asset type: comprehensive master 16-bit pixel-art deep-sea game sprite sheet for a web application.
+Create one large high-resolution square master asset sheet, organized into FOUR CLEAR QUADRANTS on a completely flat opaque pure white #FFFFFF background. All sprites fully separated with generous white gutters, no overlap or cropping. Each quadrant contains an orderly 4-column by 4-row arrangement of small isolated assets. No visible grid lines, no headings, no lettering or numbers. Prioritize readable individual creature identities and clearly different animation poses.
+
+CONSISTENT ART DIRECTION: authentic detailed 16-bit arcade pixel art, crisp hard square pixels, strong dark outlines, limited thematic palette of deep blue, dark teal, glowing green, pale salmon pink and near-black. Charming yet bizarre deep-sea animals. Pixel clusters and discrete shading, no smooth gradients, no anti-aliasing, no photographic or painterly rendering. Consistent apparent pixel size throughout. Each creature keeps the same design, scale, and proportions across its frames. Side/profile views and top-down RPG views, not isometric. White remains white around every asset.
+
+UPPER LEFT QUADRANT — BARRELEYE FISH:
+A short dark blue-green fish with an unmistakable transparent dome-shaped head, a visible pair of large luminous green tubular eyes inside the dome, small mouth and subtle fins. Make the translucent dome readable with a crisp pale cyan curved outline and sparse hard-edged highlights.
+Row 1: four idle views including left profile, right profile, top-down facing down, top-down facing up.
+Row 2: four successive left-profile swimming frames, changing fins and tail.
+Row 3: four focus ability frames, tubular eyes rotating from upward through diagonal to fully forward, culminating in two bright focused green eyes. Keep the dome transparent in every frame.
+Row 4: three isolated deep-sea sand/substrate square tiles with subtle cyan-green bioluminescent specks, plus one green sonar ripple effect sprite.
+
+UPPER RIGHT QUADRANT — GULPER EEL:
+An extremely long, thin, near-black serpentine eel with blue edge highlights, tapering whiplike tail, small eyes, and an enormous expandable pelican-like hinged mouth and throat pouch. Coil its long body neatly within each cell without cropping.
+Row 1: idle left profile, idle right profile, top-down coiled body, top-down elongated curved body.
+Row 2: four successive left-profile swimming poses with distinct traveling body waves.
+Row 3: four dramatic left-profile special attack stages: closed jaw; jaw beginning to unhinge; hugely expanded pouch and open mouth; fully expanded monumental open pelican mouth with tiny pointed teeth and visible dark interior. Maintain eel identity, make progression unmistakable.
+Row 4: two subtle blue water-ripple effect sprites and two abstract depth-indicator pixel icons (stacked descending blue chevrons, no text or numerals).
+
+LOWER LEFT QUADRANT — GOBLIN SHARK:
+A pale pink shark with a long flat paddle-like pointed snout, small dark eyes, flabby body, fins and a distinctive protrusible tooth-lined jaw located below the snout. No generic great-white-shark silhouette.
+Row 1: closed-mouth left profile, closed-mouth right profile, open-mouth left profile, top-down idle.
+Row 2: four top-down swimming frames with tail and fin motion, facing down consistently.
+Row 3: four left-profile lunge attack frames: coiled anticipation; forward thrust; upper and lower jaws projecting dramatically forward BELOW the paddle snout; full jaw extension with visible teeth followed by the start of retraction. Distinguish protruding jaws from merely opening the mouth.
+Row 4: three isolated dark sandy deep-sea substrate square tiles with sparse stones, plus a curved pink-blue pixel motion streak effect.
+
+LOWER RIGHT QUADRANT — SARCASTIC FRINGEHEAD:
+A small mottled dark teal and brown fish with prominent eyes and an extraordinarily large expandable colorful mouth membrane, using pink, green and blue pattern accents.
+Row 1: front-view fish peeking from a rock crevice; front-view fish emerging from a sandhole; left-profile idle; right-profile idle.
+Row 2: four successive left-profile swimming poses.
+Row 3: four FRONT-VIEW flare transformation frames: closed mouth; partially spreading mouth corners; broad open mouth membrane; enormous fully expanded patterned circular disc with the dark mouth at center and the little fish body behind it. Make a biologically inspired mouth flare, not a flower attached to the face.
+Row 4: two different fully flared front-view mouth pattern variants, one empty rock crevice environmental sprite, one empty sandhole environmental sprite.
+
+Keep all four creature sets visually separated by a wider central horizontal and vertical white gutter. Environmental tiles have clean square boundaries; creature sprites and effects are freely isolated on white. No UI mockup, no caption, no labels, no watermark, no decorative frame. This is a cuttable sprite reference sheet, not a composed underwater scene.
+
+REFINEMENT PROMPT
+Edit this master deep-sea pixel-art sprite sheet. Preserve the four-quadrant layout, white background, every environmental tile, all barreleye sprites, all gulper eel sprites, and the existing style and pixel scale. Make only these targeted corrections: (1) In the LOWER LEFT quadrant, THIRD ROW of creature sprites, improve the four left-facing goblin shark attack poses into a clear progression: anticipation with closed jaw; beginning forward jaw protrusion; very pronounced upper and lower jaws extruded forward below and beyond the long fixed paddle snout, joined to the face by extended pink tissue; maximum forward jaw extension with a tooth-lined open bite. The iconic goblin shark attack thrusts the jaws FORWARD rather than merely rotating the mouth open. Keep the long paddle snout and pink body consistent. All four attack sprites face left and each remains entirely within its existing cell. (2) In the LOWER RIGHT quadrant, SECOND ROW, correct the rightmost swimming sprite to face LEFT, matching the other three in that row. Preserve all other sprites, spacing, anatomy, and positions exactly as closely as possible. No added text or grid lines.

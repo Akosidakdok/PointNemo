@@ -11,3 +11,9 @@ apps/api/data/
 *.sqlite3
 *.db
 .superpowers/sdd/
+*.tmp
+assets/prepared/water.png
+assets/prepared/explorer.png
+assets/prepared/creatures.png
+assets/prepared/buoy.png
+assets/prepared/blobfish.png

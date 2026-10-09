@@ -47,8 +47,13 @@ Change `OLLAMA_BASE_URL` or `OLLAMA_MODEL` in your ignored `.env` as needed. `qw
 - SQLite initialization for subjects, topics, study materials, questions, attempts, and progress.
 - Shared Zod schemas for study content, progress, and generated multiple-choice questions. The Ollama service validates generated question data before returning it.
 - A document-extraction interface for PDF, DOCX, or PPTX files, ready for parser libraries to be connected.
+- An image asset generator and bundled artwork for the explorer, deep-sea creatures, and ocean map.
 
-The first slice does not yet accept uploads, extract documents, expose an AI question-generation endpoint, or persist lesson and battle progress. Those are extension points for the next implementation phase. No character art is bundled; the map and creatures use CSS shapes and symbols. Track asset sources and licenses when illustrations are added.
+The first slice does not yet accept uploads, extract documents, expose an AI question-generation endpoint, or persist lesson and battle progress. Those are extension points for the next implementation phase. The bundled artwork is stored under `assets/`; the current map and creature UI still use CSS shapes and symbols. Track asset sources and licenses when illustrations are added.
+
+## Art and asset generation
+
+The bundled image sheets, prompts, and asset-generation CLI are documented in [the asset guide](docs/assets/README.md). The CLI uses a local `.env` file for `OPENAI_API_KEY`; it does not add image-generation calls to the running app.
 
 ## Repository layout
 

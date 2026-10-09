@@ -1,0 +1,11 @@
+Generated using the built-in image generation tool.
+Layout: 4 rows (down, left, right, up); 4 columns (idle, swimming frames 1-3).
+Draft sheet: exact cell alignment and animation loop continuity have not been technically verified.
+
+Use case: stylized-concept
+Asset type: 2D pixel-art character sprite sheet for a top-down RPG ocean exploration game.
+Primary request: An original ocean explorer survivor wearing a dark diving suit, oxygen tank, bright visor goggles, and utility belt. Idle and swimming directional poses, isolated on a solid pure white background.
+Style: clean 16-bit retro video game pixel art, crisp hard square pixel edges, consistent pixel size and restricted palette, readable silhouette at small size. Dark navy and charcoal diving suit, bright cyan visor goggles, visible oxygen tank and utility belt. Top-down RPG perspective with a slight view of the front or back appropriate to each direction.
+Layout: exactly 16 full-body sprites in a uniform 4-column by 4-row grid, equal square cells and generous pure white spacing. Row 1 faces down toward viewer, row 2 faces left, row 3 faces right, row 4 faces up away from viewer. Within each row: column 1 is a relaxed idle pose; columns 2, 3, and 4 are three successive swimming cycle poses with clear arm and leg movement. Every sprite belongs to the exact same character; maintain the same outfit, equipment, palette, head size, body proportions, and scale. Center each sprite consistently within its cell, with entire body and equipment visible.
+Background: solid pure white #FFFFFF, completely uniform and opaque.
+Constraints: one character per cell, no overlaps, no clipped limbs, no scenery, no water, no bubbles, no separate equipment, no text, no labels, no numbers, no grid lines, no borders, no drop shadows, no watermark. Avoid smooth gradients, anti-aliasing, blur, painterly shading, 3D rendering, and high-resolution illustration.

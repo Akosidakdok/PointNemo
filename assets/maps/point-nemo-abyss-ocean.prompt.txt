@@ -1,0 +1,10 @@
+Generated using the built-in image generation tool.
+Seamless edge matching was requested but has not been technically verified.
+
+Use case: stylized-concept
+Asset type: 2D top-down pixel-art ocean map background for a retro web game, square composition.
+Primary request: Deep-sea abyss theme at the oceanic pole of inaccessibility. Minimalist dark indigo and slate blue endless ocean water tilemap, with a single bright red floating navigational marker buoy anchored in the water, emitting a faint red signal aura.
+Style: authentic clean 16-bit retro pixel art, crisp square pixels on a consistent pixel grid, limited palette, high contrast between the small red buoy and the dark ocean. Sparse subtle repeating pixel wavelets and ripples; quiet ominous isolation.
+Composition: strict top-down overhead orthographic view. Endless water fills the entire frame; one small buoy near the center with ample empty ocean around it. Anchored appearance, no visible seafloor or exposed anchor. Localized faint red aura rendered in stepped pixel tones, no smooth blur.
+Tiling constraints: water texture must wrap seamlessly across left/right and top/bottom boundaries with matching edge colors and wave patterns. Buoy and all its red aura stay well inside the image boundaries. Uniform water lighting across edges; no vignette or frame.
+Avoid: land, islands, boats, people, sea creatures, horizon, sky, perspective view, text, labels, UI, borders, watermark, photorealism, anti-aliasing, smooth gradients.
