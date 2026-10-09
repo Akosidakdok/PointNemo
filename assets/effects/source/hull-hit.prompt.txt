@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: PointNemo game VFX sprite sheet, player hull strike.
+Input images: supplied explorer and creature atlases are STYLE REFERENCES ONLY. Create a new asset.
+Primary request: Exactly eight ordered frames in a 4-column by 2-row sheet, read left to right then top to bottom. A compact physical impact on a small underwater craft hull: frame 1 tiny coral contact spark, frames 2-3 angular coral and pale mint spark at peak, frames 4-5 a few sharp fragments and tiny bubbles scattering, frames 6-8 dim fragments fading. One isolated effect centered in every cell.
+Style/medium: crisp 16-bit underwater pixel art matching the references, hard square pixel clusters, restrained coral and warm pale highlights, dark navy outlines, a few muted teal pixels.
+Composition/framing: equal cells with generous empty padding; stable center and consistent apparent size; no visible cell borders.
+Scene/backdrop: genuinely transparent alpha background.
+Constraints: no craft, fish, person, terrain, lettering, UI, grid, border, watermark, continuous background, soft blur, smooth gradient, huge bloom, explosion cloud, or clipped particles. Each frame is a distinct animation stage.

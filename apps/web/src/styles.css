@@ -119,3 +119,9 @@ h1, h2, h3, p { margin-top: 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+.battle-effects { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; image-rendering: pixelated; }
+.battle-effects--behind-actors { z-index: 1; }
+.battle-effects--on-actors { z-index: 3; }
+.battle-effects--above-actors { z-index: 4; }
+.battle-scene .submersible, .battle-scene .anglerfish { z-index: 2; }
+.battle-scene .scene-depth, .battle-scene .scene-caption { z-index: 5; }

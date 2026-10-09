@@ -1,12 +1,29 @@
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useRef } from "react";
 import { battleReducer, initialBattleState } from "../game/battleState";
+import { BattleEffects, type BattleEffectsHandle } from "./BattleEffects";
 
 export function BattleEncounter() {
   const [battle, dispatch] = useReducer(battleReducer, initialBattleState);
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<HTMLDivElement>(null);
+  const enemyRef = useRef<HTMLDivElement>(null);
+  const effectsRef = useRef<BattleEffectsHandle>(null);
 
   useEffect(() => {
-    if (battle.turn !== "enemy") return;
-    const timeoutId = window.setTimeout(() => dispatch({ type: "enemy/attack" }), 520);
+    let timeoutId: number | undefined;
+    if (battle.turn === "player-attack") {
+      timeoutId = window.setTimeout(() => {
+        effectsRef.current?.play("effects.sonar-hit", "enemy", "above-actors");
+        dispatch({ type: "player/attack-hit" });
+      }, 180);
+    } else if (battle.turn === "enemy") {
+      timeoutId = window.setTimeout(() => dispatch({ type: "enemy/attack-start" }), 300);
+    } else if (battle.turn === "enemy-attack") {
+      timeoutId = window.setTimeout(() => {
+        effectsRef.current?.play("effects.hull-hit", "player", "above-actors");
+        dispatch({ type: "enemy/attack-hit" });
+      }, 220);
+    }
     return () => window.clearTimeout(timeoutId);
   }, [battle.turn]);
 
@@ -20,18 +37,19 @@ export function BattleEncounter() {
           <h2 id="battle-title">Anglerfish ambush</h2>
         </div>
         <span className={`turn-indicator turn-${battle.turn}`} aria-live="polite">
-          {battle.turn === "player" ? "YOUR TURN" : battle.turn === "enemy" ? "ENEMY TURN" : battle.turn === "won" ? "CLEARED" : "SUB DAMAGED"}
+          {battle.turn === "player" ? "YOUR TURN" : battle.turn === "player-attack" ? "PULSE IN FLIGHT" : battle.turn === "enemy" ? "ENEMY TURN" : battle.turn === "enemy-attack" ? "INCOMING" : battle.turn === "won" ? "CLEARED" : "SUB DAMAGED"}
         </span>
       </div>
 
-      <div className={`battle-scene${battle.turn === "enemy" ? " enemy-attacking" : ""}`}>
-        <div className="submersible" role="img" aria-label="Your submersible">⌁</div>
+      <div ref={sceneRef} className={`battle-scene${battle.turn === "enemy-attack" ? " enemy-attacking" : ""}`}>
+        <div ref={playerRef} className="submersible" role="img" aria-label="Your submersible">⌁</div>
         <div className="scene-divider" aria-hidden="true" />
-        <div className="anglerfish" role="img" aria-label="Anglerfish opponent">
+        <div ref={enemyRef} className="anglerfish" role="img" aria-label="Anglerfish opponent">
           <span className="fish-lure" />
           <span className="fish-eye" />
           <span className="fish-mouth" />
         </div>
+        <BattleEffects ref={effectsRef} sceneRef={sceneRef} playerRef={playerRef} enemyRef={enemyRef} />
         <span className="scene-depth">ABYSSAL ZONE · 4,180 M</span>
         <span className="scene-caption">BIOLUMINESCENT SIGNAL DETECTED</span>
       </div>
@@ -60,8 +78,13 @@ export function BattleEncounter() {
           type="button"
           aria-disabled={!finished && battle.turn !== "player"}
           onClick={() => {
-            if (finished) dispatch({ type: "battle/reset" });
-            else if (battle.turn === "player") dispatch({ type: "player/attack" });
+            if (finished) {
+              effectsRef.current?.clear();
+              dispatch({ type: "battle/reset" });
+            } else if (battle.turn === "player") {
+              effectsRef.current?.play("effects.sonar-cast", "player", "behind-actors");
+              dispatch({ type: "player/attack-start" });
+            }
           }}
         >
           <span aria-hidden="true">⌁</span> {finished ? "Reset encounter" : "Sonar pulse"} <kbd>ENTER</kbd>

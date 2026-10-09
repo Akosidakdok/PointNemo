@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: PointNemo game VFX sprite sheet, sonar contact hit.
+Input images: supplied creature atlas and explorer atlas are STYLE REFERENCES ONLY. Create a new asset.
+Primary request: Exactly eight ordered frames in a 4-column by 2-row sheet, read left to right then top to bottom. A compact cyan sonar pulse striking an underwater creature: frame 1 tiny compressed cyan dot, frame 2 tight contact ring, frames 3-4 jagged broken pixel ring at peak, frames 5-6 sparse angular cyan droplets and tiny bubbles, frames 7-8 dissipating fragments. One isolated effect centered in every cell.
+Style/medium: crisp 16-bit underwater pixel art matching the references, dark navy outlines, bright cyan core, muted teal and mint secondary pixels, hard square pixel clusters.
+Composition/framing: equal cells with generous empty padding; stable center and consistent apparent size; no visible cell borders.
+Scene/backdrop: genuinely transparent alpha background.
+Constraints: no fish, person, submarine, terrain, lettering, icons, UI, grid, border, watermark, continuous background, soft blur, smooth gradient, huge bloom, or clipped particles. Each frame is a distinct animation stage.

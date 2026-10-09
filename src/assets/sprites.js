@@ -1,11 +1,11 @@
 /** Load a prepared atlas bundle; resolves PNG paths relative to its manifest. */
-export async function loadAssetBundle(manifestUrl) {
+export async function loadAssetBundle(manifestUrl, { atlases } = {}) {
   const url = new URL(manifestUrl, globalThis.location?.href);
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Asset manifest failed: HTTP ${response.status}`);
   const manifest = await response.json();
   const images = {};
-  await Promise.all(Object.entries(manifest.atlases).map(async ([name, atlas]) => {
+  await Promise.all(Object.entries(manifest.atlases).filter(([name]) => !atlases || atlases.includes(name)).map(async ([name, atlas]) => {
     const image = new Image();
     image.src = new URL(atlas.image, url).href;
     await image.decode();
