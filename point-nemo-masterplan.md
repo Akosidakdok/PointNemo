@@ -1,6 +1,6 @@
 # Point Nemo: The Full Masterplan
 
-**Revision 2 — October 9, 2026 — Asia/Manila (UTC+8).** This revision addresses findings F01–F10 in the [validation report](<C:/Users/Mark Vasquez/Documents/Point nemo/point-nemo-validation-report.md>). It defines implementation contracts, acceptance gates, and submission work. Implementation, benchmarks, registration, and submission remain pending; decisions below are not completed test results.
+**Revision 3 — October 10, 2026 — Asia/Manila (UTC+8).** This revision records the first P0 backend and document-intake implementation pass. It defines implementation contracts, acceptance gates, and submission work. Runtime acceptance, benchmarks, registration, and submission remain pending; implementation checks below are not a substitute for offline release evidence.
 
 **Document authority:** this masterplan is the current product and hackathon source of truth. It supersedes the earlier [project setup design](<C:/Users/Mark Vasquez/Documents/Point nemo/docs/superpowers/specs/2026-10-09-point-nemo-design.md>) wherever they conflict, especially its deferred upload/generation flow, DOCX/PPTX scope, browser-only sample state, and route direction. The setup design remains a historical record of the first scaffold proposal.
 
@@ -20,6 +20,16 @@ Point Nemo turns a student's short, text-based PDF notes into an ocean-themed st
 These exclusions are product decisions. The merged guide does not prescribe flashcards or summary reviewers.
 
 **Submission-description draft:** “Point Nemo turns short PDF notes into an ocean study adventure, with locally generated questions, source-linked explanations, and progress saved on the student's laptop.” Publish this as working behavior only after the corresponding acceptance gates pass.
+
+### Current phase — P0/P1 Authoritative game run backend and connected web interface
+
+Batch 1 and Batch 2 are complete: PDF admission, strict Ollama schema, document jobs, question sets, and web intake.
+Phase 1, 2, and 3 are complete:
+- Authoritative run engine (`POST /api/runs`, `GET /api/runs/:id`, `POST /api/runs/:id/answers`) with 18 fixed slots, stage boundaries (Surface, Twilight, Midnight 2/3 pass; Boss 8/9 pass, 7/9 fail), transactional persistence, question masking, and identical-retry idempotence.
+- 14 automated backend unit and route integration tests verifying the full lifecycle and integrity constraints.
+- Connected web interface allowing students to start runs, answer questions, inspect source evidence quotes, track live HP/XP/combo stats, and resume runs across page reloads.
+
+The next required step is release acceptance on the demo laptop: run the real configured Ollama model, repeat the flow with external networking disabled, manually review all nine answers and evidence quotes, and record runtime benchmarks before calling the full MVP complete. The current code does not claim that A3–A8 have passed.
 
 ### Hackathon critical path
 
@@ -241,7 +251,7 @@ If the target fails, shorten the supported source within published limits, tight
 
 ## 11. Acceptance gates and evidence
 
-**Every gate is currently NOT RUN / evidence unavailable.** A document revision does not pass these gates. Record execution against a release commit, model digest, fixture hashes, and hardware profile in `docs/evidence.md` when implemented.
+**Release acceptance is still pending.** The automated implementation checks now cover PDF admission, strict output rejection, transactional question-set persistence, the upload/job/question-set route path, and the web production build. A1–A8 remain unpassed until their stated evidence is recorded against a release commit, model digest, fixture hashes, and hardware profile in `docs/evidence.md`.
 
 | Gate | Owner | Passing evidence |
 | --- | --- | --- |
@@ -297,7 +307,7 @@ For the [judging criteria](<C:/Users/Mark Vasquez/Documents/Point nemo/merged_ha
 
 **Local-benefit answer — after A3 passes:** “Point Nemo processes supported PDF notes, generates questions, and saves progress on the student's laptop. After setup, studying can continue without internet, and note content need not be sent to a cloud inference service. This version supports short text-based excerpts; generation speed depends on the tested hardware and model.”
 
-**Disclosure draft — fill from release evidence:** “Point Nemo uses React/Vite/Tailwind/Zustand for UI, Node/Express/Multer/pdf-parse/Zod for the local API and document pipeline, SQLite/better-sqlite3 for storage, and Ollama with [actual model tag, digest, quantization, settings] for inference. Runtime/tokenizer versions: [release manifest]. Parsing, inference, validation and storage run on [tested device]. Runtime cloud inference: none. Development assistants, dependencies/assets and pre-existing material: [actual tools, links, provenance and contributions]. Performance/limits: [measured results and supported inputs].”
+**Disclosure draft — fill from release evidence:** “Point Nemo uses React/Vite for UI, Node/Express with a native multipart PDF intake, pdf-parse/Zod for the local document pipeline, SQLite/better-sqlite3 for storage, and Ollama with [actual model tag, digest, quantization, settings] for inference. Runtime/tokenizer versions: [release manifest]. Parsing, inference, validation and storage run on [tested device]. Runtime cloud inference: none. Development assistants, dependencies/assets and pre-existing material: [actual tools, links, provenance and contributions]. Performance/limits: [measured results and supported inputs].”
 
 Prepare Q&A on offline proof, question errors/source review, actual hardware, repeat-question scoring, storage/deletion, original work, and limits. Avoid universal privacy, guaranteed speed, novelty, or mastery claims.
 

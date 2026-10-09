@@ -2,6 +2,7 @@ import { useEffect, useReducer, useRef } from "react";
 import { battleReducer, initialBattleState } from "../game/battleState";
 import { type AssetBundle, drawFrame, speciesScale } from "../game/sprites";
 import { GameButton } from "./ui/GameButton";
+import { type BattleEffectsHandle } from "./BattleEffects";
 
 export interface BattleEncounterProps {
   bundle?: AssetBundle | null;
@@ -11,11 +12,21 @@ export interface BattleEncounterProps {
 export function BattleEncounter({ bundle, onClose }: BattleEncounterProps) {
   const [battle, dispatch] = useReducer(battleReducer, initialBattleState);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const effectsRef = useRef<BattleEffectsHandle | null>(null);
 
   useEffect(() => {
-    if (battle.turn !== "enemy") return;
-    const timeoutId = window.setTimeout(() => dispatch({ type: "enemy/attack" }), 600);
-    return () => window.clearTimeout(timeoutId);
+    if (battle.turn === "enemy") {
+      const timeoutId = window.setTimeout(() => dispatch({ type: "enemy/attack-start" }), 600);
+      return () => window.clearTimeout(timeoutId);
+    }
+    if (battle.turn === "enemy-attack") {
+      const timeoutId = window.setTimeout(() => dispatch({ type: "enemy/attack-hit" }), 500);
+      return () => window.clearTimeout(timeoutId);
+    }
+    if (battle.turn === "player-attack") {
+      const timeoutId = window.setTimeout(() => dispatch({ type: "player/attack-hit" }), 500);
+      return () => window.clearTimeout(timeoutId);
+    }
   }, [battle.turn]);
 
   // Handle keyboard ENTER to attack
@@ -23,9 +34,11 @@ export function BattleEncounter({ bundle, onClose }: BattleEncounterProps) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
         if (battle.turn === "won" || battle.turn === "lost") {
+          effectsRef.current?.clear();
           dispatch({ type: "battle/reset" });
         } else if (battle.turn === "player") {
-          dispatch({ type: "player/attack" });
+          effectsRef.current?.play("effects.sonar-cast", "player", "behind-actors");
+          dispatch({ type: "player/attack-start" });
         }
       }
     };

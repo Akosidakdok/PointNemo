@@ -1,12 +1,19 @@
+import { createHash } from "node:crypto";
 import { PDFParse } from "pdf-parse";
-import { type ExtractedDocument, type ExtractedPage } from "@point-nemo/shared";
-import { ValidationError } from "../errors.js";
+import { BadRequestError } from "../errors.js";
 
 export interface UploadedDocument {
   originalName: string;
   mimeType: string;
   buffer: Buffer;
-  size: number;
+  size?: number;
+}
+
+export interface ExtractedDocument {
+  sha256: string;
+  pageCount: number;
+  normalizedCharCount: number;
+  pagesJson: string; // Serialized array of pages/chunks
 }
 
 export interface DocumentExtractor {
@@ -15,76 +22,68 @@ export interface DocumentExtractor {
 
 export class LocalPdfExtractor implements DocumentExtractor {
   async extractText(file: UploadedDocument): Promise<ExtractedDocument> {
-    // 1. File type validation
-    const lowerName = file.originalName.toLowerCase();
-    if (!lowerName.endsWith(".pdf") && file.mimeType !== "application/pdf") {
-      throw new ValidationError("Only PDF files are supported in this MVP.");
+    // 1. Verify MIME type
+    if (file.mimeType !== "application/pdf") {
+      throw new BadRequestError("INVALID_FILE_TYPE", "Only PDF files are supported.");
     }
 
-    // 2. Parse PDF with PDFParse
-    let parsed: { total: number; pages: Array<{ text: string; num: number }>; text: string };
+    // 2. Check File Size (5 MiB = 5242880 bytes)
+    if (file.buffer.length > 5242880) {
+      throw new BadRequestError("FILE_TOO_LARGE", "PDF exceeds the 5 MiB size limit.");
+    }
+
+    // 3. Compute SHA-256
+    const hash = createHash("sha256").update(file.buffer).digest("hex");
+
+    let data: Awaited<ReturnType<PDFParse["getText"]>>;
+    let parser: PDFParse | undefined;
     try {
-      const parser = new PDFParse({ data: file.buffer });
-      parsed = await parser.getText();
-      await parser.destroy();
-    } catch (err: any) {
-      const msg = err?.message || String(err);
-      if (msg.includes("password") || msg.includes("Password") || msg.includes("encrypt")) {
-        throw new ValidationError("This PDF is encrypted or password-protected.");
-      }
-      throw new ValidationError("Point Nemo could not extract readable text from this PDF.");
+      // 4. Parse PDF
+      parser = new PDFParse({ data: Buffer.from(file.buffer) });
+      data = await parser.getText();
+    } catch (error) {
+      throw new BadRequestError(
+        "UNREADABLE_PDF",
+        "The PDF could not be parsed. It may be encrypted, malformed, or unsupported.",
+      );
+    } finally {
+      await parser?.destroy();
     }
 
-    // 3. Ensure pages exist
-    if (parsed.total === 0 || !parsed.pages || parsed.pages.length === 0) {
-      throw new ValidationError("Point Nemo could not locate any pages in this PDF.");
+    // 5. Enforce Limits
+    if (data.total > 3) {
+      throw new BadRequestError("TOO_MANY_PAGES", "PDF exceeds the 3-page limit.");
     }
 
-    // 4. Build page records & normalize text
-    const pages: ExtractedPage[] = [];
-    let combinedNormalized = "";
+    // Basic normalization: trim and compress whitespace
+    const normalizedText = data.text.trim().replace(/\s+/g, " ");
+    const charCount = normalizedText.length;
 
-    for (const p of parsed.pages) {
-      // Normalize whitespace
-      const normalizedPageText = p.text
-        .replace(/\r\n/g, "\n")
-        .replace(/[ \t]+/g, " ")
-        .trim();
-
-      pages.push({
-        pageNumber: p.num,
-        text: normalizedPageText,
-      });
-
-      if (combinedNormalized.length > 0) {
-        combinedNormalized += "\n\n";
-      }
-      combinedNormalized += `[Page ${p.num}]\n${normalizedPageText}`;
+    if (charCount < 300) {
+      throw new BadRequestError(
+        "INSUFFICIENT_TEXT",
+        "PDF must contain at least 300 characters of extractable text.",
+      );
     }
-
-    // 5. Minimum character validation (at least 300 non-whitespace characters)
-    const nonWhitespaceCount = combinedNormalized.replace(/\s+/g, "").length;
-    if (nonWhitespaceCount < 300) {
-      throw new ValidationError(
-        "This appears to be a scanned or image-only PDF. OCR is not supported in this MVP."
+    if (charCount > 8000) {
+      throw new BadRequestError(
+        "CONTEXT_OVERFLOW",
+        "PDF exceeds the 8,000 character limit.",
       );
     }
 
-    // 8. Basic English detection (ensure standard Latin alphabet predominance)
-    const latinAlphaMatches = combinedNormalized.match(/[a-zA-Z]/g) || [];
-    if (latinAlphaMatches.length < nonWhitespaceCount * 0.5) {
-      throw new ValidationError(
-        "This document does not appear to contain English text. English is required for this MVP."
-      );
-    }
-
+    // 6. Return Structured Output
     return {
-      filename: file.originalName,
-      fileSize: file.size,
-      pageCount: parsed.total,
-      totalCharacters: combinedNormalized.length,
-      pages,
-      normalizedText: combinedNormalized,
+      sha256: hash,
+      pageCount: data.total,
+      normalizedCharCount: charCount,
+      pagesJson: JSON.stringify(
+        data.pages.map((page) => ({
+          pageNumber: page.num,
+          chunkId: `chunk-${page.num}`,
+          text: page.text.trim().replace(/\s+/g, " "),
+        })),
+      ),
     };
   }
 }

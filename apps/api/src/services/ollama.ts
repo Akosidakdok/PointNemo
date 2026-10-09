@@ -1,10 +1,11 @@
 import {
-  GeneratedQuestionResponseSchema,
-  type GeneratedQuestion,
-  type StudyContent,
+  AIQuestionSetOutputSchema,
 } from "@point-nemo/shared";
+import type { z } from "zod";
 import type { ApiConfig } from "../config.js";
 import { ServiceUnavailableError } from "../errors.js";
+
+type AIQuestionSetOutput = z.infer<typeof AIQuestionSetOutputSchema>;
 
 export interface OllamaStatus {
   available: boolean;
@@ -17,8 +18,65 @@ interface OllamaChatResponse {
   error?: string;
 }
 
+const questionSetJsonSchema = {
+  type: "object",
+  additionalProperties: false,
+  required: ["topics", "questions"],
+  properties: {
+    topics: {
+      type: "array",
+      minItems: 3,
+      maxItems: 3,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["name"],
+        properties: { name: { type: "string", minLength: 1 } },
+      },
+    },
+    questions: {
+      type: "array",
+      minItems: 9,
+      maxItems: 9,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["topicName", "difficulty", "prompt", "options", "answerIndex", "explanation", "evidence"],
+        properties: {
+          topicName: { type: "string", minLength: 1 },
+          difficulty: { type: "string", enum: ["easy", "medium", "hard"] },
+          prompt: { type: "string", minLength: 1, maxLength: 300 },
+          options: {
+            type: "array",
+            minItems: 4,
+            maxItems: 4,
+            items: { type: "string", minLength: 1, maxLength: 160 },
+          },
+          answerIndex: { type: "integer", minimum: 0, maximum: 3 },
+          explanation: { type: "string", minLength: 1, maxLength: 600 },
+          evidence: {
+            type: "array",
+            minItems: 1,
+            maxItems: 2,
+            items: {
+              type: "object",
+              additionalProperties: false,
+              required: ["pageNumber", "chunkId", "quote"],
+              properties: {
+                pageNumber: { type: "integer", minimum: 1 },
+                chunkId: { type: "string", minLength: 1 },
+                quote: { type: "string", minLength: 20, maxLength: 400 },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+} as const;
+
 export class OllamaService {
-  constructor(private readonly config: Pick<ApiConfig, "ollamaBaseUrl" | "ollamaModel">) {}
+  constructor(private readonly config: Pick<ApiConfig, "ollamaBaseUrl" | "ollamaModel" | "ollamaNumCtx" | "ollamaMaxOutputTokens" | "inferenceTimeoutMs">) {}
 
   async getStatus(): Promise<OllamaStatus> {
     try {
@@ -33,10 +91,14 @@ export class OllamaService {
         };
       }
 
+      const body = await response.json() as { models?: Array<{ name?: string }> };
+      const hasModel = body.models?.some((model) => model.name === this.config.ollamaModel);
       return {
-        available: true,
+        available: Boolean(hasModel),
         model: this.config.ollamaModel,
-        message: `Ollama is reachable. Configure or pull ${this.config.ollamaModel} before generating study content.`,
+        message: hasModel
+          ? `Ollama is ready with ${this.config.ollamaModel}.`
+          : `Ollama is reachable, but ${this.config.ollamaModel} is not installed. Pull the configured model before generating study content.`,
       };
     } catch {
       return {
@@ -47,23 +109,28 @@ export class OllamaService {
     }
   }
 
-  async generateQuestions(input: StudyContent): Promise<GeneratedQuestion[]> {
+  async generateQuestions(input: string): Promise<AIQuestionSetOutput> {
     let response: Response;
     try {
       response = await fetch(`${this.config.ollamaBaseUrl}/api/chat`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        signal: AbortSignal.timeout(60_000),
+        signal: AbortSignal.timeout(this.config.inferenceTimeoutMs),
         body: JSON.stringify({
           model: this.config.ollamaModel,
           stream: false,
-          format: "json",
+          format: questionSetJsonSchema,
+          options: {
+            num_ctx: this.config.ollamaNumCtx,
+            num_predict: this.config.ollamaMaxOutputTokens,
+            temperature: 0,
+          },
           messages: [
             {
               role: "system",
-              content: "Create three multiple-choice study questions. Return a JSON object with a questions array. Each question must have id (UUID), prompt, options (at least two strings), answerIndex (zero-based integer), and explanation.",
+              content: "Create exactly three distinct topics and exactly nine source-grounded multiple-choice questions. Create one easy, one medium, and one hard question for each topic. Use only the supplied source text. Each question must have exactly four options, one answerIndex from 0 to 3, a concise explanation, and one or two exact supporting quotes with pageNumber and chunkId.",
             },
-            { role: "user", content: JSON.stringify(input) },
+            { role: "user", content: input },
           ],
         }),
       });
@@ -94,7 +161,7 @@ export class OllamaService {
       throw new ServiceUnavailableError("OLLAMA_INVALID_JSON", "Ollama returned malformed JSON; try the request again or select a different model.");
     }
 
-    return GeneratedQuestionResponseSchema.parse(generated).questions;
+    return AIQuestionSetOutputSchema.parse(generated);
   }
 
   async chat(systemPrompt: string, userMessage: string): Promise<string> {
