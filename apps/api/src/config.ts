@@ -1,8 +1,10 @@
 import { config as loadEnv } from "dotenv";
-import { dirname, resolve } from "node:path";
+import { homedir } from "node:os";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const projectEnvPath = resolve(dirname(fileURLToPath(import.meta.url)), "../../../.env");
+const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+const projectEnvPath = join(projectRoot, ".env");
 loadEnv({ path: projectEnvPath });
 
 export interface ApiConfig {
@@ -18,27 +20,72 @@ export interface ApiConfig {
 }
 
 function readPort(value: string | undefined): number {
-  const port = Number(value ?? 3001);
+  const port = Number(value ?? 3000);
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
     throw new Error("API_PORT must be an integer between 1 and 65535.");
   }
   return port;
 }
 
+function positiveInteger(value: string | undefined, fallback: number, name: string): number {
+  const number = Number(value ?? fallback);
+  if (!Number.isSafeInteger(number) || number < 1 || number > fallback) {
+    throw new Error(`${name} must be an integer between 1 and ${fallback}.`);
+  }
+  return number;
+}
+
+function localOllamaUrl(value: string | undefined): string {
+  let url: URL;
+  try {
+    url = new URL(value ?? "http://127.0.0.1:11434");
+  } catch {
+    throw new Error("OLLAMA_BASE_URL must be a loopback HTTP URL.");
+  }
+  if (
+    url.protocol !== "http:" ||
+    !["127.0.0.1", "localhost", "[::1]"].includes(url.hostname) ||
+    url.username || url.password || url.pathname !== "/" || url.search || url.hash
+  ) {
+    throw new Error("OLLAMA_BASE_URL must be a loopback HTTP URL without credentials or a path.");
+  }
+  // Avoid resolving a configurable hostname for inference.
+  if (url.hostname === "localhost") url.hostname = "127.0.0.1";
+  return url.href.replace(/\/$/, "");
+}
+
+function defaultDatabasePath(environment: NodeJS.ProcessEnv): string {
+  const userDirectory = environment.USERPROFILE || homedir();
+  const appData = process.platform === "win32"
+    ? environment.LOCALAPPDATA || join(userDirectory, "AppData", "Local")
+    : process.platform === "darwin"
+      ? join(userDirectory, "Library", "Application Support")
+      : environment.XDG_DATA_HOME || join(userDirectory, ".local", "share");
+  return join(appData, "PointNemo", "point-nemo.sqlite");
+}
+
 export function readConfig(environment: NodeJS.ProcessEnv = process.env): ApiConfig {
+  if (environment.OLLAMA_MODEL && environment.OLLAMA_MODEL !== "qwen2.5:1.5b") {
+    throw new Error("OLLAMA_MODEL must be qwen2.5:1.5b for this release.");
+  }
+  const numCtx = positiveInteger(environment.OLLAMA_NUM_CTX, 8192, "OLLAMA_NUM_CTX");
+  if (numCtx !== 8192) throw new Error("OLLAMA_NUM_CTX must be 8192 for this release.");
+  const maxInput = positiveInteger(environment.OLLAMA_MAX_INPUT_TOKENS, 4096, "OLLAMA_MAX_INPUT_TOKENS");
+  const maxOutput = positiveInteger(environment.OLLAMA_MAX_OUTPUT_TOKENS, 3072, "OLLAMA_MAX_OUTPUT_TOKENS");
+  if (maxInput + maxOutput + 1024 > numCtx) {
+    throw new Error("The input/output token budgets and 1024-token reserve must fit OLLAMA_NUM_CTX.");
+  }
   return {
     port: readPort(environment.API_PORT),
-    databasePath: resolve(
-      dirname(fileURLToPath(import.meta.url)),
-      "../",
-      environment.DATABASE_PATH ?? "data/point-nemo.sqlite",
-    ),
-    ollamaBaseUrl: (environment.OLLAMA_BASE_URL ?? "http://127.0.0.1:11434").replace(/\/$/, ""),
-    ollamaModel: environment.OLLAMA_MODEL ?? "qwen2.5:1.5b",
-    ollamaNumCtx: Number(environment.OLLAMA_NUM_CTX ?? 8192),
-    ollamaMaxInputTokens: Number(environment.OLLAMA_MAX_INPUT_TOKENS ?? 4096),
-    ollamaMaxOutputTokens: Number(environment.OLLAMA_MAX_OUTPUT_TOKENS ?? 3072),
-    inferenceTimeoutMs: Number(environment.INFERENCE_TIMEOUT_MS ?? 40000),
-    jobTimeoutMs: Number(environment.JOB_TIMEOUT_MS ?? 90000),
+    databasePath: environment.DATABASE_PATH?.trim()
+      ? resolve(projectRoot, environment.DATABASE_PATH)
+      : resolve(defaultDatabasePath(environment)),
+    ollamaBaseUrl: localOllamaUrl(environment.OLLAMA_BASE_URL),
+    ollamaModel: "qwen2.5:1.5b",
+    ollamaNumCtx: numCtx,
+    ollamaMaxInputTokens: maxInput,
+    ollamaMaxOutputTokens: maxOutput,
+    inferenceTimeoutMs: positiveInteger(environment.INFERENCE_TIMEOUT_MS, 40000, "INFERENCE_TIMEOUT_MS"),
+    jobTimeoutMs: positiveInteger(environment.JOB_TIMEOUT_MS, 90000, "JOB_TIMEOUT_MS"),
   };
 }

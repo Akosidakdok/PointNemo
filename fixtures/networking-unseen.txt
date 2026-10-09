@@ -1,0 +1,23 @@
+Topic 1: TCP vs UDP
+
+TCP establishes a connection and delivers a reliable, ordered byte stream. TCP can retransmit lost data, and a receiving application reads bytes in order rather than receiving separate message boundaries.
+
+UDP sends individual datagrams without establishing a TCP-style connection. UDP does not guarantee delivery or ordering, so an application must handle loss or reordering if that matters.
+
+A synthetic file-copy application needs every byte in order, so TCP fits that requirement. A synthetic position-update application can discard an old update and use the newest one, so it can choose UDP when occasional loss is acceptable. These examples describe different requirements; UDP is not a guarantee of faster delivery.
+
+Topic 2: Ports
+
+TCP and UDP port numbers identify communication endpoints for applications on a host. A port number is a 16-bit value and ranges from 0 to 65535. An IP address selects a host interface; the port identifies the application endpoint used for the conversation.
+
+In these synthetic service examples, an SSH server listens on TCP port 22, an IMAP server listens on TCP port 143, and a PostgreSQL server listens on TCP port 5432. A client selects the server's listening port to contact that service.
+
+A TCP endpoint and a UDP endpoint with the same numeric port are distinct. A connection is distinguished by its protocol and the source and destination addresses and ports. Two clients can contact the same server port using different source ports.
+
+Topic 3: Subnetting
+
+Subnetting divides an address block into smaller networks. An IPv4 /24 prefix uses 24 network bits and leaves 8 host bits. The subnet mask for /24 is 255.255.255.0.
+
+The synthetic subnet 198.51.100.0/24 has 256 total addresses. Its network address is 198.51.100.0 and its broadcast address is 198.51.100.255. In a conventional /24 subnet, the host range is 198.51.100.1 through 198.51.100.254.
+
+Splitting 198.51.100.0/24 into two /25 subnets yields 198.51.100.0/25 and 198.51.100.128/25. Each /25 uses 25 network bits, leaves 7 host bits, and contains 128 total addresses. Its subnet mask is 255.255.255.128.

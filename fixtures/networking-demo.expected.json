@@ -1,17 +1,68 @@
 {
-  "documentHash": "will-be-populated-on-upload",
+  "filename": "networking-demo.pdf",
+  "synthetic": true,
+  "sampleEligible": true,
+  "hashAlgorithm": "SHA-256",
+  "documentHash": "559955e2e5b78308a7d7caadd1fde078decf06f9bd3152ffcd66cff3ce7aae76",
+  "fileSize": 3362,
+  "pageCount": 3,
+  "sourceTextFile": "networking-demo.txt",
+  "totalCharacters": 1821,
+  "nonWhitespaceCharacters": 1520,
+  "normalizedText": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination. IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1). IPv6 uses 128 bits, represented in hexadecimal. Each IPv4 decimal number represents an 8-bit octet and ranges from 0 to 255. The four octets together account for the 32 bits in an IPv4 address. A router examines the destination IP address when choosing where to forward a packet. An address tells the network where to deliver data; it does not describe the contents of that data. Topic 2: DNS DNS translates human-readable domain names into IP addresses. For example, a fictional lookup for study.example can return 192.0.2.25 to the client. A DNS resolver receives a name lookup from a client and obtains the requested record. An A record contains an IPv4 address. An AAAA record contains an IPv6 address. A DNS cache keeps a previous lookup result for the record's time to live (TTL). Reusing an unexpired cached answer avoids another lookup. Once that lifetime expires, the resolver must obtain a current answer rather than treating the expired entry as fresh. Topic 3: HTTP HTTP is an application-layer protocol used to exchange requests and responses. In its client-server model, a client sends a request and a server returns a response. A GET request asks for a representation of a resource. In this synthetic example, GET /notes requests the study notes stored at the /notes path. A POST request submits data to a resource for processing. An HTTP response includes a status code and may include a body. Status code 200 means the request succeeded. Status code 404 means the requested resource was not found. The client can use the status code to distinguish a successful /notes response from a missing resource.",
+  "pages": [
+    {
+      "pageNumber": 1,
+      "chunkId": "chunk-1",
+      "topic": "IP Addressing",
+      "text": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination. IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1). IPv6 uses 128 bits, represented in hexadecimal. Each IPv4 decimal number represents an 8-bit octet and ranges from 0 to 255. The four octets together account for the 32 bits in an IPv4 address. A router examines the destination IP address when choosing where to forward a packet. An address tells the network where to deliver data; it does not describe the contents of that data."
+    },
+    {
+      "pageNumber": 2,
+      "chunkId": "chunk-2",
+      "topic": "DNS",
+      "text": "Topic 2: DNS DNS translates human-readable domain names into IP addresses. For example, a fictional lookup for study.example can return 192.0.2.25 to the client. A DNS resolver receives a name lookup from a client and obtains the requested record. An A record contains an IPv4 address. An AAAA record contains an IPv6 address. A DNS cache keeps a previous lookup result for the record's time to live (TTL). Reusing an unexpired cached answer avoids another lookup. Once that lifetime expires, the resolver must obtain a current answer rather than treating the expired entry as fresh."
+    },
+    {
+      "pageNumber": 3,
+      "chunkId": "chunk-3",
+      "topic": "HTTP",
+      "text": "Topic 3: HTTP HTTP is an application-layer protocol used to exchange requests and responses. In its client-server model, a client sends a request and a server returns a response. A GET request asks for a representation of a resource. In this synthetic example, GET /notes requests the study notes stored at the /notes path. A POST request submits data to a resource for processing. An HTTP response includes a status code and may include a body. Status code 200 means the request succeeded. Status code 404 means the requested resource was not found. The client can use the status code to distinguish a successful /notes response from a missing resource."
+    }
+  ],
   "expectedTopics": [
     {
       "name": "IP Addressing",
-      "facts": ["IPv4 uses 32 bits", "IPv6 uses 128 bits", "Used for routing data packets"]
+      "pageNumber": 1,
+      "chunkId": "chunk-1",
+      "facts": [
+        "IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1).",
+        "IPv6 uses 128 bits, represented in hexadecimal.",
+        "Each IPv4 decimal number represents an 8-bit octet and ranges from 0 to 255.",
+        "A router examines the destination IP address when choosing where to forward a packet."
+      ]
     },
     {
-      "name": "DNS (Domain Name System)",
-      "facts": ["Translates domain names to IP addresses", "Functions as the phonebook of the Internet"]
+      "name": "DNS",
+      "pageNumber": 2,
+      "chunkId": "chunk-2",
+      "facts": [
+        "DNS translates human-readable domain names into IP addresses.",
+        "An A record contains an IPv4 address.",
+        "An AAAA record contains an IPv6 address.",
+        "Reusing an unexpired cached answer avoids another lookup."
+      ]
     },
     {
       "name": "HTTP",
-      "facts": ["Hypertext Transfer Protocol", "Application layer protocol", "Client-server model"]
+      "pageNumber": 3,
+      "chunkId": "chunk-3",
+      "facts": [
+        "HTTP is an application-layer protocol used to exchange requests and responses.",
+        "A GET request asks for a representation of a resource.",
+        "Status code 200 means the request succeeded.",
+        "Status code 404 means the requested resource was not found."
+      ]
     }
   ]
 }

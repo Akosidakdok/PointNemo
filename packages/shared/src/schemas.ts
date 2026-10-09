@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const PDF_LIMITS = { maxBytes: 5 * 1024 * 1024, maxPages: 3, maxCharacters: 8000, minNonWhitespace: 300 } as const;
+
 // Document admission & metadata
 export const DocumentSchema = z.object({
   id: z.string().uuid(),
@@ -28,6 +30,10 @@ export const GenerationJobSchema = z.object({
   state: JobStateSchema,
   questionSetId: z.string().uuid().optional(),
   errorCode: z.string().optional(),
+  errorMessage: z.string().optional(),
+  errorStage: z.enum(["extracting", "generating", "validating"]).optional(),
+  retryCount: z.number().int().min(0).max(1).optional(),
+  timings: z.record(z.string(), z.number().nonnegative()).optional(),
   elapsedTimeMs: z.number().int().min(0).optional(),
   createdAt: z.string().datetime(),
 });
@@ -36,9 +42,9 @@ export type GenerationJob = z.infer<typeof GenerationJobSchema>;
 // Evidence, Questions, Topics, QuestionSet
 export const EvidenceSchema = z.object({
   pageNumber: z.number().int().min(1),
-  chunkId: z.string(),
-  quote: z.string().min(20).max(400),
-});
+  chunkId: z.string().trim().min(1),
+  quote: z.string().trim().min(20).max(400),
+}).strict();
 export type Evidence = z.infer<typeof EvidenceSchema>;
 
 export const TopicSchema = z.object({
@@ -64,26 +70,39 @@ export type Question = z.infer<typeof QuestionSchema>;
 
 // AI output structure
 export const AIQuestionOutputSchema = z.object({
-  topicName: z.string().min(1),
+  topicName: z.string().trim().min(1).max(100),
   difficulty: QuestionDifficultySchema,
-  prompt: z.string().min(1).max(300),
-  options: z.array(z.string().min(1).max(160)).length(4),
+  prompt: z.string().trim().min(1).max(300),
+  options: z.array(z.string().trim().min(1).max(160)).length(4),
   answerIndex: z.number().int().min(0).max(3),
-  explanation: z.string().min(1).max(600),
+  explanation: z.string().trim().min(1).max(600),
   evidence: z.array(EvidenceSchema).min(1).max(2),
-});
+}).strict();
 
 export const AIQuestionSetOutputSchema = z.object({
+  status: z.literal("ready").optional(),
   topics: z.array(z.object({
-    name: z.string().min(1)
-  })).length(3),
+    name: z.string().trim().min(1).max(100)
+  }).strict()).length(3),
   questions: z.array(AIQuestionOutputSchema).length(9),
-});
+}).strict();
 export type AIQuestionSetOutput = z.infer<typeof AIQuestionSetOutputSchema>;
+
+export const InsufficientSourceSchema = z.object({ status: z.literal("insufficient_source"), reason: z.string().trim().min(1).max(300) }).strict();
+
+export const GenerationMetadataSchema = z.object({
+  documentHash: z.string(), extractorVersion: z.string(), promptVersion: z.string(), schemaVersion: z.string(),
+  tokenizerDigest: z.string(), modelTag: z.string(), modelDigest: z.string(), settingsHash: z.string(), createdAt: z.string().datetime(),
+});
+export type GenerationMetadata = z.infer<typeof GenerationMetadataSchema>;
 
 export const BackendQuestionSetSchema = z.object({
   id: z.string().uuid(),
   documentId: z.string().uuid(),
+  filename: z.string().optional(),
+  extractedPages: z.array(z.object({ pageNumber: z.number().int().positive(), chunkId: z.string(), text: z.string() })).optional(),
+  metadata: GenerationMetadataSchema.optional(),
+  compatible: z.boolean().optional(),
   topics: z.array(TopicSchema).length(3),
   questions: z.array(QuestionSchema).length(9),
   createdAt: z.string().datetime(),
@@ -160,6 +179,8 @@ export type CurrentSlot = z.infer<typeof CurrentSlotSchema>;
 export const RunAttemptDetailSchema = z.object({
   id: z.string().uuid(),
   slotId: z.string().uuid(),
+  questionId: z.string().uuid().optional(),
+  options: z.array(z.string()).length(4).optional(),
   slotIndex: z.number().int().min(0),
   encounterType: z.enum(["surface", "twilight", "midnight", "boss"]),
   selectedOptionIndex: z.number().int().min(0).max(3),
@@ -167,6 +188,8 @@ export const RunAttemptDetailSchema = z.object({
   feedback: AnswerFeedbackSchema,
   questionPrompt: z.string(),
   topicName: z.string(),
+  prompt: z.string().optional(),
+  topic: z.string().optional(),
   createdAt: z.string().datetime(),
 });
 export type RunAttemptDetail = z.infer<typeof RunAttemptDetailSchema>;
@@ -174,7 +197,15 @@ export type RunAttemptDetail = z.infer<typeof RunAttemptDetailSchema>;
 export const RunDetailSchema = z.object({
   id: z.string().uuid(),
   questionSetId: z.string().uuid(),
+  documentId: z.string().uuid().optional(),
+  filename: z.string().optional(),
+  updatedAt: z.string().datetime().optional(),
+  failureStage: z.enum(["surface", "twilight", "midnight", "boss"]).optional(),
+  bossOrder: z.array(z.string().uuid()).length(9).optional(),
+  slots: z.array(RunSlotSchema).length(18).optional(),
   state: RunStateSchema,
+  status: RunStateSchema.optional(),
+  documentName: z.string().optional(),
   playerHp: z.number().int().min(0).max(100),
   currentEncounterHp: z.number().int().min(0).max(100),
   xp: z.number().int().min(0),
@@ -187,6 +218,14 @@ export const RunDetailSchema = z.object({
   attempts: z.array(RunAttemptDetailSchema).optional(),
 });
 export type RunDetail = z.infer<typeof RunDetailSchema>;
+
+export const LibraryDocumentSchema = DocumentSchema.extend({
+  updatedAt: z.string().datetime(),
+  questionSets: z.array(BackendQuestionSetSchema),
+  runs: z.array(RunDetailSchema),
+  jobs: z.array(GenerationJobSchema),
+});
+export type LibraryDocument = z.infer<typeof LibraryDocumentSchema>;
 
 export const CreateRunRequestSchema = z.object({
   questionSetId: z.string().uuid(),
@@ -219,16 +258,21 @@ export type ApiError = z.infer<typeof ApiErrorSchema>;
 
 export const ExtractedPageSchema = z.object({
   pageNumber: z.number().int().min(1),
+  chunkId: z.string().optional(),
   text: z.string(),
 });
 
 export const ExtractedDocumentSchema = z.object({
   filename: z.string().min(1),
-  fileSize: z.number().int().min(1),
-  pageCount: z.number().int().min(1),
-  totalCharacters: z.number().int().min(300),
-  pages: z.array(ExtractedPageSchema).min(1),
-  normalizedText: z.string().min(300),
+  fileSize: z.number().int().min(1).max(PDF_LIMITS.maxBytes),
+  pageCount: z.number().int().min(1).max(PDF_LIMITS.maxPages),
+  totalCharacters: z.number().int().min(300).max(PDF_LIMITS.maxCharacters),
+  pages: z.array(ExtractedPageSchema).min(1).max(PDF_LIMITS.maxPages),
+  normalizedText: z.string().max(PDF_LIMITS.maxCharacters),
+}).superRefine((doc, context) => {
+  const normalized = doc.normalizedText.trim().replace(/\s+/g, " ");
+  if (normalized.replace(/\s/g, "").length < PDF_LIMITS.minNonWhitespace) context.addIssue({ code: "custom", message: "At least 300 non-whitespace characters are required." });
+  if (normalized.length !== doc.totalCharacters || doc.pages.length !== doc.pageCount) context.addIssue({ code: "custom", message: "Document counts must match the admitted source." });
 });
 
 export const PointNemoQuestionSchema = z.object({
@@ -246,11 +290,15 @@ export const PointNemoQuestionSchema = z.object({
   explanation: z.string().min(5),
   sourceQuote: z.string().min(3),
   sourcePage: z.number().int().min(1),
+  evidence: z.array(EvidenceSchema).optional(),
 });
 
 export const FrontendQuestionSetSchema = z.object({
   id: z.string().min(1),
   documentName: z.string().min(1),
+  documentId: z.string().optional(),
+  compatible: z.boolean().optional(),
+  metadata: GenerationMetadataSchema.optional(),
   topics: z.tuple([z.string().min(1), z.string().min(1), z.string().min(1)]),
   questions: z.array(PointNemoQuestionSchema).length(9),
   extractedPages: z.array(ExtractedPageSchema).default([]),
@@ -277,6 +325,8 @@ export const DescentRunSchema = z.object({
   id: z.string().min(1),
   questionSetId: z.string().min(1),
   documentName: z.string().min(1),
+  documentId: z.string().optional(),
+  failureStage: z.enum(["surface", "twilight", "midnight", "boss"]).optional(),
   stage: DescentZoneEnum,
   status: RunStatusEnum,
   currentQuestionIndex: z.number().int().min(0),

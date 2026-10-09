@@ -1,12 +1,11 @@
 import { OceanAuthScene } from "./OceanAuthScene";
 import { AuthPanel } from "./AuthPanel";
-import { type AuthenticatedUser } from "./auth.types";
+import { type LocalExplorer } from "./auth.types";
 import { type AssetBundle } from "../../game/sprites";
 
 export interface AuthLayoutProps {
   bundle: AssetBundle | null;
-  onAuthSuccess: (user: AuthenticatedUser) => void;
-  onGuestAccess: () => void;
+  onContinue: (user: LocalExplorer) => void;
   onOpenSettings: () => void;
   reducedMotion: boolean;
   onToggleReducedMotion: () => void;
@@ -14,8 +13,7 @@ export interface AuthLayoutProps {
 
 export function AuthLayout({
   bundle,
-  onAuthSuccess,
-  onGuestAccess,
+  onContinue,
   onOpenSettings,
   reducedMotion,
   onToggleReducedMotion,
@@ -68,7 +66,7 @@ export function AuthLayout({
         </section>
 
         <section className="auth-panel-column" aria-label="Explorer identification">
-          <AuthPanel onSuccess={onAuthSuccess} onGuestAccess={onGuestAccess} />
+          <AuthPanel onSuccess={onContinue} />
         </section>
       </div>
 

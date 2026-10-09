@@ -1,0 +1,23 @@
+Topic 1: IP Addressing
+
+An IP address identifies a network interface and helps routers direct packets to a destination. IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1). IPv6 uses 128 bits, represented in hexadecimal.
+
+Each IPv4 decimal number represents an 8-bit octet and ranges from 0 to 255. The four octets together account for the 32 bits in an IPv4 address.
+
+A router examines the destination IP address when choosing where to forward a packet. An address tells the network where to deliver data; it does not describe the contents of that data.
+
+Topic 2: DNS
+
+DNS translates human-readable domain names into IP addresses. For example, a fictional lookup for study.example can return 192.0.2.25 to the client.
+
+A DNS resolver receives a name lookup from a client and obtains the requested record. An A record contains an IPv4 address. An AAAA record contains an IPv6 address.
+
+A DNS cache keeps a previous lookup result for the record's time to live (TTL). Reusing an unexpired cached answer avoids another lookup. Once that lifetime expires, the resolver must obtain a current answer rather than treating the expired entry as fresh.
+
+Topic 3: HTTP
+
+HTTP is an application-layer protocol used to exchange requests and responses. In its client-server model, a client sends a request and a server returns a response.
+
+A GET request asks for a representation of a resource. In this synthetic example, GET /notes requests the study notes stored at the /notes path. A POST request submits data to a resource for processing.
+
+An HTTP response includes a status code and may include a body. Status code 200 means the request succeeded. Status code 404 means the requested resource was not found. The client can use the status code to distinguish a successful /notes response from a missing resource.

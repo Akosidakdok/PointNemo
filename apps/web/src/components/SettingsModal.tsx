@@ -79,28 +79,28 @@ export function SettingsModal({
 
         {/* Submersible Offline & Telemetry Diagnostics */}
         <section className="settings-block" aria-labelledby="diagnostics-title">
-          <h3 id="diagnostics-title" className="settings-block-title">SYSTEM DIAGNOSTICS & PWA STATUS</h3>
+          <h3 id="diagnostics-title" className="settings-block-title">LOCAL SYSTEM STATUS</h3>
           <div className="diagnostics-grid">
             <div className="diag-item">
-              <span className="diag-label">PWA CACHE STATUS</span>
-              <span className="diag-value">POINTNEMO-V1 (PRELOADED)</span>
+              <span className="diag-label">STUDY STORAGE</span>
+              <span className="diag-value">LOCAL SERVER DATABASE · ONE SHARED USER</span>
             </div>
             <div className="diag-item">
               <span className="diag-label">NETWORK TELEMETRY</span>
               <span className={`diag-value ${isOnline ? "is-ok" : "is-warn"}`}>
-                {isOnline ? "ONLINE (CONNECTED)" : "OFFLINE (CACHED APP SHELL)"}
+                {isOnline ? "BROWSER REPORTS NETWORK AVAILABLE" : "BROWSER REPORTS NETWORK UNAVAILABLE"}
               </span>
             </div>
             <div className="diag-item">
               <span className="diag-label">LOCAL API SERVER</span>
               <span className={`diag-value ${status.api.available ? "is-ok" : "is-warn"}`}>
-                {status.api.available ? "EXPRESS API ACTIVE" : "OFFLINE (RUN NPM RUN DEV)"}
+                {status.api.message}
               </span>
             </div>
             <div className="diag-item">
               <span className="diag-label">LOCAL INFERENCE</span>
               <span className={`diag-value ${status.ai.available ? "is-ok" : "is-muted"}`}>
-                {status.ai.available ? `OLLAMA (${status.ai.model || "LOCAL"})` : "STANDBY"}
+                {status.ai.message}
               </span>
             </div>
           </div>

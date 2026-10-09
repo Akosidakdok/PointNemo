@@ -1,163 +1,66 @@
 import { useEffect, useState } from "react";
+import { type GenerationJob } from "../api";
+import { type ProcessingStage } from "../processing";
 import { GameButton } from "./ui/GameButton";
-
-export type SonarStageStatus = "waiting" | "active" | "complete" | "failed";
 
 export interface SonarProcessingProps {
   filename: string;
-  extractionStatus: SonarStageStatus;
-  generationStatus: SonarStageStatus;
-  validationStatus: SonarStageStatus;
-  extractionDetail?: string;
-  generationDetail?: string;
-  validationDetail?: string;
-  error?: string | null;
-  isOllamaOffline?: boolean;
+  stage: ProcessingStage;
+  job: GenerationJob | null;
+  error: string | null;
+  isCancelling: boolean;
+  canRetry: boolean;
   onCancel: () => void;
   onRetry: () => void;
+  onReturnToLibrary: () => void;
   onChooseAnotherPdf: () => void;
 }
 
-export function SonarProcessing({
-  filename,
-  extractionStatus,
-  generationStatus,
-  validationStatus,
-  extractionDetail = "Reading source and locating pages",
-  generationDetail = "Preparing questions with local AI",
-  validationDetail = "Checking answers and source evidence",
-  error = null,
-  isOllamaOffline = false,
-  onCancel,
-  onRetry,
-  onChooseAnotherPdf,
-}: SonarProcessingProps) {
-  const [secondsElapsed, setSecondsElapsed] = useState(0);
-
-  const hasFailed =
-    extractionStatus === "failed" ||
-    generationStatus === "failed" ||
-    validationStatus === "failed" ||
-    error !== null;
-
-  useEffect(() => {
-    if (hasFailed) return;
-    const interval = setInterval(() => {
-      setSecondsElapsed((s) => s + 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [hasFailed]);
-
-  const formattedTime = `${String(Math.floor(secondsElapsed / 60)).padStart(2, "0")}:${String(
-    secondsElapsed % 60
-  ).padStart(2, "0")}`;
-
-  function renderStatusIcon(status: SonarStageStatus) {
-    if (status === "complete") return <span className="status-icon icon-complete">✓</span>;
-    if (status === "active") return <span className="status-icon icon-active">●</span>;
-    if (status === "failed") return <span className="status-icon icon-failed">✕</span>;
-    return <span className="status-icon icon-waiting">○</span>;
-  }
-
+export function SonarProcessing({ filename, stage, job, error, isCancelling, canRetry,
+  onCancel, onRetry, onReturnToLibrary, onChooseAnotherPdf }: SonarProcessingProps) {
+  const [startedAt, setStartedAt] = useState(Date.now);
+  const [now, setNow] = useState(Date.now);
+  useEffect(() => { if (stage === "uploading" && !job) setStartedAt(Date.now()); }, [stage, job]);
+  useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, []);
+  const terminal = !!job && ["ready", "failed", "cancelled"].includes(job.state);
+  const elapsedMs = terminal ? job.elapsedTimeMs ?? 0
+    : job ? Math.max(job.elapsedTimeMs ?? 0, now - Date.parse(job.createdAt)) : now - startedAt;
+  const seconds = Math.max(0, Math.floor(elapsedMs / 1000));
+  const elapsed = `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+  const stages = ["extracting", "generating", "validating"] as const;
+  const activeIndex = stages.findIndex((entry) => entry === (job?.state === "failed" ? job.errorStage : job?.state));
+  const failure = error || (job?.state === "failed" ? job.errorMessage || "The local generation job failed." : null);
   return (
-    <div className="sonar-processing-view" role="region" aria-label="Sonar document processing">
+    <div className="sonar-processing-view" role="region" aria-label="Document processing">
       <div className="sonar-processing-card pixel-panel">
-        <header className="sonar-header">
-          <div className="sonar-radar-orb" aria-hidden="true">
-            <span className="radar-beam" />
-            <span className="radar-blip" />
+        <header className="sonar-header"><div>
+          <h1 className="sonar-title">POINT NEMO — SOURCE PROCESSING</h1>
+          <p className="sonar-filename">DOCUMENT: <b>{filename}</b></p>
+          <p role="status">{isCancelling ? "Cancellation requested. Waiting for the server to confirm…" : stage === "uploading" ? "Uploading and checking admission…" : stage === "opening" ? "Questions saved. Opening an authoritative run…" : job?.state === "cancelled" ? "Generation cancelled by the server." : "Reading the actual local job status."}</p>
+        </div></header>
+        <div className="sonar-stages-list">{stages.map((entry, index) => {
+          const status = job?.state === "ready" ? "complete" : job?.state === "cancelled" ? "stopped"
+            : activeIndex < 0 ? "waiting" : index < activeIndex ? "complete"
+            : index === activeIndex ? job?.state === "failed" ? "failed" : "active" : "waiting";
+          return <div key={entry} className={`sonar-stage stage-${status}`}>
+            <div className="stage-indicator"><span aria-hidden="true">{status === "complete" ? "✓" : status === "failed" ? "✕" : status === "active" ? "●" : "○"}</span></div>
+            <div className="stage-content"><div className="stage-name-row"><span className="stage-title">{index + 1}. {entry.toUpperCase()}</span><span className="stage-status-badge">{status.toUpperCase()}</span></div></div>
+          </div>;
+        })}</div>
+        <div className="sonar-telemetry-row"><span>{job ? "JOB ELAPSED" : "UPLOAD ELAPSED"}: <b>{elapsed}</b></span><span>REQUESTED: <b>3 TOPICS · 9 QUESTIONS</b></span></div>
+        {job?.retryCount !== undefined && <p>Model repair attempts: {job.retryCount} / 1</p>}
+        {job?.timings && Object.keys(job.timings).length > 0 && <p>Recorded timings: {Object.entries(job.timings).map(([name, duration]) => `${name}: ${(duration / 1000).toFixed(1)}s`).join(" · ")}</p>}
+        {failure && <div className="sonar-failure-panel" role="alert">
+          <h2 className="failure-heading">{job?.state === "failed" ? `GENERATION FAILED${job.errorStage ? ` DURING ${job.errorStage.toUpperCase()}` : ""}` : "LOCAL REQUEST COULD NOT BE COMPLETED"}</h2>
+          <p className="failure-message">{failure}{job?.errorCode ? ` (${job.errorCode})` : ""}</p>
+          <p>Saved lessons remain available in the library. Using them is a separate choice.</p>
+          <div className="failure-actions">
+            {canRetry && <GameButton variant="primary" disabled={isCancelling} onClick={onRetry}>RETRY · FRESH GENERATION</GameButton>}
+            <GameButton disabled={isCancelling} onClick={onChooseAnotherPdf}>CHOOSE ANOTHER PDF</GameButton>
+            <GameButton disabled={isCancelling} onClick={onReturnToLibrary}>RETURN TO LIBRARY</GameButton>
           </div>
-          <div>
-            <p className="sonar-eyebrow">HADAL ACOUSTIC SCAN // SOURCE PROCESSING</p>
-            <h1 className="sonar-title">POINT NEMO — SONAR PROCESSING</h1>
-            <p className="sonar-filename">SOURCE DOCUMENT: <b>{filename}</b></p>
-          </div>
-        </header>
-
-        {/* 3 Real Stages */}
-        <div className="sonar-stages-list">
-          {/* Stage 1: Extraction */}
-          <div className={`sonar-stage stage-${extractionStatus}`}>
-            <div className="stage-indicator">
-              {renderStatusIcon(extractionStatus)}
-            </div>
-            <div className="stage-content">
-              <div className="stage-name-row">
-                <span className="stage-title">1. EXTRACTION</span>
-                <span className="stage-status-badge">{extractionStatus.toUpperCase()}</span>
-              </div>
-              <p className="stage-description">{extractionDetail}</p>
-            </div>
-          </div>
-
-          {/* Stage 2: Generation */}
-          <div className={`sonar-stage stage-${generationStatus}`}>
-            <div className="stage-indicator">
-              {renderStatusIcon(generationStatus)}
-            </div>
-            <div className="stage-content">
-              <div className="stage-name-row">
-                <span className="stage-title">2. GENERATION</span>
-                <span className="stage-status-badge">{generationStatus.toUpperCase()}</span>
-              </div>
-              <p className="stage-description">{generationDetail}</p>
-            </div>
-          </div>
-
-          {/* Stage 3: Validation */}
-          <div className={`sonar-stage stage-${validationStatus}`}>
-            <div className="stage-indicator">
-              {renderStatusIcon(validationStatus)}
-            </div>
-            <div className="stage-content">
-              <div className="stage-name-row">
-                <span className="stage-title">3. VALIDATION</span>
-                <span className="stage-status-badge">{validationStatus.toUpperCase()}</span>
-              </div>
-              <p className="stage-description">{validationDetail}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Timer row */}
-        <div className="sonar-telemetry-row">
-          <span>ELAPSED TIME: <b>{formattedTime}</b></span>
-          <span>TARGET: <b>EXACTLY 9 SOURCE-GROUNDED QUESTIONS</b></span>
-        </div>
-
-        {/* Error / Failure Banner */}
-        {hasFailed && (
-          <div className="sonar-failure-panel" role="alert">
-            <h2 className="failure-heading">
-              {isOllamaOffline ? "LOCAL AI UNAVAILABLE" : "SONAR PROCESSING HALTED"}
-            </h2>
-            <p className="failure-message">
-              {isOllamaOffline
-                ? "Point Nemo could not connect to the configured local Ollama service. Ensure Ollama is running (ollama serve) with model qwen2.5:1.5b pulled."
-                : error || "Point Nemo could not complete source calibration from this document."}
-            </p>
-            <div className="failure-actions">
-              <GameButton variant="primary" size="md" onClick={onRetry}>
-                ↻ RETRY CALIBRATION
-              </GameButton>
-              <GameButton variant="secondary" size="md" onClick={onChooseAnotherPdf}>
-                CHOOSE ANOTHER PDF
-              </GameButton>
-              <GameButton variant="secondary" size="md" onClick={onCancel}>
-                RETURN TO LIBRARY
-              </GameButton>
-            </div>
-          </div>
-        )}
-
-        {/* Non-failed Cancel row */}
-        {!hasFailed && (
-          <div className="sonar-footer-actions">
-            <GameButton variant="secondary" size="md" onClick={onCancel}>
-              [CANCEL] RETURN TO LIBRARY
-            </GameButton>
-          </div>
-        )}
+        </div>}
+        <div className="sonar-footer-actions"><GameButton disabled={isCancelling} onClick={onCancel}>{isCancelling ? "CONFIRMING CANCELLATION…" : terminal ? "RETURN TO LIBRARY" : "CANCEL GENERATION"}</GameButton></div>
       </div>
     </div>
   );

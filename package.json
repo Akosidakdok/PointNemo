@@ -8,13 +8,17 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run build --workspace=@point-nemo/shared && concurrently -k -n api,web \"npm run dev --workspace=@point-nemo/api\" \"npm run dev --workspace=@point-nemo/web\"",
+    "dev": "npm run build --workspace=@point-nemo/shared && concurrently -k -n api,web \"tsx watch apps/api/src/server.ts --dev\" \"npm run dev --workspace=@point-nemo/web\"",
     "build": "npm run build --workspace=@point-nemo/shared && npm run build --workspace=@point-nemo/api && npm run build --workspace=@point-nemo/web",
     "typecheck": "npm run build --workspace=@point-nemo/shared && npm run typecheck --workspaces --if-present",
     "assets": "node --env-file-if-exists=.env tools/generate-asset.mjs",
-    "test": "npm run test:assets && npm run test:api",
+    "start": "node apps/api/dist/server.js",
+    "db:init": "tsx apps/api/src/db-init.ts",
+    "release:check": "npm run typecheck && npm test && npm run test:smoke && npm run build",
+    "test": "npm run test:assets && npm run test:api && npm run test:web",
     "test:assets": "node --test tests/*.test.mjs",
     "test:api": "npm run test --workspace=@point-nemo/api",
+    "test:web": "tsx --test apps/web/tests/*.test.ts",
     "test:smoke": "tsx scripts/smoke-test.ts",
     "preview:assets": "node tools/preview-assets.mjs",
     "prepare:vfx": "node tools/merge-vfx.mjs"

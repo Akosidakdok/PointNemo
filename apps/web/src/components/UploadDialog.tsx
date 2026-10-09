@@ -1,4 +1,5 @@
-import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
+import { useState, useRef, useEffect, type ChangeEvent, type DragEvent } from "react";
+import { validateUploadFile } from "../api";
 import { GameModal } from "./ui/GameModal";
 import { GameButton } from "./ui/GameButton";
 
@@ -13,20 +14,14 @@ export function UploadDialog({ isOpen, onClose, onConfirmFile }: UploadDialogPro
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => { if (!isOpen) handleReset(); }, [isOpen]);
 
   function validateAndSetFile(file: File) {
     setValidationError(null);
 
-    // 1. Check extension and mime type
-    const lowerName = file.name.toLowerCase();
-    if (!lowerName.endsWith(".pdf") && file.type !== "application/pdf") {
-      setValidationError("Only PDF files are supported in this MVP.");
-      setSelectedFile(null);
-      return;
-    }
-
-    if (file.size >= 5 * 1024 * 1024) {
-      setValidationError("PDF must be smaller than 5 MiB.");
+    const error = validateUploadFile(file);
+    if (error) {
+      setValidationError(error);
       setSelectedFile(null);
       return;
     }
@@ -36,7 +31,9 @@ export function UploadDialog({ isOpen, onClose, onConfirmFile }: UploadDialogPro
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
-    if (files && files.length > 0) {
+    if (files && files.length !== 1) {
+      setValidationError("Choose exactly one PDF file."); setSelectedFile(null);
+    } else if (files && files.length > 0) {
       validateAndSetFile(files[0]);
     }
   }
@@ -44,7 +41,9 @@ export function UploadDialog({ isOpen, onClose, onConfirmFile }: UploadDialogPro
   function handleDrop(e: DragEvent<HTMLDivElement>) {
     e.preventDefault();
     setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    if (e.dataTransfer.files.length !== 1) {
+      setValidationError("Drop exactly one PDF file."); setSelectedFile(null);
+    } else if (e.dataTransfer.files.length > 0) {
       validateAndSetFile(e.dataTransfer.files[0]);
     }
   }
@@ -89,7 +88,7 @@ export function UploadDialog({ isOpen, onClose, onConfirmFile }: UploadDialogPro
               }
             }}
           >
-            CONTINUE TO SONAR ↗
+            GENERATE FRESH QUESTIONS ↗
           </GameButton>
         </div>
       }
@@ -127,7 +126,7 @@ export function UploadDialog({ isOpen, onClose, onConfirmFile }: UploadDialogPro
               <p className="dropzone-prompt">
                 <b>CLICK TO BROWSE</b> OR DRAG ONE PDF HERE
               </p>
-              <span className="dropzone-limits">ENGLISH TEXT · UNDER 5 MiB · UP TO 3 PAGES</span>
+              <span className="dropzone-limits">ENGLISH TEXT PDF · MAX 3 PAGES · MAX 5 MiB</span>
             </>
           ) : (
             <div className="selected-file-meta">
@@ -152,13 +151,15 @@ export function UploadDialog({ isOpen, onClose, onConfirmFile }: UploadDialogPro
         <div className="admission-rules-checklist">
           <span className="checklist-heading">PDF ADMISSION RULES:</span>
           <ul>
-            <li><span>✓</span> One English, text-based PDF</li>
-            <li><span>✓</span> Smaller than 5 MiB · up to 3 pages</li>
-            <li><span>✓</span> 300–8,000 extractable characters</li>
-            <li><span>✗</span> Scanned/image-only PDFs are unsupported (no OCR)</li>
-            <li><span>✗</span> Encrypted or password-protected PDFs are unsupported</li>
+            <li><span>✓</span> Exactly 1 text-based PDF file</li>
+            <li><span>✓</span> English text-based PDF, at most 3 pages</li>
+            <li><span>✓</span> At most 5 MiB and 8,000 normalized characters</li>
+            <li><span>✓</span> At least 300 non-whitespace characters</li>
+            <li><span>✗</span> Scanned/image-only PDFs rejected (No OCR)</li>
+            <li><span>✗</span> Encrypted or password-protected PDFs rejected</li>
           </ul>
-          <p className="admission-rules-note">Page count and readable text are checked locally after you continue. English is expected; language is not auto-detected yet.</p>
+          <p>The local server checks signature, extracted text, language, pages, and model input budget. Figures and image-dependent content are not interpreted.</p>
+          <p>Uploading always requests fresh generation. Choose saved questions separately from the library.</p>
         </div>
       </div>
     </GameModal>
