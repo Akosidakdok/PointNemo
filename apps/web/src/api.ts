@@ -78,7 +78,7 @@ export async function handleResponse<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
 
-async function getJson<T>(path: string, timeoutMs = 5000): Promise<T> {
+async function getJson<T>(path: string, timeoutMs = 60_000): Promise<T> {
   const response = await fetch(path, { signal: AbortSignal.timeout(timeoutMs) });
   return handleResponse<T>(response);
 }
@@ -98,7 +98,7 @@ export async function uploadDocument(file: File): Promise<{ documentId: string; 
   const response = await fetch("/api/documents", {
     method: "POST",
     body: formData,
-    signal: AbortSignal.timeout(15_000),
+    signal: AbortSignal.timeout(60_000),
   });
 
   const body = await handleResponse<ApiEnvelope<{ documentId: string; jobId: string }>>(response);
@@ -109,7 +109,7 @@ export async function uploadDocument(file: File): Promise<{ documentId: string; 
  * Poll job status until "ready", "failed", or "cancelled".
  */
 export async function getGenerationJob(jobId: string): Promise<GenerationJob> {
-  const body = await getJson<ApiEnvelope<GenerationJob>>(`/api/jobs/${jobId}`, 5_000);
+  const body = await getJson<ApiEnvelope<GenerationJob>>(`/api/jobs/${jobId}`, 60_000);
   return body.data;
 }
 
@@ -117,7 +117,7 @@ export async function getGenerationJob(jobId: string): Promise<GenerationJob> {
  * Fetch the validated question set (3 topics, 9 questions).
  */
 export async function getQuestionSet(questionSetId: string): Promise<QuestionSet> {
-  const body = await getJson<ApiEnvelope<QuestionSet>>(`/api/question-sets/${questionSetId}`, 5_000);
+  const body = await getJson<ApiEnvelope<QuestionSet>>(`/api/question-sets/${questionSetId}`, 60_000);
   return body.data;
 }
 

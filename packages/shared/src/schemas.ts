@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const PDF_LIMITS = { maxBytes: 5 * 1024 * 1024, maxPages: 3, maxCharacters: 8000, minNonWhitespace: 300 } as const;
+export const PDF_LIMITS = { maxBytes: Infinity, maxPages: Infinity, maxCharacters: Infinity, minNonWhitespace: 300 } as const;
 
 // Document admission & metadata
 export const DocumentSchema = z.object({
@@ -264,11 +264,11 @@ export const ExtractedPageSchema = z.object({
 
 export const ExtractedDocumentSchema = z.object({
   filename: z.string().min(1),
-  fileSize: z.number().int().min(1).max(PDF_LIMITS.maxBytes),
-  pageCount: z.number().int().min(1).max(PDF_LIMITS.maxPages),
-  totalCharacters: z.number().int().min(300).max(PDF_LIMITS.maxCharacters),
-  pages: z.array(ExtractedPageSchema).min(1).max(PDF_LIMITS.maxPages),
-  normalizedText: z.string().max(PDF_LIMITS.maxCharacters),
+  fileSize: z.number().int().min(1),
+  pageCount: z.number().int().min(1),
+  totalCharacters: z.number().int().min(300),
+  pages: z.array(ExtractedPageSchema).min(1),
+  normalizedText: z.string(),
 }).superRefine((doc, context) => {
   const normalized = doc.normalizedText.trim().replace(/\s+/g, " ");
   if (normalized.replace(/\s/g, "").length < PDF_LIMITS.minNonWhitespace) context.addIssue({ code: "custom", message: "At least 300 non-whitespace characters are required." });

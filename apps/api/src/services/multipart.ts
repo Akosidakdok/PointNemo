@@ -2,7 +2,7 @@ import type { IncomingMessage } from "node:http";
 import { BadRequestError } from "../errors.js";
 import type { UploadedDocument } from "./document-extractor.js";
 
-const MAX_MULTIPART_BYTES = 5 * 1024 * 1024 + 64 * 1024;
+const MAX_MULTIPART_BYTES = 100 * 1024 * 1024;
 
 function extractBoundary(contentType: string | undefined): string {
   const match = contentType?.match(/boundary=(?:"([^"]+)"|([^;]+))/i);
@@ -20,7 +20,7 @@ async function readRequest(request: IncomingMessage): Promise<Buffer> {
     const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
     total += buffer.length;
     if (total > MAX_MULTIPART_BYTES) {
-      throw new BadRequestError("FILE_TOO_LARGE", "PDF exceeds the 5 MiB size limit.");
+      throw new BadRequestError("FILE_TOO_LARGE", "PDF exceeds the 100 MiB size limit.");
     }
     chunks.push(buffer);
   }

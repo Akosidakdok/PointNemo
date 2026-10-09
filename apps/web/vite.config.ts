@@ -6,7 +6,7 @@ const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
 export default defineConfig(({ mode }) => {
   const environment = loadEnv(mode, projectRoot, "");
-  const apiPort = process.env.API_PORT ?? environment.API_PORT ?? "3001";
+  const apiPort = process.env.API_PORT ?? environment.API_PORT ?? "3000";
 
   return {
     server: {

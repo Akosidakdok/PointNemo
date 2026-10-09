@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   type DescentRun,
   type QuestionSet,
+  type GenerationJob,
 } from "@point-nemo/shared";
 import {
   getAppStatus,
@@ -171,9 +172,20 @@ export function App() {
         const uploadResult = await uploadDocument(file);
         const jobId = uploadResult.jobId;
 
-        // 2. Poll /api/jobs/:id
-        let job = await getGenerationJob(jobId);
-        while (job.state === "extracting" || job.state === "generating" || job.state === "validating") {
+        // 2. Poll /api/jobs/:id with retry resilience
+        let job: GenerationJob | null = null;
+        let pollFails = 0;
+        while (!job || job.state === "extracting" || job.state === "generating" || job.state === "validating") {
+          try {
+            job = await getGenerationJob(jobId);
+            pollFails = 0;
+          } catch (pollErr: any) {
+            pollFails++;
+            if (pollFails > 15) throw pollErr;
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+            continue;
+          }
+
           if (job.state === "extracting") {
             setExtractionStatus("active");
             setGenerationStatus("waiting");
@@ -187,16 +199,20 @@ export function App() {
             setGenerationStatus("complete");
             setValidationStatus("active");
           }
-          await new Promise((resolve) => setTimeout(resolve, 800));
-          job = await getGenerationJob(jobId);
+
+          if (job.state === "ready" || job.state === "failed" || job.state === "cancelled") {
+            break;
+          }
+
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
 
-        if (job.state === "failed") {
-          const errMessage = job.errorCode || "Document processing failed.";
+        if (job?.state === "failed") {
+          const errMessage = job.errorMessage || job.errorCode || "Document processing failed.";
           throw new Error(errMessage);
         }
 
-        if (job.state === "ready" && job.questionSetId) {
+        if (job?.state === "ready" && job.questionSetId) {
           setExtractionStatus("complete");
           setGenerationStatus("complete");
           setValidationStatus("complete");
@@ -207,7 +223,10 @@ export function App() {
           return qSet;
         }
       } catch (err: any) {
-        const msg = err?.message || "Document processing failed.";
+        const isFetchFail = err?.message === "Failed to fetch" || err?.name === "TypeError";
+        const msg = isFetchFail
+          ? "Failed to connect to local backend (http://127.0.0.1:3000). Ensure backend is running with 'npm run dev'."
+          : err?.message || "Document processing failed.";
         console.error("Processing error:", err);
         setProcessingError(msg);
 

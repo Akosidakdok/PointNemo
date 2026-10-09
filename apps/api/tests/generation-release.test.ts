@@ -28,12 +28,11 @@ async function terminal(service:GenerationJobService,id:string) { for(let i=0;i<
 async function databaseTest(fn:(db:SqliteDatabase)=>Promise<void>) {const dir=await mkdtemp(join(tmpdir(),"nemo-release-"));const db=initializeDatabase(join(dir,"test.sqlite"));try{await fn(db);}finally{db.close();await rm(dir,{recursive:true,force:true});}}
 function count(db:SqliteDatabase,table:string){return (db.prepare(`SELECT COUNT(*) AS n FROM ${table}`).get() as {n:number}).n;}
 
-test("admission checks signature, actual exact byte size and extension",()=>{
+test("admission checks signature and extension",()=>{
   const file=upload();admitPdf(file);
   assert.throws(()=>admitPdf({...file,buffer:Buffer.from("not a pdf")}),{code:"INVALID_PDF_SIGNATURE"});
   assert.throws(()=>admitPdf({...file,originalName:"notes.txt"}),{code:"INVALID_FILE_TYPE"});
-  const boundary=Buffer.alloc(5*1024*1024);file.buffer.copy(boundary);admitPdf({...file,buffer:boundary,size:99});
-  assert.throws(()=>admitPdf({...file,buffer:Buffer.concat([boundary,Buffer.from("x")]),size:1}),{code:"FILE_TOO_LARGE"});
+  const large=Buffer.alloc(6*1024*1024);file.buffer.copy(large);admitPdf({...file,buffer:large,size:99});
 });
 test("normalization counts nonwhitespace, rejects mixed scan pages and retains blank pages",()=>{
   const page={pageNumber:1,chunkId:"chunk-1",text:"word ".repeat(80),hasImages:false,hasDrawings:false};
@@ -42,8 +41,8 @@ test("normalization counts nonwhitespace, rejects mixed scan pages and retains b
   assert.throws(()=>normalizePages([page,{...page,pageNumber:2,text:"",hasImages:true}]),{code:"IMAGE_DEPENDENT_PDF"});
   assert.throws(()=>normalizePages([page,{...page,pageNumber:2,text:"",hasDrawings:true}]),{code:"UNUSABLE_PAGE_TEXT"});
   assert.equal(normalizePages([page,{...page,pageNumber:2,text:""}]).pageCount,2);
-  assert.throws(()=>normalizePages([{...page,text:"word ".repeat(1700)}]),{code:"CONTEXT_OVERFLOW"});
-  assert.throws(()=>normalizePages(Array.from({length:4},(_,i)=>({...page,pageNumber:i+1}))),{code:"TOO_MANY_PAGES"});
+  assert.ok(normalizePages([{...page,text:"word ".repeat(1700)}]).normalizedCharCount>8000);
+  assert.equal(normalizePages(Array.from({length:4},(_,i)=>({...page,pageNumber:i+1}))).pageCount,4);
 });
 test("local Qwen tokenizer counts actual BPE tokens and complete repair prompts",()=>{
   const counter=localTokenizer();assert.equal(counter.count("Hello world"),2);assert.equal(counter.count("123456"),6);

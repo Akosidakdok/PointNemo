@@ -31,6 +31,49 @@ function parseChunks(pagesJson: string): SourceChunk[] {
   return pages as SourceChunk[];
 }
 
+function findExactOrFuzzyQuote(
+  evidence: { pageNumber: number; chunkId: string; quote: string },
+  pages: SourceChunk[]
+): boolean {
+  const citedChunk = pages.find((p) => p.chunkId === evidence.chunkId && p.pageNumber === evidence.pageNumber);
+  const cleanEvidenceQuote = evidence.quote.normalize("NFC").trim().replace(/\s+/g, " ");
+  if (citedChunk && (citedChunk.text.includes(evidence.quote) || citedChunk.text.includes(cleanEvidenceQuote))) {
+    return true;
+  }
+
+  for (const page of pages) {
+    if (page.text.includes(evidence.quote) || page.text.includes(cleanEvidenceQuote)) {
+      evidence.pageNumber = page.pageNumber;
+      evidence.chunkId = page.chunkId;
+      return true;
+    }
+  }
+
+  const normQuote = cleanEvidenceQuote.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
+  if (normQuote.length >= 15) {
+    for (const page of pages) {
+      const normPage = page.text.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
+      if (normPage.includes(normQuote)) {
+        const sentences = page.text.split(/(?<=[.!?\n])\s+/);
+        for (const sentence of sentences) {
+          const normSent = sentence.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
+          if (normSent.includes(normQuote) || normQuote.includes(normSent)) {
+            const snapped = sentence.trim();
+            if (snapped.length >= 20 && snapped.length <= 400) {
+              evidence.quote = snapped;
+              evidence.pageNumber = page.pageNumber;
+              evidence.chunkId = page.chunkId;
+              return true;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
 export function validateGeneratedOutput(output: unknown, pagesJson: string): AIQuestionSetOutput {
   if (InsufficientSourceSchema.safeParse(output).success) throw new BadRequestError("INSUFFICIENT_SOURCE", "The source does not support three distinct topics and nine reliable questions. Export a richer text excerpt.");
   const parsed = AIQuestionSetOutputSchema.parse(output);
@@ -45,9 +88,9 @@ export function validateGeneratedOutput(output: unknown, pagesJson: string): AIQ
     if (uniqueOptions.size !== 4) throw new BadRequestError("INVALID_MODEL_OUTPUT", `In ${question.topicName} (${question.difficulty}), all four answer options must be distinct.`);
     coverage.add(coverageKey); stems.add(stem);
     for (const evidence of question.evidence) {
-      const chunk = pages.find((page) => page.chunkId === evidence.chunkId && page.pageNumber === evidence.pageNumber);
-      const cleanQuote = evidence.quote.normalize("NFC").trim().replace(/\s+/g, " ");
-      if (!chunk || (!chunk.text.includes(evidence.quote) && !chunk.text.includes(cleanQuote))) throw new BadRequestError("SOURCE_EVIDENCE_INVALID", "An evidence quote is not an exact passage in its cited page and chunk of this document.");
+      if (!findExactOrFuzzyQuote(evidence, pages)) {
+        throw new BadRequestError("SOURCE_EVIDENCE_INVALID", "An evidence quote is not an exact passage in its cited page and chunk of this document.");
+      }
     }
   }
   if (coverage.size !== 9) throw new BadRequestError("INVALID_MODEL_OUTPUT", "The model returned incomplete topic/difficulty coverage.");
@@ -164,14 +207,14 @@ export class GenerationJobService {
 
   private checkActive(jobId: string, signal: AbortSignal, deadline: number): void {
     signal.throwIfAborted();
-    if (Date.now() >= deadline) throw new ServiceUnavailableError("JOB_TIMEOUT", "The complete generation job exceeded 90 seconds. Export a smaller excerpt and retry.");
+    if (Date.now() >= deadline) throw new ServiceUnavailableError("JOB_TIMEOUT", "The complete generation job exceeded its deadline. Export a smaller excerpt and retry.");
     const row = this.database.prepare("SELECT state,cancel_requested FROM generation_jobs WHERE id=?").get(jobId) as {state:string;cancel_requested:number} | undefined;
     if (!row || row.cancel_requested || ["cancelled","failed","ready"].includes(row.state)) throw new BadRequestError("JOB_CANCELLED", "Generation was cancelled or deleted.");
   }
 
   private async run(jobId: string, documentId: string, file: UploadedDocument, controller: AbortController): Promise<void> {
     const start = Date.now(), deadline = start + this.config.jobTimeoutMs, signal = controller.signal;
-    const timer = setTimeout(() => controller.abort(new ServiceUnavailableError("JOB_TIMEOUT", "The complete generation job exceeded 90 seconds. Export a smaller excerpt and retry.")), this.config.jobTimeoutMs);
+    const timer = setTimeout(() => controller.abort(new ServiceUnavailableError("JOB_TIMEOUT", "The complete generation job exceeded its deadline. Export a smaller excerpt and retry.")), this.config.jobTimeoutMs);
     const timings: Record<string, number> = {};
     let stage: "extracting" | "generating" | "validating" = "extracting";
     let stageStart = start;
@@ -192,7 +235,13 @@ export class GenerationJobService {
       if (!status.available || !status.digest) throw new ServiceUnavailableError("OLLAMA_UNAVAILABLE", status.message);
       this.modelDigest = status.digest;
       const counter = this.tokenCounter ?? localTokenizer();
-      const source = parseChunks(extracted.pagesJson).map((p) => `[Page ${p.pageNumber} | ${p.chunkId}]\n${p.text}`).join("\n\n");
+      const allChunks = parseChunks(extracted.pagesJson);
+      let chunksToUse = allChunks;
+      if (allChunks.length > 3) {
+        const substantive = allChunks.filter((c) => c.text.replace(/\s/g, "").length >= 50);
+        chunksToUse = substantive.length >= 3 ? substantive.slice(0, 3) : allChunks.slice(0, 3);
+      }
+      const source = chunksToUse.map((p) => `[Page ${p.pageNumber} | ${p.chunkId}]\n${p.text}`).join("\n\n");
       let feedback: string | undefined, validated: AIQuestionSetOutput | undefined;
       for (let attempt = 0; attempt < 2; attempt++) {
         this.checkActive(jobId, signal, deadline);
@@ -201,7 +250,7 @@ export class GenerationJobService {
         try {
           const attemptSignal = AbortSignal.any([signal, AbortSignal.timeout(this.config.inferenceTimeoutMs)]);
           const output = await abortable(this.ollama.generateQuestions(source, { signal: attemptSignal, repairFeedback: feedback }), attemptSignal)
-            .catch((error: unknown) => { if (signal.aborted) throw signal.reason; if (attemptSignal.aborted) throw new ServiceUnavailableError("INFERENCE_TIMEOUT", "Local inference exceeded its 40-second attempt limit."); throw error; });
+            .catch((error: unknown) => { if (signal.aborted) throw signal.reason; if (attemptSignal.aborted) throw new ServiceUnavailableError("INFERENCE_TIMEOUT", "Local inference timed out."); throw error; });
           timings.generationMs = (timings.generationMs ?? 0) + Date.now() - inferenceStart;
           transition("validating"); validated = validateGeneratedOutput(output, extracted.pagesJson);
           break;

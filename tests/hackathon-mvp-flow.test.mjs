@@ -53,22 +53,14 @@ test('ExtractedDocumentSchema accepts exact admission boundaries', () => {
   assert.equal(ExtractedDocumentSchema.safeParse(documentWithText(['x'.repeat(300)])).success, true);
 });
 
-test('ExtractedDocumentSchema rejects more than 5 MiB', () => {
+test('ExtractedDocumentSchema admits documents with no upper page, file size, or character limit', () => {
   assert.equal(ExtractedDocumentSchema.safeParse({
-    ...validDocument, fileSize: 5 * 1024 * 1024 + 1,
-  }).success, false);
-});
-
-test('ExtractedDocumentSchema rejects more than three pages', () => {
-  const document = documentWithText(Array.from({ length: 4 }, () => 'x'.repeat(100)));
-  assert.equal(ExtractedDocumentSchema.safeParse(document).success, false);
-});
-
-test('ExtractedDocumentSchema rejects more than 8000 normalized characters', () => {
-  const document = documentWithText(['x'.repeat(8001)]);
-  assert.equal(ExtractedDocumentSchema.safeParse(document).success, false);
-  // A caller cannot bypass the text limit by understating the count field.
-  assert.equal(ExtractedDocumentSchema.safeParse({ ...document, totalCharacters: 300 }).success, false);
+    ...validDocument, fileSize: 10 * 1024 * 1024,
+  }).success, true);
+  const tenPages = documentWithText(Array.from({ length: 10 }, () => 'x'.repeat(100)));
+  assert.equal(ExtractedDocumentSchema.safeParse(tenPages).success, true);
+  const longDoc = documentWithText(['x'.repeat(12000)]);
+  assert.equal(ExtractedDocumentSchema.safeParse(longDoc).success, true);
 });
 
 test('ExtractedDocumentSchema rejects fewer than 300 non-whitespace characters', () => {

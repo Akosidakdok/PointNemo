@@ -85,7 +85,7 @@ export function readConfig(environment: NodeJS.ProcessEnv = process.env): ApiCon
     ollamaNumCtx: numCtx,
     ollamaMaxInputTokens: maxInput,
     ollamaMaxOutputTokens: maxOutput,
-    inferenceTimeoutMs: positiveInteger(environment.INFERENCE_TIMEOUT_MS, 40000, "INFERENCE_TIMEOUT_MS"),
-    jobTimeoutMs: positiveInteger(environment.JOB_TIMEOUT_MS, 90000, "JOB_TIMEOUT_MS"),
+    inferenceTimeoutMs: positiveInteger(environment.INFERENCE_TIMEOUT_MS, 180000, "INFERENCE_TIMEOUT_MS"),
+    jobTimeoutMs: positiveInteger(environment.JOB_TIMEOUT_MS, 360000, "JOB_TIMEOUT_MS"),
   };
 }
