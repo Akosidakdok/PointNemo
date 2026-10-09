@@ -77,11 +77,11 @@ Current main accepts one English, text-based PDF per run with these admission ru
 | Admission rule | MVP limit |
 | --- | --- |
 | File count | One PDF per document and generation run; different PDFs remain isolated |
-| File size | No upper admission limit |
-| Pages | No upper admission limit |
-| Extracted text | At least 300 extracted characters; no upper admission limit |
-| Language/content | English text that can be extracted and tied to page-level source locations |
-| Unsupported input | Scanned/image-only, encrypted, unreadable, empty, or out-of-limit PDF |
+| File size | Exact 5 MiB (5,242,880 bytes) upper admission limit |
+| Pages | At most 3 pages; no pages are silently truncated |
+| Extracted text | At least 300 non-whitespace characters; maximum 8,000 normalized NFC characters |
+| Language/content | English text (at least 80% Latin letters) tied to verbatim page-level source locations |
+| Unsupported input | Scanned/image-only, embedded figures, drawings, encrypted, unreadable, empty, or out-of-limit PDF |
 
 Validate before generation and show a specific, actionable reason when a file is rejected. Require usable text on each nonblank content page; figures and tables are not interpreted. Do not add OCR or silently truncate content. Keep uploaded PDF bytes in memory for extraction, then release them. Store normalized extracted pages and source passages needed for questions and feedback; do not retain the original PDF by default. A library record represents this saved extracted material and its generated data, not an archived copy of the uploaded file.
 
