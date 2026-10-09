@@ -1,16 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   type AssetBundle,
   SpriteAnimation,
+  frameDeltaSeconds,
   drawFrame,
   speciesScale,
 } from "../../game/sprites";
-import { type LessonRecord } from "../../game/lessonCatalog";
+import { type LessonRecord, type DescentInstance, lessonParts, bossPassScore } from "../../game/lessonCatalog";
 
 interface LessonBossViewProps {
   lesson: LessonRecord;
   bundle: AssetBundle | null;
-  onFinishBoss: (score: number, total: number) => void;
+  instance: DescentInstance;
+  onAnswer: (option: number) => void;
+  onContinue: () => void;
+  onStart: () => void;
   onReturnToDescent: () => void;
   reducedMotion?: boolean;
 }
@@ -18,19 +22,27 @@ interface LessonBossViewProps {
 export function LessonBossView({
   lesson,
   bundle,
-  onFinishBoss,
+  instance,
+  onAnswer,
+  onContinue,
+  onStart,
   onReturnToDescent,
   reducedMotion = false,
 }: LessonBossViewProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [inReview, setInReview] = useState(false);
-  const [currentQIndex, setCurrentQIndex] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [showFeedback, setShowFeedback] = useState(false);
+  const questionHeadingRef=useRef<HTMLHeadingElement | null>(null);
+  const inReview=instance.bossStarted ?? false;
+  const currentQIndex=instance.bossQuestionIndex ?? 0;
+  const correctCount=instance.bossScore ?? 0;
+  const selectedOption=instance.bossAnswers?.[currentQIndex] ?? null;
+  const showFeedback=selectedOption!==null;
+  const answerLocked=useRef(false);
+  useEffect(()=>{answerLocked.current=showFeedback;},[currentQIndex,showFeedback]);
+  useEffect(()=>{if(inReview)questionHeadingRef.current?.focus();},[currentQIndex,inReview]);
 
   // Filter valid questions
-  const questions = lesson.questions.filter((q): q is NonNullable<typeof q> => q !== null);
+  const allQuestions = lessonParts(lesson).flat();
+  const questions=(instance.bossOrder ?? allQuestions.map((_,index)=>index)).map((index)=>allQuestions[index]);
   const totalQuestions = questions.length;
   const currentQuestion = questions[currentQIndex];
 
@@ -42,12 +54,12 @@ export function LessonBossView({
     if (!ctx) return;
 
     let animId = 0;
-    let prev = performance.now();
+    let prev: number | null = null;
 
     const bossAnim = new SpriteAnimation(bundle, "goblin.idle.profile");
 
     const render = (time: number) => {
-      const dt = Math.min((time - prev) / 1000, 0.1);
+      const dt = frameDeltaSeconds(time, prev);
       prev = time;
 
       if (!reducedMotion) {
@@ -79,24 +91,13 @@ export function LessonBossView({
   }, [bundle, reducedMotion]);
 
   const handleAnswer = (optionIdx: number) => {
-    if (showFeedback) return;
-    setSelectedOption(optionIdx);
-    const isCorrect = optionIdx === currentQuestion.correct;
-    if (isCorrect) {
-      setCorrectCount((c) => c + 1);
-    }
-    setShowFeedback(true);
+    if (showFeedback || answerLocked.current || !currentQuestion) return;
+    answerLocked.current=true;
+    onAnswer(optionIdx);
   };
 
   const handleNextQuestion = () => {
-    if (currentQIndex < totalQuestions - 1) {
-      setCurrentQIndex((idx) => idx + 1);
-      setSelectedOption(null);
-      setShowFeedback(false);
-    } else {
-      // Completed all questions
-      onFinishBoss(correctCount + (selectedOption === currentQuestion.correct ? 1 : 0), totalQuestions);
-    }
+    if(showFeedback) onContinue();
   };
 
   return (
@@ -107,16 +108,16 @@ export function LessonBossView({
         <div className="boss-copy">
           <h1 id="boss-title">Apex Challenge</h1>
           <p>
-            The Hadal Apex Goblin Shark guards the Point Nemo boundary. Prove mastery across all
-            lesson concepts to conquer the expedition.
+            The Hadal Apex Goblin Shark guards the Point Nemo boundary. Review all
+            lesson concepts to complete the expedition. Mixed-topic review: previously encountered questions.
           </p>
 
           <div className="boss-stats">
             <span>
-              <b>09</b> TARGET QUESTIONS
+              <b>{totalQuestions}</b> TARGET QUESTIONS
             </span>
             <span>
-              <b>08</b> REQUIRED TO PASS
+              <b>{bossPassScore(totalQuestions)}</b> REQUIRED TO PASS
             </span>
           </div>
 
@@ -132,7 +133,8 @@ export function LessonBossView({
               <button
                 type="button"
                 className="primary-button"
-                onClick={() => setInReview(true)}
+                onClick={onStart}
+                disabled={!totalQuestions}
               >
                 Engage Boss Review <span>→</span>
               </button>
@@ -146,7 +148,7 @@ export function LessonBossView({
 
         <div className="boss-visual">
           <canvas ref={canvasRef} width={420} height={340} className="pixel-scene" />
-          <span>GOBLIN SHARK · APEX BOSS SPRITE</span>
+          <span>GOBLIN SHARK · PROTOTYPE BOSS SPRITE</span>
         </div>
       </div>
 
@@ -154,10 +156,11 @@ export function LessonBossView({
         <div className="panel question-panel" style={{ marginTop: "18px" }}>
           <div className="question-meta">
             <span>{`BOSS REVIEW QUESTION ${currentQIndex + 1} OF ${totalQuestions}`}</span>
-            <span>SCORE: {correctCount} / {currentQIndex} CORRECT</span>
+            <span>SCORE: {correctCount} / {instance.bossAnswers?.length ?? 0} CORRECT</span>
+            <span>Hull: {instance.playerHP} / 100 HP · Boss: {instance.enemyHP} / 80 HP · XP: {instance.xp ?? 0}</span>
           </div>
 
-          <h2 style={{ margin: "16px 0" }}>{currentQuestion.prompt}</h2>
+          <h2 ref={questionHeadingRef} tabIndex={-1} style={{ margin: "16px 0" }}>{currentQuestion.prompt}</h2>
 
           <div className="answer-list">
             {currentQuestion.options.map((opt, idx) => {
@@ -173,7 +176,7 @@ export function LessonBossView({
 
               return (
                 <button
-                  key={opt}
+                  key={idx}
                   type="button"
                   className={btnClass}
                   disabled={showFeedback}
@@ -196,10 +199,14 @@ export function LessonBossView({
                 <>
                   ✕ <b>Deflection!</b> Correct answer: <b>{currentQuestion.answer}</b>.
                   <p style={{ margin: "6px 0 0", fontSize: "12px", color: "var(--muted)" }}>
-                    {currentQuestion.explanation}
+                    Review the explanation and source passage below.
                   </p>
                 </>
               )}
+              <div className="source-evidence"><small>SOURCE EXPLANATION</small><p>{currentQuestion.explanation}</p>
+                {currentQuestion.supportingQuote && <blockquote>“{currentQuestion.supportingQuote}”</blockquote>}
+                {currentQuestion.sourcePage && <p>PDF page {currentQuestion.sourcePage}</p>}
+              </div>
             </div>
           )}
 

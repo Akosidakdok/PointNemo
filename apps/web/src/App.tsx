@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   type DescentRun,
   type QuestionSet,
@@ -7,6 +7,9 @@ import {
 import {
   getAppStatus,
   uploadDocument,
+  retryDocument,
+  cancelGenerationJob,
+  type ProcessingRequest,
   getGenerationJob,
   getQuestionSet,
   fetchRuns,
@@ -42,18 +45,17 @@ export function App() {
   const [navKey, setNavKey] = useState(0);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeInstanceId, setActiveInstanceId] = useState<string | null>("PN-001");
+  const [activeLessonTitle,setActiveLessonTitle]=useState("Introduction to Marine Biology (sample)");
   const [bossUnlocked, setBossUnlocked] = useState(false);
+  const [resultsUnlocked, setResultsUnlocked] = useState(false);
+  const handleUpdateProgress = useCallback((boss: boolean, results: boolean)=>{
+    setBossUnlocked(boss);setResultsUnlocked(results);
+  },[]);
 
   const handleNavigate = useCallback(
     (screen: AppNavScreen) => {
       setCurrentScreen(screen);
       setNavKey((k) => k + 1);
-      if (screen === "boss") {
-        setBossUnlocked(true);
-      }
-      if (screen === "descent" && !activeInstanceId) {
-        setActiveInstanceId("PN-001");
-      }
     },
     [activeInstanceId]
   );
@@ -76,6 +78,23 @@ export function App() {
   const [validationStatus, setValidationStatus] = useState<"waiting" | "active" | "complete" | "failed">("waiting");
   const [processingError, setProcessingError] = useState<string | null>(null);
   const [isOllamaOffline, setIsOllamaOffline] = useState(false);
+  const [processingJob, setProcessingJob] = useState<GenerationJob | null>(null);
+  const [savedNotice, setSavedNotice] = useState<string | null>(null);
+  const processingSession = useRef<{ controller: AbortController; jobId?: string } | null>(null);
+
+  const cancelProcessing = useCallback(() => {
+    const session = processingSession.current;
+    session?.controller.abort();
+    if (session?.jobId) void cancelGenerationJob(session.jobId).catch((error) => {
+      setProcessingError(`Could not confirm cancellation: ${error.message}. Check the local API.`);
+    });
+    processingSession.current = null;
+  }, []);
+
+  useEffect(() => () => cancelProcessing(), [cancelProcessing]);
+  useEffect(() => {
+    if (currentScreen !== "upload" && currentScreen !== "sonar") cancelProcessing();
+  }, [currentScreen, cancelProcessing]);
 
   // User Authentication State
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(() => {
@@ -159,23 +178,36 @@ export function App() {
   }, [refreshLibraryData]);
 
   // Handler: Start Sonar Processing for Uploaded File via Authoritative Backend
-  const handleStartProcessing = useCallback(
-    async (file: File): Promise<QuestionSet | void> => {
+  const processDocument = useCallback(
+    async (start: (signal: AbortSignal) => Promise<ProcessingRequest>): Promise<QuestionSet | void> => {
+      cancelProcessing();
+      const session: { controller: AbortController; jobId?: string } = { controller: new AbortController() };
+      processingSession.current = session;
       setExtractionStatus("active");
       setGenerationStatus("waiting");
       setValidationStatus("waiting");
       setProcessingError(null);
       setIsOllamaOffline(false);
+      setProcessingJob(null);
+      setSavedNotice(null);
+      let processingStage: "extracting" | "generating" | "validating" = "extracting";
 
       try {
         // 1. Upload to /api/documents
-        const uploadResult = await uploadDocument(file);
+        const uploadResult = await start(session.controller.signal);
         const jobId = uploadResult.jobId;
+        session.jobId = jobId;
+        if (session.controller.signal.aborted) {
+          if (!uploadResult.reused) await cancelGenerationJob(jobId);
+          return;
+        }
+        if (uploadResult.reused) setSavedNotice(`Saved questions · Created ${new Date(uploadResult.savedAt!).toLocaleString()}`);
 
         // 2. Poll /api/jobs/:id with retry resilience
         let job: GenerationJob | null = null;
         let pollFails = 0;
         while (!job || job.state === "extracting" || job.state === "generating" || job.state === "validating") {
+          session.controller.signal.throwIfAborted();
           try {
             job = await getGenerationJob(jobId);
             pollFails = 0;
@@ -186,15 +218,20 @@ export function App() {
             continue;
           }
 
+          session.controller.signal.throwIfAborted();
+          setProcessingJob(job);
           if (job.state === "extracting") {
+            processingStage = "extracting";
             setExtractionStatus("active");
             setGenerationStatus("waiting");
             setValidationStatus("waiting");
           } else if (job.state === "generating") {
+            processingStage = "generating";
             setExtractionStatus("complete");
             setGenerationStatus("active");
             setValidationStatus("waiting");
           } else if (job.state === "validating") {
+            processingStage = "validating";
             setExtractionStatus("complete");
             setGenerationStatus("complete");
             setValidationStatus("active");
@@ -208,9 +245,11 @@ export function App() {
         }
 
         if (job?.state === "failed") {
+          processingStage = job.errorStage ?? processingStage;
           const errMessage = job.errorMessage || job.errorCode || "Document processing failed.";
           throw new Error(errMessage);
         }
+        if (job?.state === "cancelled") throw new Error("Processing was cancelled. Select the PDF again to retry.");
 
         if (job?.state === "ready" && job.questionSetId) {
           setExtractionStatus("complete");
@@ -219,10 +258,13 @@ export function App() {
 
           // 3. Load question set
           const qSet = await getQuestionSet(job.questionSetId);
+          session.controller.signal.throwIfAborted();
           await refreshLibraryData();
+          session.controller.signal.throwIfAborted();
           return qSet;
         }
       } catch (err: any) {
+        if (session.controller.signal.aborted) return;
         const isFetchFail = err?.message === "Failed to fetch" || err?.name === "TypeError";
         const msg = isFetchFail
           ? "Failed to connect to local backend (http://127.0.0.1:3000). Ensure backend is running with 'npm run dev'."
@@ -230,21 +272,28 @@ export function App() {
         console.error("Processing error:", err);
         setProcessingError(msg);
 
-        if (extractionStatus === "active") {
-          setExtractionStatus("failed");
-        } else {
-          setGenerationStatus("failed");
-          setValidationStatus("failed");
-        }
+        setExtractionStatus(processingStage === "extracting" ? "failed" : "complete");
+        setGenerationStatus(processingStage === "generating" ? "failed" : processingStage === "validating" ? "complete" : "waiting");
+        setValidationStatus(processingStage === "validating" ? "failed" : "waiting");
 
         if (msg.includes("Ollama") || msg.includes("local AI") || err?.code === "OLLAMA_UNAVAILABLE") {
           setIsOllamaOffline(true);
         }
         throw err;
+      } finally {
+        if (processingSession.current === session) processingSession.current = null;
       }
     },
-    [extractionStatus, refreshLibraryData]
+    [cancelProcessing, refreshLibraryData]
   );
+
+  const handleStartProcessing = useCallback((file: File, reuseSaved = false) =>
+    // Keep the start response readable after Cancel so its job ID can be cancelled.
+    processDocument(() => uploadDocument(file, reuseSaved)), [processDocument]);
+  const handleRetryProcessing = useCallback(() => {
+    if (!processingJob?.canRetry) return Promise.resolve();
+    return processDocument(() => retryDocument(processingJob.documentId));
+  }, [processingJob, processDocument]);
 
   // Convert real SQLite questionSets into playable LessonRecords
   const customLessonRecords = useMemo<LessonRecord[]>(() => {
@@ -312,15 +361,18 @@ export function App() {
           onToggleTheme={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
           activeInstanceId={activeInstanceId}
           bossUnlocked={bossUnlocked}
+          resultsUnlocked={resultsUnlocked}
         />
 
         {/* Active Screen Content */}
         <main className="playground-main">
+          {savedNotice && <p className="muted" role="status">{savedNotice}</p>}
           {/* Module 1: Local Library Hub */}
           {currentScreen === "library" && (
             <LibraryHubView
               questionSets={questionSets}
               activeInstanceId={activeInstanceId}
+              activeLessonTitle={activeLessonTitle}
               onOpenUpload={() => handleNavigate("upload")}
               onGoToSeas={() => handleNavigate("seas")}
               bundle={bundle}
@@ -332,13 +384,16 @@ export function App() {
           {(currentScreen === "upload" || currentScreen === "sonar") && (
             <DocumentIntakeModule
               onStartRealProcessing={handleStartProcessing}
+              onRetryGeneration={processingJob?.canRetry ? handleRetryProcessing : undefined}
+              processingJob={processingJob}
+              modelName={status.ai.model}
               onProcessingFinished={(newQSet) => {
                 if (newQSet) {
-                  setQuestionSets((prev) => [newQSet, ...prev]);
+                  setQuestionSets((prev) => [newQSet, ...prev.filter((set) => set.id !== newQSet.id)]);
                 }
                 handleNavigate("seas");
               }}
-              onCancel={() => handleNavigate("library")}
+              onCancel={() => { cancelProcessing(); handleNavigate("library"); }}
               realExtractionStatus={extractionStatus}
               realGenerationStatus={generationStatus}
               realValidationStatus={validationStatus}
@@ -348,11 +403,9 @@ export function App() {
           )}
 
           {/* Module 3: Gameplay Module (Choose Sea, WASD Map, Combat, Boss, Results) */}
-          {(currentScreen === "seas" ||
-            currentScreen === "descent" ||
-            currentScreen === "boss" ||
-            currentScreen === "results") && (
+          {(
             <GameplayModule
+              enabled={["seas","descent","boss","results"].includes(currentScreen)}
               bundle={bundle}
               customLessons={customLessonRecords}
               navKey={navKey}
@@ -363,12 +416,13 @@ export function App() {
                   ? "descent"
                   : currentScreen === "boss"
                   ? "boss"
-                  : "results"
+                  : currentScreen === "results" ? "results" : "seas"
               }
               onNavigateScreen={(screen) => handleNavigate(screen)}
               onUploadNewPdf={() => handleNavigate("upload")}
               reducedMotion={reducedMotion}
-              onUpdateActiveInstanceId={(id) => setActiveInstanceId(id)}
+              onUpdateActiveInstanceId={(id,title) => {setActiveInstanceId(id);if(title)setActiveLessonTitle(title);}}
+              onUpdateProgress={handleUpdateProgress}
             />
           )}
 

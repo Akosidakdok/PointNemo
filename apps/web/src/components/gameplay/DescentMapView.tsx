@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import {
   type AssetBundle,
   SpriteAnimation,
+  frameDeltaSeconds,
   drawFrame,
   speciesScale,
 } from "../../game/sprites";
@@ -56,6 +57,8 @@ export function DescentMapView({
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target=e.target as HTMLElement | null;
+      if(target?.closest("input,textarea,select,[contenteditable='true']") || e.ctrlKey || e.metaKey || e.altKey)return;
       const code = e.code;
       if (
         code === "KeyW" ||
@@ -88,6 +91,17 @@ export function DescentMapView({
     };
   }, []);
 
+  const stepDirection=(direction:"up"|"down"|"left"|"right")=>{
+    if(instance.activeEncounter)return;
+    const player=playerPosRef.current;
+    player.x=Math.max(0.05,Math.min(0.95,player.x+(direction==="left"?-0.03:direction==="right"?0.03:0)));
+    player.y=Math.max(0.05,Math.min(0.95,player.y+(direction==="up"?-0.03:direction==="down"?0.03:0)));
+    player.facing=direction;
+    onUpdatePlayer(player.x,player.y,direction);
+    const target=BASE_ROUTE_POINTS[instance.routeNode];
+    if(target && Math.hypot(player.x-target.x,player.y-target.y)<0.07){heldKeysRef.current.clear();onReachTarget(instance.routeNode);}
+  };
+
   // Virtual D-pad for mobile / touch accessibility
   const handleVirtualDirection = useCallback((dir: "up" | "down" | "left" | "right", active: boolean) => {
     const codeMap: Record<string, string> = {
@@ -112,7 +126,7 @@ export function DescentMapView({
     if (!ctx) return;
 
     let animId = 0;
-    let prevTime = performance.now();
+    let prevTime: number | null = null;
 
     // Creature animations
     const creatures = [
@@ -124,7 +138,7 @@ export function DescentMapView({
     const playerAnim = new SpriteAnimation(bundle, "explorer.idle.up");
 
     const render = (time: number) => {
-      const dt = Math.min((time - prevTime) / 1000, 0.1);
+      const dt = frameDeltaSeconds(time, prevTime);
       prevTime = time;
 
       const width = canvas.width;
@@ -302,10 +316,12 @@ export function DescentMapView({
         <button
           type="button"
           className="secondary-button"
-          style={{ width: "42px", height: "38px", padding: 0 }}
+          style={{ width: "44px", height: "44px", padding: 0 }}
           onPointerDown={() => handleVirtualDirection("up", true)}
           onPointerUp={() => handleVirtualDirection("up", false)}
           onPointerLeave={() => handleVirtualDirection("up", false)}
+          onPointerCancel={() => handleVirtualDirection("up", false)}
+          onClick={()=>stepDirection("up")}
           aria-label="Swim Up"
         >
           ▲
@@ -313,10 +329,12 @@ export function DescentMapView({
         <button
           type="button"
           className="secondary-button"
-          style={{ width: "42px", height: "38px", padding: 0 }}
+          style={{ width: "44px", height: "44px", padding: 0 }}
           onPointerDown={() => handleVirtualDirection("left", true)}
           onPointerUp={() => handleVirtualDirection("left", false)}
           onPointerLeave={() => handleVirtualDirection("left", false)}
+          onPointerCancel={() => handleVirtualDirection("left", false)}
+          onClick={()=>stepDirection("left")}
           aria-label="Swim Left"
         >
           ◀
@@ -324,10 +342,12 @@ export function DescentMapView({
         <button
           type="button"
           className="secondary-button"
-          style={{ width: "42px", height: "38px", padding: 0 }}
+          style={{ width: "44px", height: "44px", padding: 0 }}
           onPointerDown={() => handleVirtualDirection("down", true)}
           onPointerUp={() => handleVirtualDirection("down", false)}
           onPointerLeave={() => handleVirtualDirection("down", false)}
+          onPointerCancel={() => handleVirtualDirection("down", false)}
+          onClick={()=>stepDirection("down")}
           aria-label="Swim Down"
         >
           ▼
@@ -335,10 +355,12 @@ export function DescentMapView({
         <button
           type="button"
           className="secondary-button"
-          style={{ width: "42px", height: "38px", padding: 0 }}
+          style={{ width: "44px", height: "44px", padding: 0 }}
           onPointerDown={() => handleVirtualDirection("right", true)}
           onPointerUp={() => handleVirtualDirection("right", false)}
           onPointerLeave={() => handleVirtualDirection("right", false)}
+          onPointerCancel={() => handleVirtualDirection("right", false)}
+          onClick={()=>stepDirection("right")}
           aria-label="Swim Right"
         >
           ▶

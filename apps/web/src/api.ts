@@ -13,6 +13,7 @@ import {
   type Evidence,
   type JobState,
   type GenerationJob,
+  type LibraryDocument,
 } from "@point-nemo/shared";
 
 export {
@@ -91,18 +92,29 @@ async function getJson<T>(path: string, timeoutMs = 60_000): Promise<T> {
  * Upload a PDF to the authoritative Express backend.
  * Uses FormData with field name "file".
  */
-export async function uploadDocument(file: File): Promise<{ documentId: string; jobId: string }> {
+export interface ProcessingRequest { documentId: string; jobId: string; reused?: boolean; savedAt?: string }
+export async function uploadDocument(file: File, reuseSaved = false, signal?: AbortSignal): Promise<ProcessingRequest> {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch("/api/documents", {
+  const response = await fetch(`/api/documents?reuse=${reuseSaved}`, {
     method: "POST",
     body: formData,
-    signal: AbortSignal.timeout(60_000),
+    signal: AbortSignal.any([AbortSignal.timeout(60_000), ...(signal ? [signal] : [])]),
   });
 
-  const body = await handleResponse<ApiEnvelope<{ documentId: string; jobId: string }>>(response);
+  const body = await handleResponse<ApiEnvelope<ProcessingRequest>>(response);
   return body.data;
+}
+
+export async function retryDocument(documentId: string, signal?: AbortSignal): Promise<ProcessingRequest> {
+  const response = await fetch(`/api/documents/${documentId}/retry`, { method: "POST", signal });
+  return (await handleResponse<ApiEnvelope<ProcessingRequest>>(response)).data;
+}
+
+export async function cancelGenerationJob(jobId: string): Promise<GenerationJob> {
+  const response = await fetch(`/api/jobs/${jobId}/cancel`, { method: "POST", signal: AbortSignal.timeout(5000) });
+  return (await handleResponse<ApiEnvelope<GenerationJob>>(response)).data;
 }
 
 /**
@@ -308,6 +320,14 @@ export async function fetchRuns(): Promise<{ runs: DescentRun[]; questionSets: Q
 
     const runsList = json.data;
     const questionSetsMap = new Map<string, QuestionSet>();
+    // A generated lesson exists before its first run. Do not hide those
+    // lessons by deriving the library only from run records.
+    try {
+      const documents=await getJson<ApiEnvelope<LibraryDocument[]>>("/api/documents",5000);
+      for(const document of documents.data) for(const set of document.questionSets) {
+        if(set.compatible!==false)questionSetsMap.set(set.id,set);
+      }
+    } catch { /* Existing run-linked lessons remain available below. */ }
 
     // Fetch question sets for each run
     for (const r of runsList) {

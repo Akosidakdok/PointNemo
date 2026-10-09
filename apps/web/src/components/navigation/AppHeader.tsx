@@ -20,6 +20,7 @@ interface AppHeaderProps {
   theme: "dark" | "light";
   onToggleTheme: () => void;
   bossUnlocked?: boolean;
+  resultsUnlocked?: boolean;
   activeInstanceId?: string | null;
 }
 
@@ -32,6 +33,7 @@ export function AppHeader({
   theme,
   onToggleTheme,
   bossUnlocked = false,
+  resultsUnlocked = false,
   activeInstanceId,
 }: AppHeaderProps) {
   return (
@@ -146,8 +148,9 @@ export function AppHeader({
           type="button"
           className={`nav-step ${currentScreen === "boss" ? "active" : ""}`}
           onClick={() => onNavigate("boss")}
+          disabled={!bossUnlocked}
           aria-current={currentScreen === "boss" ? "page" : undefined}
-          title={bossUnlocked ? "Final Review Boss (Unlocked)" : "Apex Goblin Shark Lesson Boss"}
+          title={bossUnlocked ? "Final Review Boss (Unlocked)" : "Clear all three parts and reach the boss marker"}
         >
           <b>05</b> Lesson Boss
         </button>
@@ -156,6 +159,7 @@ export function AppHeader({
           type="button"
           className={`nav-step ${currentScreen === "results" ? "active" : ""}`}
           onClick={() => onNavigate("results")}
+          disabled={!resultsUnlocked}
           aria-current={currentScreen === "results" ? "page" : undefined}
         >
           <b>06</b> Results

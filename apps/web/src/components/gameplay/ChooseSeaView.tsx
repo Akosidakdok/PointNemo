@@ -1,4 +1,4 @@
-import { type LessonRecord } from "../../game/lessonCatalog";
+import { type LessonRecord, lessonParts } from "../../game/lessonCatalog";
 
 interface ChooseSeaViewProps {
   lessons: LessonRecord[];
@@ -43,7 +43,7 @@ export function ChooseSeaView({
               />
               <div className="sea-card-copy">
                 <p className="eyebrow">
-                  {lesson.isCustom ? "CUSTOM PDF LESSON" : "3 TOPICS · 9 QUESTIONS"}
+                  {lesson.isCustom ? "CUSTOM PDF LESSON · 3 TOPICS · 9 QUESTIONS" : "SAMPLE · 3 TOPICS · 3 QUESTIONS"}
                 </p>
                 <h2>{lesson.title}</h2>
                 <p>
@@ -71,6 +71,7 @@ export function ChooseSeaView({
                   type="button"
                   className="primary-button"
                   onClick={() => onSelectLesson(lesson.id, "new")}
+                  disabled={lesson.isCustom && lessonParts(lesson).some((part)=>part.length!==3)}
                   aria-label={`Start new descent for ${lesson.title}`}
                 >
                   Start new descent <span>→</span>
