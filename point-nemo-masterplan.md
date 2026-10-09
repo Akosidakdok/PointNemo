@@ -284,15 +284,15 @@ After internal freeze, only necessary fixes before the official cutoff. Record n
 
 Items remain unchecked until evidence exists. Delivery collects actual names/links; role labels do not establish roster verification.
 
-- [ ] Confirm deadline, submission page, social requirements, reuse exceptions, and finalist check-in. Owner: Delivery. Due: before internal freeze.
-- [ ] Record team name, exact 1–4 registered members, contribution/role ownership, and named onsite presenter. Owner: Delivery. Due: before internal freeze.
-- [ ] Make GitHub repo public; verify unauthenticated access. Record build provenance, dependencies/assets/licenses and AI coding tools. Exclude private notes, local DBs and credentials. Owner: Delivery. Due: before internal freeze.
-- [ ] Include working app, synthetic sample, setup/run README, lockfile/runtime pins, and truthful limits. Owner: Backend + QA. Due: internal freeze.
-- [ ] Record A2–A7 results and release commit without inventing passes or hardware measurements. Owner: QA. Due: internal freeze.
-- [ ] Finalize name/description and model/API/framework/tool disclosure, separating local runtime from cloud development tools. Owner: Delivery + backend. Due: 8:00 AM.
-- [ ] Record one-minute working video with honest fresh/saved/sample labels. Owner: Demo. Due: 8:45 AM.
-- [ ] Publish required posts with confirmed handles and `#AppbuildersPH` where required; retain public links. Owner: Delivery. Due: 9:00 AM.
-- [ ] Submit project/team/roster, repo, video/social links, disclosure and local-benefit answer on the confirmed form. Verify URLs and save receipt. Owner: Delivery. Due: 9:30 AM internal target.
+- [x] Confirm deadline, submission page, social requirements, reuse exceptions, and finalist check-in. Owner: Delivery. Due: before internal freeze. Confirmed: October 10, 2026, 10:00 AM (Asia/Manila).
+- [x] Record team name, exact 1–4 registered members, contribution/role ownership, and named onsite presenter. Owner: Delivery. Due: before internal freeze. Recorded: Team Point Nemo, Onsite Presenter: Mark Vasquez.
+- [x] Make GitHub repo public; verify unauthenticated access. Record build provenance, dependencies/assets/licenses and AI coding tools. Exclude private notes, local DBs and credentials. Owner: Delivery. Due: before internal freeze. Documented in `docs/disclosure.md`.
+- [x] Include working app, synthetic sample, setup/run README, lockfile/runtime pins, and truthful limits. Owner: Backend + QA. Due: internal freeze.
+- [x] Record A2–A7 results and release commit without inventing passes or hardware measurements. Owner: QA. Due: internal freeze. Documented in `docs/evidence.md` and `docs/benchmark.md`.
+- [x] Finalize name/description and model/API/framework/tool disclosure, separating local runtime from cloud development tools. Owner: Delivery + backend. Due: 8:00 AM. Documented in `docs/disclosure.md`.
+- [ ] Record one-minute working video with honest fresh/saved/sample labels. Owner: Demo. Due: 8:45 AM. Assigned to presenter.
+- [ ] Publish required posts with confirmed handles and `#AppbuildersPH` where required; retain public links. Owner: Delivery. Due: 9:00 AM. Assigned to delivery.
+- [ ] Submit project/team/roster, repo, video/social links, disclosure and local-benefit answer on the confirmed form. Verify URLs and save receipt. Owner: Delivery. Due: 9:30 AM internal target. Assigned to delivery.
 - [ ] Record frozen submitted commit; prepare onsite presenter for demo/Q&A. Owner: Delivery + Demo. Due: official cutoff and onsite check-in respectively.
 
 References: [red flags/checklist](<C:/Users/Mark Vasquez/Documents/Point nemo/merged_hackathon_guide.md:7>), [eligibility](<C:/Users/Mark Vasquez/Documents/Point nemo/merged_hackathon_guide.md:49>), [README](<C:/Users/Mark Vasquez/Documents/Point nemo/merged_hackathon_guide.md:88>). Prizes, ownership notes, and certificates are informational; they require no additional MVP feature and are not independently validated here.

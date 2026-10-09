@@ -10,6 +10,7 @@ import { GenerationJobService } from "../src/services/generation-job.js";
 import { LocalPdfExtractor, type DocumentExtractor, type ExtractedDocument, type UploadedDocument } from "../src/services/document-extractor.js";
 import type { ApiConfig } from "../src/config.js";
 import type { OllamaService } from "../src/services/ollama.js";
+import { TOKENIZER_DIGEST } from "../src/services/token-budget.js";
 
 const config: ApiConfig = {
   port: 3001,
@@ -52,12 +53,12 @@ function mockExtractor(result: ExtractedDocument): DocumentExtractor {
 function mockOllama(output: unknown): OllamaService {
   return {
     generateQuestions: async (_input: string) => output as AIQuestionSetOutput,
-    getStatus: async () => ({ available: true, model: config.ollamaModel, message: "ready" }),
+    getStatus: async () => ({ available: true, model: config.ollamaModel, message: "ready", digest: "test-model-digest", tokenizerReady: true, tokenizerDigest: TOKENIZER_DIGEST }),
   } as OllamaService;
 }
 
 async function waitForTerminal(service: GenerationJobService, jobId: string): Promise<ReturnType<GenerationJobService["getJob"]>> {
-  for (let attempt = 0; attempt < 40; attempt += 1) {
+  for (let attempt = 0; attempt < 200; attempt += 1) {
     const job = service.getJob(jobId);
     if (["ready", "failed", "cancelled"].includes(job.state)) return job;
     await new Promise((resolve) => setTimeout(resolve, 5));
@@ -82,7 +83,7 @@ test("LocalPdfExtractor admits the networking fixture", async () => {
     mimeType: "application/pdf",
     buffer,
   });
-  assert.equal(extracted.pageCount, 1);
+  assert.equal(extracted.pageCount, 3);
   assert.ok(extracted.normalizedCharCount >= 300);
   assert.match(extracted.sha256, /^[a-f0-9]{64}$/);
 });
@@ -92,7 +93,7 @@ test("valid model output is persisted as one complete question set", async () =>
     const database = initializeDatabase(databasePath);
     try {
       const service = new GenerationJobService(database, config, mockExtractor(source), mockOllama(validOutput()));
-      const result = await service.enqueue({ originalName: "notes.pdf", mimeType: "application/pdf", buffer: Buffer.from("pdf") });
+      const result = await service.enqueue({ originalName: "notes.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.7\n%%EOF") });
       const job = await waitForTerminal(service, result.jobId);
       assert.equal(job.state, "ready");
       assert.ok(job.questionSetId);
@@ -111,7 +112,7 @@ test("invalid model output fails closed without persisting a question set", asyn
     const database = initializeDatabase(databasePath);
     try {
       const service = new GenerationJobService(database, config, mockExtractor(source), mockOllama({ topics: [{ name: "IP Addressing" }], questions: [] }));
-      const result = await service.enqueue({ originalName: "notes.pdf", mimeType: "application/pdf", buffer: Buffer.from("pdf") });
+      const result = await service.enqueue({ originalName: "notes.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.7\n%%EOF") });
       const job = await waitForTerminal(service, result.jobId);
       assert.equal(job.state, "failed");
       assert.equal(job.errorCode, "INVALID_MODEL_OUTPUT");

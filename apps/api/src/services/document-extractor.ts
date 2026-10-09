@@ -1,89 +1,105 @@
 import { createHash } from "node:crypto";
-import { PDFParse } from "pdf-parse";
+import { Worker } from "node:worker_threads";
+import { PDF_LIMITS } from "@point-nemo/shared";
 import { BadRequestError } from "../errors.js";
 
-export interface UploadedDocument {
-  originalName: string;
-  mimeType: string;
-  buffer: Buffer;
-  size?: number;
+export interface UploadedDocument { originalName: string; mimeType: string; buffer: Buffer; size?: number }
+export interface ExtractedDocument { sha256: string; pageCount: number; normalizedCharCount: number; pagesJson: string }
+export interface DocumentExtractor { extractText(file: UploadedDocument, signal?: AbortSignal): Promise<ExtractedDocument> }
+interface ParsedPage { pageNumber: number; chunkId: string; text: string; hasImages: boolean; hasDrawings: boolean }
+interface WorkerResult { pages?: ParsedPage[]; error?: { code: string; message: string } }
+
+export function admitPdf(file: UploadedDocument): void {
+  if (!file.originalName.toLowerCase().endsWith(".pdf") || !["application/pdf", "application/octet-stream", ""].includes(file.mimeType)) {
+    throw new BadRequestError("INVALID_FILE_TYPE", "Upload one English text-based .pdf file.");
+  }
+  // Use actual bytes, never a client-reported size or MIME as proof of content.
+  if (file.buffer.length > PDF_LIMITS.maxBytes) throw new BadRequestError("FILE_TOO_LARGE", "PDF exceeds the exact 5 MiB (5,242,880 byte) limit.");
+  if (!/^%PDF-\d\.\d(?:\r|\n|\s)/.test(file.buffer.subarray(0, 16).toString("ascii"))) {
+    throw new BadRequestError("INVALID_PDF_SIGNATURE", "The file does not start with a valid PDF signature.");
+  }
 }
 
-export interface ExtractedDocument {
-  sha256: string;
-  pageCount: number;
-  normalizedCharCount: number;
-  pagesJson: string; // Serialized array of pages/chunks
-}
-
-export interface DocumentExtractor {
-  extractText(file: UploadedDocument): Promise<ExtractedDocument>;
+export function normalizePages(pages: ParsedPage[]): Omit<ExtractedDocument, "sha256"> {
+  if (!pages.length || pages.length > PDF_LIMITS.maxPages) throw new BadRequestError("TOO_MANY_PAGES", "Use a PDF with at most 3 pages; no pages are silently truncated.");
+  const normalized = pages.map((page) => ({ pageNumber: page.pageNumber, chunkId: page.chunkId, text: page.text.normalize("NFC").trim().replace(/\s+/g, " ") }));
+  for (let i = 0; i < pages.length; i++) {
+    const page = pages[i]!, text = normalized[i]!.text;
+    if (page.hasImages) throw new BadRequestError("IMAGE_DEPENDENT_PDF", `Page ${page.pageNumber} contains an embedded image. Export a text-only excerpt; images and scans are not interpreted.`);
+    if (text.replace(/\s/g, "").length < 20 && (page.hasDrawings || text.length > 0)) {
+      throw new BadRequestError("UNUSABLE_PAGE_TEXT", `Page ${page.pageNumber} has content but too little usable text. Blank pages are allowed; scans, figures and tables are not interpreted.`);
+    }
+  }
+  const text = normalized.map((page) => page.text).join(" ").trim();
+  if (text.replace(/\s/g, "").length < PDF_LIMITS.minNonWhitespace) throw new BadRequestError("INSUFFICIENT_TEXT", "PDF needs at least 300 non-whitespace text characters.");
+  if (text.length > PDF_LIMITS.maxCharacters) throw new BadRequestError("CONTEXT_OVERFLOW", "PDF exceeds 8,000 normalized characters. Export a shorter excerpt.");
+  const letters = text.match(/\p{L}/gu) ?? [];
+  if (letters.length && letters.filter((letter) => /[a-z]/i.test(letter)).length / letters.length < 0.8) {
+    throw new BadRequestError("UNSUPPORTED_LANGUAGE", "This release supports English text-based notes. Export an English text excerpt.");
+  }
+  return { pageCount: pages.length, normalizedCharCount: text.length, pagesJson: JSON.stringify(normalized) };
 }
 
 export class LocalPdfExtractor implements DocumentExtractor {
-  async extractText(file: UploadedDocument): Promise<ExtractedDocument> {
-    // 1. Verify MIME type
-    if (file.mimeType !== "application/pdf") {
-      throw new BadRequestError("INVALID_FILE_TYPE", "Only PDF files are supported.");
-    }
+  async extractText(file: UploadedDocument, signal?: AbortSignal): Promise<ExtractedDocument> {
+    admitPdf(file);
+    signal?.throwIfAborted();
+    const sha256 = createHash("sha256").update(file.buffer).digest("hex");
+    let parser: any;
+    let timer: NodeJS.Timeout | undefined;
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(new BadRequestError("EXTRACTION_TIMEOUT", "PDF extraction exceeded 10 seconds. Export a simpler text excerpt.")), 10_000);
+    });
+    const extractPromise = (async () => {
+      try {
+        const { PDFParse } = await import("pdf-parse");
+        const { OPS } = await import("pdfjs-dist/legacy/build/pdf.mjs");
+        parser = new PDFParse({ data: new Uint8Array(file.buffer), verbosity: 0, stopAtErrors: true, isEvalSupported: false });
+        const info = await parser.getInfo();
+        if (info.info?.IsEncrypted || info.permission) throw new BadRequestError("ENCRYPTED_PDF", "Encrypted PDFs are unsupported. Export an unencrypted excerpt.");
+        if (info.total > 3) throw new BadRequestError("TOO_MANY_PAGES", "PDF exceeds the 3-page limit.");
+        signal?.throwIfAborted();
+        const data = await parser.getText({ pageJoiner: "" });
+        const imageOps = new Set([OPS.paintImageXObject, OPS.paintInlineImageXObject, OPS.paintImageMaskXObject, OPS.paintImageXObjectRepeat, OPS.paintImageMaskXObjectRepeat]);
+        const drawingOps = new Set([OPS.stroke, OPS.fill, OPS.eoFill, OPS.fillStroke, OPS.eoFillStroke, OPS.shadingFill]);
+        const pages: ParsedPage[] = [];
+        for (const page of data.pages) {
+          signal?.throwIfAborted();
+          const pdfPage = await parser.doc.getPage(page.num);
+          const ops = await pdfPage.getOperatorList();
+          pages.push({
+            pageNumber: page.num,
+            chunkId: "chunk-" + page.num,
+            text: page.text,
+            hasImages: ops.fnArray.some((op: any) => imageOps.has(op)),
+            hasDrawings: ops.fnArray.some((op: any) => drawingOps.has(op)),
+          });
+          pdfPage.cleanup();
+        }
+        return { sha256, ...normalizePages(pages) };
+      } catch (error: any) {
+        if (signal?.aborted) throw signal.reason;
+        if (error instanceof BadRequestError) throw error;
+        const code = error.code || (error.name === "PasswordException" ? "ENCRYPTED_PDF" : "UNREADABLE_PDF");
+        throw new BadRequestError(code, error.code ? error.message : "The PDF is encrypted, malformed, or unreadable. Export an unencrypted text excerpt.");
+      } finally {
+        try { await parser?.destroy(); } catch {}
+      }
+    })();
 
-    // 2. Check File Size (5 MiB = 5242880 bytes)
-    if (file.buffer.length > 5242880) {
-      throw new BadRequestError("FILE_TOO_LARGE", "PDF exceeds the 5 MiB size limit.");
-    }
+    let cancel: (() => void) | undefined;
+    const cancelPromise = signal ? new Promise<never>((_, reject) => {
+      cancel = () => reject(signal.reason ?? new BadRequestError("JOB_CANCELLED", "Generation was cancelled."));
+      signal.addEventListener("abort", cancel, { once: true });
+    }) : undefined;
 
-    // 3. Compute SHA-256
-    const hash = createHash("sha256").update(file.buffer).digest("hex");
-
-    let data: Awaited<ReturnType<PDFParse["getText"]>>;
-    let parser: PDFParse | undefined;
     try {
-      // 4. Parse PDF
-      parser = new PDFParse({ data: Buffer.from(file.buffer) });
-      data = await parser.getText();
-    } catch (error) {
-      throw new BadRequestError(
-        "UNREADABLE_PDF",
-        "The PDF could not be parsed. It may be encrypted, malformed, or unsupported.",
-      );
+      const raceTargets = [extractPromise, timeoutPromise];
+      if (cancelPromise) raceTargets.push(cancelPromise);
+      return await Promise.race(raceTargets);
     } finally {
-      await parser?.destroy();
+      if (timer) clearTimeout(timer);
+      if (cancel) signal?.removeEventListener("abort", cancel);
     }
-
-    // 5. Enforce Limits
-    if (data.total > 3) {
-      throw new BadRequestError("TOO_MANY_PAGES", "PDF exceeds the 3-page limit.");
-    }
-
-    // Basic normalization: trim and compress whitespace
-    const normalizedText = data.text.trim().replace(/\s+/g, " ");
-    const charCount = normalizedText.length;
-
-    if (charCount < 300) {
-      throw new BadRequestError(
-        "INSUFFICIENT_TEXT",
-        "PDF must contain at least 300 characters of extractable text.",
-      );
-    }
-    if (charCount > 8000) {
-      throw new BadRequestError(
-        "CONTEXT_OVERFLOW",
-        "PDF exceeds the 8,000 character limit.",
-      );
-    }
-
-    // 6. Return Structured Output
-    return {
-      sha256: hash,
-      pageCount: data.total,
-      normalizedCharCount: charCount,
-      pagesJson: JSON.stringify(
-        data.pages.map((page) => ({
-          pageNumber: page.num,
-          chunkId: `chunk-${page.num}`,
-          text: page.text.trim().replace(/\s+/g, " "),
-        })),
-      ),
-    };
   }
 }
