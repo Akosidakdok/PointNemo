@@ -1,0 +1,17 @@
+{
+  "documentHash": "will-be-populated-on-upload",
+  "expectedTopics": [
+    {
+      "name": "IP Addressing",
+      "facts": ["IPv4 uses 32 bits", "IPv6 uses 128 bits", "Used for routing data packets"]
+    },
+    {
+      "name": "DNS (Domain Name System)",
+      "facts": ["Translates domain names to IP addresses", "Functions as the phonebook of the Internet"]
+    },
+    {
+      "name": "HTTP",
+      "facts": ["Hypertext Transfer Protocol", "Application layer protocol", "Client-server model"]
+    }
+  ]
+}

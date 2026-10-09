@@ -2,15 +2,20 @@ import { useState, useEffect, useCallback } from "react";
 import {
   type DescentRun,
   type QuestionSet,
+  type RunDetail,
 } from "@point-nemo/shared";
 import {
   getAppStatus,
-  extractDocument,
-  generateQuestionSet,
-  fetchRuns,
+  uploadDocument,
+  getGenerationJob,
+  getQuestionSet,
+  createRun,
+  getRun,
   submitRunAnswer,
+  fetchRuns,
   tryAgainRun,
   deleteRun,
+  toDescentRun,
   type AppStatus,
 } from "./api";
 import { loadAssetBundle, type AssetBundle } from "./game/sprites";
@@ -24,13 +29,17 @@ import { SettingsModal } from "./components/SettingsModal";
 import { SonarPreloader } from "./components/ui/SonarPreloader";
 import { AuthPage } from "./components/auth/AuthPage";
 import { type AuthenticatedUser } from "./components/auth/auth.types";
+import { AuthoritativeBattle } from "./components/AuthoritativeBattle";
+import { BattleEncounter } from "./components/BattleEncounter";
+import { DocumentIntake } from "./components/DocumentIntake";
+import { ExpeditionMap, mapNodes, type MapNode } from "./components/ExpeditionMap";
 
 const initialStatus: AppStatus = {
   api: { available: false, message: "Checking local API…" },
   ai: { available: false, message: "Checking Ollama…" },
 };
 
-type AppView = "library" | "processing" | "encounter" | "results";
+type AppView = "library" | "processing" | "encounter" | "results" | "expedition";
 
 export function App() {
   // Preloading & assets
@@ -49,7 +58,11 @@ export function App() {
   const [runs, setRuns] = useState<DescentRun[]>([]);
   const [questionSets, setQuestionSets] = useState<QuestionSet[]>([]);
   const [currentRun, setCurrentRun] = useState<DescentRun | null>(null);
+  const [currentRunDetail, setCurrentRunDetail] = useState<RunDetail | null>(null);
   const [currentQuestionSet, setCurrentQuestionSet] = useState<QuestionSet | null>(null);
+
+  // Classic Expedition Map state
+  const [selectedNode, setSelectedNode] = useState<MapNode>(mapNodes[0]);
 
   // Sonar Processing Stage State
   const [processingFile, setProcessingFile] = useState<File | null>(null);
@@ -143,7 +156,7 @@ export function App() {
   // Determine active run (unfinished run)
   const activeRun = runs.find((r) => r.status === "active") || null;
 
-  // Handler: Start Sonar Processing for Uploaded File
+  // Handler: Start Sonar Processing for Uploaded File via Authoritative Backend
   const handleStartProcessing = useCallback(
     async (file: File) => {
       setProcessingFile(file);
@@ -156,27 +169,57 @@ export function App() {
       setIsOllamaOffline(false);
 
       try {
-        // Stage 1: Extraction
-        const extractedDoc = await extractDocument(file);
-        setExtractionStatus("complete");
-        setGenerationStatus("active");
+        // 1. Upload to /api/documents
+        const uploadResult = await uploadDocument(file);
+        const jobId = uploadResult.jobId;
 
-        // Stage 2 & 3: Generation & Strict Validation
-        const result = await generateQuestionSet(extractedDoc);
-        setGenerationStatus("complete");
-        setValidationStatus("complete");
+        // 2. Poll /api/jobs/:id
+        let job = await getGenerationJob(jobId);
+        while (job.state === "extracting" || job.state === "generating" || job.state === "validating") {
+          if (job.state === "extracting") {
+            setExtractionStatus("active");
+            setGenerationStatus("waiting");
+            setValidationStatus("waiting");
+          } else if (job.state === "generating") {
+            setExtractionStatus("complete");
+            setGenerationStatus("active");
+            setValidationStatus("waiting");
+          } else if (job.state === "validating") {
+            setExtractionStatus("complete");
+            setGenerationStatus("complete");
+            setValidationStatus("active");
+          }
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          job = await getGenerationJob(jobId);
+        }
 
-        // Set active run and question set
-        setCurrentRun(result.run);
-        setCurrentQuestionSet(result.questionSet);
+        if (job.state === "failed") {
+          const errMessage = job.errorCode || "Document processing failed.";
+          throw new Error(errMessage);
+        }
 
-        // Update library list
-        await refreshLibraryData();
+        if (job.state === "ready" && job.questionSetId) {
+          setExtractionStatus("complete");
+          setGenerationStatus("complete");
+          setValidationStatus("complete");
 
-        // Short pause to show validation complete, then start Surface Zone
-        setTimeout(() => {
-          setView("encounter");
-        }, 800);
+          // 3. Load question set
+          const qSet = await getQuestionSet(job.questionSetId);
+
+          // 4. Create authoritative run (18 slots)
+          const runDetail = await createRun(job.questionSetId);
+          const descentRun = toDescentRun(runDetail, qSet, file.name);
+
+          setCurrentRun(descentRun);
+          setCurrentRunDetail(runDetail);
+          setCurrentQuestionSet(qSet);
+
+          await refreshLibraryData();
+
+          setTimeout(() => {
+            setView("encounter");
+          }, 800);
+        }
       } catch (err: any) {
         const msg = err?.message || "Document processing failed.";
         console.error("Processing error:", err);
@@ -197,13 +240,40 @@ export function App() {
     [extractionStatus, refreshLibraryData]
   );
 
+  // Handler: Start Run from Classic View
+  const handleStartClassicRun = useCallback(
+    async (questionSetId: string) => {
+      try {
+        const runDetail = await createRun(questionSetId);
+        const qSet = await getQuestionSet(questionSetId);
+        const descentRun = toDescentRun(runDetail, qSet);
+        setCurrentRunDetail(runDetail);
+        setCurrentRun(descentRun);
+        setCurrentQuestionSet(qSet);
+        localStorage.setItem("point_nemo_active_run_id", runDetail.id);
+        const encounterNode = mapNodes.find((node) => node.id === "anglerfish");
+        if (encounterNode) setSelectedNode(encounterNode);
+      } catch (err) {
+        alert(err instanceof Error ? err.message : "Could not start expedition run.");
+      }
+    },
+    []
+  );
+
   // Handler: Resume Run
   const handleResumeRun = useCallback(
-    (runId: string) => {
+    async (runId: string) => {
       const run = runs.find((r) => r.id === runId);
       if (!run) return;
       const qSet = questionSets.find((qs) => qs.id === run.questionSetId);
       if (!qSet) return;
+
+      try {
+        const runDetail = await getRun(runId);
+        setCurrentRunDetail(runDetail);
+      } catch {
+        // fallback
+      }
 
       setCurrentRun(run);
       setCurrentQuestionSet(qSet);
@@ -225,14 +295,16 @@ export function App() {
       try {
         const response = await submitRunAnswer(currentRun.id, selectedAnswer);
         setCurrentRun(response.run);
+        setCurrentRunDetail(response.runDetail);
         await refreshLibraryData();
 
         // Check if run transitioned to results
-        if (response.run.stage === "results") {
+        if (response.run.stage === "results" || response.runDetail.state !== "active") {
           setTimeout(() => {
             setView("results");
           }, 1200);
         }
+        return response.runDetail.latestFeedback;
       } catch (err) {
         console.error("Failed to submit answer:", err);
       }
@@ -246,6 +318,8 @@ export function App() {
       try {
         const result = await tryAgainRun(runId);
         setCurrentRun(result.run);
+        const runDetail = await getRun(result.run.id);
+        setCurrentRunDetail(runDetail);
         setCurrentQuestionSet(result.questionSet);
         await refreshLibraryData();
         setView("encounter");
@@ -264,6 +338,7 @@ export function App() {
         await refreshLibraryData();
         if (currentRun?.id === runId) {
           setCurrentRun(null);
+          setCurrentRunDetail(null);
           setCurrentQuestionSet(null);
           setView("library");
         }
@@ -276,11 +351,18 @@ export function App() {
 
   // Handler: View Results of finished run
   const handleViewResults = useCallback(
-    (runId: string) => {
+    async (runId: string) => {
       const run = runs.find((r) => r.id === runId);
       if (!run) return;
       const qSet = questionSets.find((qs) => qs.id === run.questionSetId);
       if (!qSet) return;
+
+      try {
+        const runDetail = await getRun(runId);
+        setCurrentRunDetail(runDetail);
+      } catch {
+        // fallback
+      }
 
       setCurrentRun(run);
       setCurrentQuestionSet(qSet);
@@ -378,7 +460,7 @@ export function App() {
           isOllamaOffline={isOllamaOffline}
           onCancel={() => setView("library")}
           onRetry={() => {
-            if (processingFile) handleStartProcessing(processingFile);
+            if (processingFile) void handleStartProcessing(processingFile);
           }}
           onChooseAnotherPdf={() => {
             setView("library");
@@ -391,6 +473,8 @@ export function App() {
       {view === "encounter" && currentRun && currentQuestionSet && (
         <DescentEncounter
           run={currentRun}
+          runDetail={currentRunDetail ?? undefined}
+          latestFeedback={currentRunDetail?.latestFeedback}
           questionSet={currentQuestionSet}
           bundle={bundle}
           onAnswerSubmit={handleAnswerSubmit}
@@ -412,11 +496,94 @@ export function App() {
         />
       )}
 
+      {/* Screen 5: Optional Classic Expedition Map Dashboard */}
+      {view === "expedition" && (
+        <div className="app-shell" style={{ position: "relative", zIndex: 10, width: "100%", background: "rgba(6,20,38,0.92)", minHeight: "100vh" }}>
+          <header className="topbar">
+            <div className="brand">
+              <span className="brand-mark" aria-hidden="true"><i /><i /></span>
+              <span>POINT <b>NEMO</b></span>
+            </div>
+            <div className="topbar-center">
+              <span className="live-dot" aria-hidden="true" />
+              <span>CLASSIC EXPEDITION DASHBOARD</span>
+            </div>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                type="button"
+                className="connection-pill"
+                onClick={() => setView("library")}
+                style={{ cursor: "pointer", background: "none" }}
+              >
+                ← RETURN TO RETRO VIEW
+              </button>
+            </div>
+          </header>
+
+          <section className="expedition-layout" aria-label="Expedition dashboard">
+            <div className="map-column">
+              <ExpeditionMap selectedId={selectedNode.id} onSelect={setSelectedNode} />
+              <section className="selected-location" aria-live="polite">
+                <div className="location-index">{String(mapNodes.findIndex((node) => node.id === selectedNode.id) + 1).padStart(2, "0")}</div>
+                <div className="location-copy">
+                  <p className="eyebrow">SELECTED WAYPOINT <span>· {selectedNode.short.toUpperCase()}</span></p>
+                  <h3>{selectedNode.label}</h3>
+                  <p>{selectedNode.detail}</p>
+                </div>
+                {(selectedNode.kind === "encounter" || currentRunDetail) && <span className="waypoint-open">ENCOUNTER OPEN <i>↗</i></span>}
+              </section>
+            </div>
+
+            <aside className="side-column" aria-label="Expedition details">
+              {currentRunDetail ? (
+                <AuthoritativeBattle
+                  run={currentRunDetail}
+                  onRunUpdated={(updated) => {
+                    setCurrentRunDetail(updated);
+                    if (currentQuestionSet) {
+                      setCurrentRun(toDescentRun(updated, currentQuestionSet));
+                    }
+                    if (updated.state === "completed" || updated.state === "failed") {
+                      localStorage.removeItem("point_nemo_active_run_id");
+                    }
+                  }}
+                  onNewRun={() => {
+                    setCurrentRunDetail(null);
+                    setCurrentRun(null);
+                    localStorage.removeItem("point_nemo_active_run_id");
+                  }}
+                  onRetryQuestionSet={(questionSetId) => void handleStartClassicRun(questionSetId)}
+                />
+              ) : selectedNode.kind === "encounter" ? (
+                <BattleEncounter />
+              ) : (
+                <section className="mission-card">
+                  <div className="mission-header"><p className="eyebrow">CURRENT MISSION</p><span className="mission-number">01 — 04</span></div>
+                  <h2>Pressure<br /><em>makes life.</em></h2>
+                  <p className="mission-description">Meet the organisms that turn darkness, cold, and immense pressure into a way of life.</p>
+                  <div className="mission-separator" />
+                  <div className="mission-stat"><span>SUBMERSIBLE</span><b>NAUTILUS-01</b></div>
+                  <div className="mission-stat"><span>DEPTH</span><b>10,935 <small>m</small></b></div>
+                  <div className="mission-stat"><span>EST. DURATION</span><b>~ 12 <small>min</small></b></div>
+                  <button className="mission-button" type="button" onClick={() => setSelectedNode(mapNodes.find((node) => node.id === "adaptation")!)}>
+                    Open lesson briefing <span aria-hidden="true">↗</span>
+                  </button>
+                </section>
+              )}
+
+              <DocumentIntake onStartRun={handleStartClassicRun} activeRunId={currentRunDetail?.id} />
+
+              <div className="ambient-note"><span>↳</span> The map is only the beginning. Every lesson opens a deeper route.</div>
+            </aside>
+          </section>
+        </div>
+      )}
+
       {/* Upload Dialog */}
       <UploadDialog
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
-        onConfirmFile={handleStartProcessing}
+        onConfirmFile={(file) => void handleStartProcessing(file)}
       />
 
       {/* Settings Modal */}

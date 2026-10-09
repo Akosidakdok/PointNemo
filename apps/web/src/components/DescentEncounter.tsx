@@ -4,15 +4,20 @@ import {
   type QuestionSet,
   type PointNemoQuestion,
   type DescentZone,
+  type RunDetail,
+  type AnswerFeedback,
 } from "@point-nemo/shared";
 import { type AssetBundle, speciesScale, SpriteAnimation } from "../game/sprites";
 import { GameButton } from "./ui/GameButton";
 
 export interface DescentEncounterProps {
   run: DescentRun;
+  runDetail?: RunDetail;
+  latestFeedback?: AnswerFeedback | null;
   questionSet: QuestionSet;
   bundle: AssetBundle | null;
-  onAnswerSubmit: (selectedAnswer: number) => Promise<void>;
+  onAnswerSubmit: (selectedAnswer: number) => Promise<AnswerFeedback | void>;
+  onContinue?: () => void;
   reducedMotion?: boolean;
 }
 
@@ -83,14 +88,18 @@ const ZONE_METADATA: Record<
 
 export function DescentEncounter({
   run,
+  runDetail,
+  latestFeedback,
   questionSet,
   bundle,
   onAnswerSubmit,
+  onContinue,
   reducedMotion = false,
 }: DescentEncounterProps) {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedbackActive, setFeedbackActive] = useState(false);
+  const [serverFeedback, setServerFeedback] = useState<AnswerFeedback | null>(latestFeedback ?? null);
   const [lastAnswerRecord, setLastAnswerRecord] = useState<{
     isCorrect: boolean;
     selectedAnswer: number;
@@ -99,18 +108,34 @@ export function DescentEncounter({
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const zoneInfo = ZONE_METADATA[run.stage] || ZONE_METADATA.surface;
+  const activeFeedback = serverFeedback || runDetail?.latestFeedback || null;
 
-  // Determine active question
+  // Determine active question from authoritative server snapshot if available
   let currentQuestion: PointNemoQuestion | undefined;
-  if (run.stage === "surface") {
-    currentQuestion = questionSet.questions.filter((q) => q.difficulty === "easy")[run.currentQuestionIndex];
-  } else if (run.stage === "twilight") {
-    currentQuestion = questionSet.questions.filter((q) => q.difficulty === "medium")[run.currentQuestionIndex];
-  } else if (run.stage === "midnight") {
-    currentQuestion = questionSet.questions.filter((q) => q.difficulty === "hard")[run.currentQuestionIndex];
-  } else if (run.stage === "boss") {
-    const qId = run.shuffledBossOrder[run.currentQuestionIndex];
-    currentQuestion = questionSet.questions.find((q) => q.id === qId);
+  if (runDetail?.currentSlot?.question) {
+    const q = runDetail.currentSlot.question;
+    currentQuestion = {
+      id: q.id,
+      topic: q.topicName,
+      difficulty: q.difficulty,
+      prompt: q.prompt,
+      options: q.options as [string, string, string, string],
+      answerIndex: (activeFeedback?.correctAnswerIndex ?? 0) as 0 | 1 | 2 | 3,
+      explanation: activeFeedback?.explanation ?? "",
+      sourceQuote: activeFeedback?.evidence?.[0]?.quote ?? "",
+      sourcePage: activeFeedback?.evidence?.[0]?.pageNumber ?? 1,
+    };
+  } else if ("questions" in questionSet && Array.isArray(questionSet.questions)) {
+    if (run.stage === "surface") {
+      currentQuestion = (questionSet.questions as any[]).filter((q) => q.difficulty === "easy")[run.currentQuestionIndex];
+    } else if (run.stage === "twilight") {
+      currentQuestion = (questionSet.questions as any[]).filter((q) => q.difficulty === "medium")[run.currentQuestionIndex];
+    } else if (run.stage === "midnight") {
+      currentQuestion = (questionSet.questions as any[]).filter((q) => q.difficulty === "hard")[run.currentQuestionIndex];
+    } else if (run.stage === "boss") {
+      const qId = run.shuffledBossOrder[run.currentQuestionIndex];
+      currentQuestion = (questionSet.questions as any[]).find((q) => q.id === qId);
+    }
   }
 
   // Current zone attempts count & correct count
@@ -235,17 +260,18 @@ export function DescentEncounter({
 
     setIsSubmitting(true);
     const chosen = selectedOption;
-    const isCorrect = chosen === currentQuestion.answerIndex;
-
-    setLastAnswerRecord({
-      isCorrect,
-      selectedAnswer: chosen,
-      question: currentQuestion,
-    });
-    setFeedbackActive(true);
 
     try {
-      await onAnswerSubmit(chosen);
+      const fb = await onAnswerSubmit(chosen);
+      if (fb) {
+        setServerFeedback(fb);
+      }
+      setLastAnswerRecord({
+        isCorrect: fb ? fb.isCorrect : chosen === currentQuestion.answerIndex,
+        selectedAnswer: chosen,
+        question: currentQuestion,
+      });
+      setFeedbackActive(true);
     } catch (err) {
       console.error("Failed to submit answer:", err);
     } finally {
@@ -256,6 +282,8 @@ export function DescentEncounter({
   function handleDismissFeedback() {
     setFeedbackActive(false);
     setSelectedOption(null);
+    setServerFeedback(null);
+    onContinue?.();
   }
 
   if (!currentQuestion) {
@@ -367,31 +395,55 @@ export function DescentEncounter({
           </div>
         ) : (
           /* Instant Source-Grounded Feedback Panel */
-          <div className={`answer-feedback-panel ${lastAnswerRecord?.isCorrect ? "feedback-correct" : "feedback-incorrect"}`} role="alert">
+          <div className={`answer-feedback-panel ${(activeFeedback ? activeFeedback.isCorrect : lastAnswerRecord?.isCorrect) ? "feedback-correct" : "feedback-incorrect"}`} role="alert">
             <div className="feedback-result-title">
-              <span className="feedback-icon">{lastAnswerRecord?.isCorrect ? "✓" : "✕"}</span>
-              <b>{lastAnswerRecord?.isCorrect ? "CORRECT! (+10 XP · ENEMY -50 HP)" : "INCORRECT (HULL -50 HP)"}</b>
+              <span className="feedback-icon">{(activeFeedback ? activeFeedback.isCorrect : lastAnswerRecord?.isCorrect) ? "✓" : "✕"}</span>
+              <b>
+                {activeFeedback
+                  ? activeFeedback.isCorrect
+                    ? `CORRECT! (+${activeFeedback.xpAwarded} XP · ENEMY -${activeFeedback.enemyDamageTaken} HP)`
+                    : `INCORRECT (HULL -${activeFeedback.playerDamageTaken} HP)`
+                  : lastAnswerRecord?.isCorrect
+                  ? "CORRECT! (+10 XP · ENEMY -50 HP)"
+                  : "INCORRECT (HULL -50 HP)"}
+              </b>
             </div>
 
-            {!lastAnswerRecord?.isCorrect && (
+            {!(activeFeedback ? activeFeedback.isCorrect : lastAnswerRecord?.isCorrect) && (
               <p className="correct-answer-callout">
-                CORRECT ANSWER: <b>[{optionLetters[currentQuestion.answerIndex]}] {currentQuestion.options[currentQuestion.answerIndex]}</b>
+                CORRECT ANSWER:{" "}
+                <b>
+                  [
+                  {
+                    optionLetters[
+                      activeFeedback ? activeFeedback.correctAnswerIndex : currentQuestion.answerIndex
+                    ]
+                  }
+                  ]{" "}
+                  {
+                    currentQuestion.options[
+                      activeFeedback ? activeFeedback.correctAnswerIndex : currentQuestion.answerIndex
+                    ]
+                  }
+                </b>
               </p>
             )}
 
             <div className="explanation-block">
               <span className="block-label">EXPLANATION:</span>
-              <p className="explanation-text">{currentQuestion.explanation}</p>
+              <p className="explanation-text">{activeFeedback?.explanation || currentQuestion.explanation}</p>
             </div>
 
             {/* Mandatory Exact Source Quote & Page Citation */}
             <div className="source-evidence-block">
               <div className="source-evidence-header">
                 <span className="source-badge">VERIFIED SOURCE EVIDENCE</span>
-                <span className="source-page-tag">PAGE {currentQuestion.sourcePage}</span>
+                <span className="source-page-tag">
+                  PAGE {activeFeedback?.evidence?.[0]?.pageNumber ?? currentQuestion.sourcePage}
+                </span>
               </div>
               <blockquote className="source-quote-text">
-                "{currentQuestion.sourceQuote}"
+                "{activeFeedback?.evidence?.[0]?.quote ?? currentQuestion.sourceQuote}"
               </blockquote>
             </div>
 

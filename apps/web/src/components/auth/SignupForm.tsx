@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { TerminalInput } from "./TerminalInput";
 import { PasswordInput } from "./PasswordInput";
 import { RPGButton } from "./RPGButton";
@@ -17,9 +17,15 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<AuthValidationErrors>({});
   const [viewState, setViewState] = useState<AuthViewState>("idle");
+  const pendingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (pendingTimeout.current !== null) clearTimeout(pendingTimeout.current);
+  }, []);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    if (pendingTimeout.current !== null) return;
 
     const validationErrors = validateSignup(displayName, email, password, confirmPassword);
     if (Object.keys(validationErrors).length > 0) {
@@ -31,9 +37,9 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
     setErrors({});
     setViewState("submitting");
 
-    setTimeout(() => {
+    pendingTimeout.current = setTimeout(() => {
       setViewState("success");
-      setTimeout(() => {
+      pendingTimeout.current = setTimeout(() => {
         onSuccess({
           displayName: displayName.trim(),
           email: email.trim(),

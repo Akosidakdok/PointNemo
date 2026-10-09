@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { TerminalInput } from "./TerminalInput";
 import { PasswordInput } from "./PasswordInput";
 import { RPGButton } from "./RPGButton";
@@ -17,9 +17,15 @@ export function LoginForm({ onSuccess, onSwitchToSignup }: LoginFormProps) {
   const [errors, setErrors] = useState<AuthValidationErrors>({});
   const [viewState, setViewState] = useState<AuthViewState>("idle");
   const [showForgotNotice, setShowForgotNotice] = useState(false);
+  const pendingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (pendingTimeout.current !== null) clearTimeout(pendingTimeout.current);
+  }, []);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    if (pendingTimeout.current !== null) return;
     setShowForgotNotice(false);
 
     const validationErrors = validateLogin(email, password);
@@ -33,9 +39,9 @@ export function LoginForm({ onSuccess, onSwitchToSignup }: LoginFormProps) {
     setViewState("submitting");
 
     // Local authentication delay
-    setTimeout(() => {
+    pendingTimeout.current = setTimeout(() => {
       setViewState("success");
-      setTimeout(() => {
+      pendingTimeout.current = setTimeout(() => {
         onSuccess({
           displayName: email.split("@")[0] || "Explorer",
           email: email.trim(),
