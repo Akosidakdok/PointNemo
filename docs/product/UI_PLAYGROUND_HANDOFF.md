@@ -10,7 +10,7 @@ The playground is a frontend-only preview at `apps/web/ui-playground`. It helps 
 
 This PR retains main's API, SQLite migrations, shared contracts, and React login flow unchanged. Earlier competing backend implementations and their API documentation have been excluded. Approved playground screens must be integrated into React in a separate change; running the main app does not display this preview after signup.
 
-PDF selection checks the extension/type only and does not read or upload file contents. Current main has no upper file-size, page-count, or extracted-character limit and requires at least 300 extracted characters. This preview cannot validate extracted text or language. Sonar stages, questions, Profile, Leaderboard, and Results use sample content; instance progress lasts only until reload.
+PDF selection in the standalone preview checks the extension/type only and does not read or upload file contents. The integrated app accepts PDFs up to 5 MiB and 3 pages, with 300–8,000 extracted characters. Its upload dialog checks file size before upload; page and extracted-text limits are checked by the API. This preview cannot validate extracted text or language. Sonar stages, questions, Profile, Leaderboard, and Results use sample content; instance progress lasts only until reload.
 
 ## Module order
 

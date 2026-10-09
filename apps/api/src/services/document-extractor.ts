@@ -54,8 +54,8 @@ export class LocalPdfExtractor implements DocumentExtractor {
         const { PDFParse } = await import("pdf-parse");
         const { OPS } = await import("pdfjs-dist/legacy/build/pdf.mjs");
         parser = new PDFParse({ data: new Uint8Array(file.buffer), verbosity: 0, stopAtErrors: true, isEvalSupported: false });
-        const info = await parser.getInfo();
-        if (info.info?.IsEncrypted || info.permission) throw new BadRequestError("ENCRYPTED_PDF", "Encrypted PDFs are unsupported. Export an unencrypted excerpt.");
+        // PDF.js can open encrypted PDFs with an empty user password. Permission
+        // metadata alone does not mean a password is required to read the text.
         signal?.throwIfAborted();
         const data = await parser.getText({ pageJoiner: "" });
         const imageOps = new Set([OPS.paintImageXObject, OPS.paintInlineImageXObject, OPS.paintImageMaskXObject, OPS.paintImageXObjectRepeat, OPS.paintImageMaskXObjectRepeat]);
@@ -78,8 +78,11 @@ export class LocalPdfExtractor implements DocumentExtractor {
       } catch (error: any) {
         if (signal?.aborted) throw signal.reason;
         if (error instanceof BadRequestError) throw error;
-        const code = error.code || (error.name === "PasswordException" ? "ENCRYPTED_PDF" : "UNREADABLE_PDF");
-        throw new BadRequestError(code, error.code ? error.message : "The PDF is encrypted, malformed, or unreadable. Export an unencrypted text excerpt.");
+        if (error.name === "PasswordException") {
+          throw new BadRequestError("ENCRYPTED_PDF", "This PDF requires a password. Open it with its password and save an unlocked copy, then upload that copy.");
+        }
+        const code = typeof error.code === "string" ? error.code : "UNREADABLE_PDF";
+        throw new BadRequestError(code, typeof error.code === "string" ? error.message : "The PDF is malformed or unreadable. Export a text-based PDF and try again.");
       } finally {
         try { await parser?.destroy(); } catch {}
       }

@@ -5,7 +5,7 @@ Point Nemo is a local-first study expedition. Students travel from Point Nemo th
 ## Prerequisites
 
 - Node.js `^20.19.0` or `>=22.12.0` and npm. These versions satisfy the Vite 7 engine requirement.
-- **Local Ollama** (default `http://127.0.0.1:11434` with configured model, e.g. `qwen2.5:1.5b` or `qwen3:4b`). All runtime inference is strictly local Ollama with zero cloud API dependencies. Ollama is optional for the app and API to start; mock and deterministic validation flows are supported without an active Ollama instance.
+- **Local Ollama** at `http://127.0.0.1:11434`, with `qwen2.5:1.5b` or `qwen2.5:3b` installed. All runtime inference stays on the local machine. Saved lessons remain playable without Ollama; generating a new lesson requires it.
 
 ## Run locally
 
@@ -14,6 +14,7 @@ From the repository root:
 ```cmd
 npm install
 copy .env.example .env
+ollama pull qwen2.5:3b
 npm run dev
 ```
 
@@ -44,14 +45,16 @@ The checked-in `.env.example` contains local defaults:
 API_PORT=3000
 DATABASE_PATH=
 OLLAMA_BASE_URL=http://127.0.0.1:11434
-OLLAMA_MODEL=qwen2.5:1.5b
+OLLAMA_MODEL=qwen2.5:3b
 ```
 
 Change `OLLAMA_BASE_URL` or `OLLAMA_MODEL` in your `.env` as needed. All inference calls are dispatched to your local Ollama loopback host. No document text, prompts, or answers are ever sent to remote or cloud AI endpoints.
 
+See [the local AI pipeline guide](docs/LOCAL_AI_PIPELINE.md) for token budgets, saved-lesson reuse, retries, measured model comparisons, and current quality limitations.
+
 ## What is included
 
-- **Local Document Intake**: Accepts English text-based PDFs within strict admission bounds: maximum 5 MiB (5,242,880 bytes), at most 3 pages, at least 300 non-whitespace characters, and at most 8,000 normalized NFC characters. Scans and embedded images are rejected to guarantee source-grounded active recall. `POST /api/documents` admits the file, `GET /api/jobs/:id` reports bounded job status, and `GET /api/question-sets/:id` returns the persisted 3-topic/9-question set with source evidence.
+- **Local Document Intake**: Accepts English text-based PDFs with at least 300 non-whitespace characters. Scans require readable text; figures and tables are not interpreted. Large documents are sampled across pages within a token budget. `POST /api/documents` admits the file, `GET /api/jobs/:id` reports processing phases, and `GET /api/question-sets/:id` returns the saved 3-topic/9-question set with exact source passages. Compatible saved lessons can be reused; failed generation can retry from extracted text.
 - **Authoritative Game Run Backend**:
   - `POST /api/runs`: Creates an authoritative run from a ready question set with 18 fixed, persisted slots.
     - 3 easy questions (Surface: Clownfish)

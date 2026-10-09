@@ -17,6 +17,9 @@ export interface ApiConfig {
   ollamaMaxOutputTokens: number;
   inferenceTimeoutMs: number;
   jobTimeoutMs: number;
+  ollamaKeepAlive?: string;
+  generationSeed?: number;
+  reviewEnabled?: boolean;
 }
 
 function readPort(value: string | undefined): number {
@@ -65,13 +68,18 @@ function defaultDatabasePath(environment: NodeJS.ProcessEnv): string {
 }
 
 export function readConfig(environment: NodeJS.ProcessEnv = process.env): ApiConfig {
-  if (environment.OLLAMA_MODEL && environment.OLLAMA_MODEL !== "qwen2.5:1.5b") {
-    throw new Error("OLLAMA_MODEL must be qwen2.5:1.5b for this release.");
+  const model = environment.OLLAMA_MODEL || "qwen2.5:3b";
+  if (!["qwen2.5:1.5b", "qwen2.5:3b"].includes(model)) {
+    throw new Error("OLLAMA_MODEL must be qwen2.5:1.5b or qwen2.5:3b (the supported Qwen tokenizer family).");
   }
   const numCtx = positiveInteger(environment.OLLAMA_NUM_CTX, 8192, "OLLAMA_NUM_CTX");
-  if (numCtx !== 8192) throw new Error("OLLAMA_NUM_CTX must be 8192 for this release.");
   const maxInput = positiveInteger(environment.OLLAMA_MAX_INPUT_TOKENS, 4096, "OLLAMA_MAX_INPUT_TOKENS");
   const maxOutput = positiveInteger(environment.OLLAMA_MAX_OUTPUT_TOKENS, 3072, "OLLAMA_MAX_OUTPUT_TOKENS");
+  const keepAlive = environment.OLLAMA_KEEP_ALIVE?.trim() || "30m";
+  const generationSeed = environment.OLLAMA_SEED === undefined ? undefined : Number(environment.OLLAMA_SEED);
+  if (environment.OLLAMA_REVIEW !== undefined && !["0","1"].includes(environment.OLLAMA_REVIEW)) throw new Error("OLLAMA_REVIEW must be 0 or 1.");
+  if (generationSeed !== undefined && (!Number.isInteger(generationSeed) || generationSeed < 0 || generationSeed > 2_000_000_000)) throw new Error("OLLAMA_SEED must be an integer from 0 to 2000000000.");
+  if (!/^(?:0|[1-9]\d*(?:ms|s|m|h))$/.test(keepAlive)) throw new Error("OLLAMA_KEEP_ALIVE must be 0 or a positive duration such as 30m.");
   if (maxInput + maxOutput + 1024 > numCtx) {
     throw new Error("The input/output token budgets and 1024-token reserve must fit OLLAMA_NUM_CTX.");
   }
@@ -81,7 +89,10 @@ export function readConfig(environment: NodeJS.ProcessEnv = process.env): ApiCon
       ? resolve(projectRoot, environment.DATABASE_PATH)
       : resolve(defaultDatabasePath(environment)),
     ollamaBaseUrl: localOllamaUrl(environment.OLLAMA_BASE_URL),
-    ollamaModel: "qwen2.5:1.5b",
+    ollamaModel: model,
+    ollamaKeepAlive: keepAlive,
+    generationSeed,
+    reviewEnabled: environment.OLLAMA_REVIEW === "1",
     ollamaNumCtx: numCtx,
     ollamaMaxInputTokens: maxInput,
     ollamaMaxOutputTokens: maxOutput,

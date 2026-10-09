@@ -8,6 +8,7 @@
     "packages/*"
   ],
   "scripts": {
+    "benchmark:ai": "tsx scripts/benchmark-local-ai.ts",
     "dev": "npm run build --workspace=@point-nemo/shared && concurrently -k -n api,web \"tsx watch apps/api/src/server.ts --dev\" \"npm run dev --workspace=@point-nemo/web\"",
     "build": "npm run build --workspace=@point-nemo/shared && npm run build --workspace=@point-nemo/api && npm run build --workspace=@point-nemo/web",
     "typecheck": "npm run build --workspace=@point-nemo/shared && npm run typecheck --workspaces --if-present",

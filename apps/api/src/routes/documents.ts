@@ -16,11 +16,16 @@ export function createDocumentRouter(jobs: GenerationJobService): Router {
   router.post("/", async (request, response, next) => {
     try {
       const file = await readPdfUpload(request);
-      const result = await jobs.enqueue(file);
+      const result = await jobs.enqueue(file, request.query.reuse === "true");
       response.status(202).json({ success: true, data: result });
     } catch (error) {
       next(error);
     }
+  });
+
+  router.post("/:id/retry", async (request, response, next) => {
+    try { response.status(202).json({ success: true, data: await jobs.retryDocument(request.params.id) }); }
+    catch (error) { next(error); }
   });
 
   router.delete("/:id", (request, response, next) => {

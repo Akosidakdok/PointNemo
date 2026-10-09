@@ -34,6 +34,8 @@ export class QwenTokenCounter implements TokenCounter {
   private readonly vocab: Record<string, number>;
   private readonly specialPattern: RegExp;
   private readonly special = new Set<string>();
+  private readonly tokenIds = new Map<number, string>();
+  private readonly merges: string[];
   private readonly cache = new Map<string, number>();
 
   constructor() {
@@ -46,6 +48,9 @@ export class QwenTokenCounter implements TokenCounter {
     const asset = JSON.parse(bytes) as TokenizerAsset;
     if (asset.normalizer.type !== "NFC" || asset.model.type !== "BPE") throw new Error("Unsupported tokenizer format.");
     this.vocab = asset.model.vocab;
+    this.merges = asset.model.merges;
+    for (const [token, id] of Object.entries(asset.model.vocab)) this.tokenIds.set(id,token);
+    for (const token of asset.added_tokens) this.tokenIds.set(token.id,token.content);
     asset.model.merges.forEach((pair, rank) => this.ranks.set(pair, rank));
     for (const token of asset.added_tokens) this.special.add(token.content);
     this.specialPattern = new RegExp(`(${[...this.special].sort((a, b) => b.length - a.length).map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "u");
@@ -58,6 +63,13 @@ export class QwenTokenCounter implements TokenCounter {
       for (const match of part.normalize("NFC").matchAll(PRE_TOKEN)) count += this.countPiece(match[0]);
     }
     return count;
+  }
+
+  matchesModelTokenizer(info: Record<string, unknown>): boolean {
+    const tokens = info["tokenizer.ggml.tokens"], merges = info["tokenizer.ggml.merges"];
+    return info["general.architecture"] === "qwen2" && Array.isArray(tokens) && Array.isArray(merges) &&
+      [...this.tokenIds].every(([id,token]) => tokens[id] === token) &&
+      merges.length === this.merges.length && this.merges.every((merge,index) => merge === merges[index]);
   }
 
   private countPiece(piece: string): number {
