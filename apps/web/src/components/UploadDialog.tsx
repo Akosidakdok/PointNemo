@@ -25,6 +25,12 @@ export function UploadDialog({ isOpen, onClose, onConfirmFile }: UploadDialogPro
       return;
     }
 
+    if (file.size >= 5 * 1024 * 1024) {
+      setValidationError("PDF must be smaller than 5 MiB.");
+      setSelectedFile(null);
+      return;
+    }
+
     setSelectedFile(file);
   }
 
@@ -121,7 +127,7 @@ export function UploadDialog({ isOpen, onClose, onConfirmFile }: UploadDialogPro
               <p className="dropzone-prompt">
                 <b>CLICK TO BROWSE</b> OR DRAG ONE PDF HERE
               </p>
-              <span className="dropzone-limits">ENGLISH · NO PAGE LIMIT · NO FILE SIZE LIMIT</span>
+              <span className="dropzone-limits">ENGLISH TEXT · UNDER 5 MiB · UP TO 3 PAGES</span>
             </>
           ) : (
             <div className="selected-file-meta">
@@ -146,13 +152,13 @@ export function UploadDialog({ isOpen, onClose, onConfirmFile }: UploadDialogPro
         <div className="admission-rules-checklist">
           <span className="checklist-heading">PDF ADMISSION RULES:</span>
           <ul>
-            <li><span>✓</span> Exactly 1 text-based PDF file</li>
-            <li><span>✓</span> No page limit</li>
-            <li><span>✓</span> No file size limit</li>
-            <li><span>✓</span> Minimum 300 readable characters</li>
-            <li><span>✗</span> Scanned/image-only PDFs rejected (No OCR)</li>
-            <li><span>✗</span> Encrypted or password-protected PDFs rejected</li>
+            <li><span>✓</span> One English, text-based PDF</li>
+            <li><span>✓</span> Smaller than 5 MiB · up to 3 pages</li>
+            <li><span>✓</span> 300–8,000 extractable characters</li>
+            <li><span>✗</span> Scanned/image-only PDFs are unsupported (no OCR)</li>
+            <li><span>✗</span> Encrypted or password-protected PDFs are unsupported</li>
           </ul>
+          <p className="admission-rules-note">Page count and readable text are checked locally after you continue. English is expected; language is not auto-detected yet.</p>
         </div>
       </div>
     </GameModal>

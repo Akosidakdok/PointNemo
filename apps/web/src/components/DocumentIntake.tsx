@@ -65,6 +65,10 @@ function DocumentIntake({ onStartRun, activeRunId }: DocumentIntakeProps = {}) {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!file) return;
+    if (file.size >= 5 * 1024 * 1024) {
+      setError("PDF must be smaller than 5 MiB.");
+      return;
+    }
     setUploading(true);
     setError(undefined);
     setJob(undefined);
@@ -88,7 +92,7 @@ function DocumentIntake({ onStartRun, activeRunId }: DocumentIntakeProps = {}) {
       <p className="intake-copy">Upload a PDF and the local model will turn its source text into nine evidence-linked questions.</p>
       <form onSubmit={handleSubmit}>
         <label className="file-picker">
-          <span>{file?.name ?? "Choose a PDF · max 5 MiB"}</span>
+          <span>{file?.name ?? "Choose a PDF · under 5 MiB · up to 3 pages"}</span>
           <input type="file" accept="application/pdf,.pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
         </label>
         <button className="intake-button" type="submit" disabled={!file || uploading || Boolean(job && !["ready", "failed", "cancelled"].includes(job.state))}>

@@ -31,6 +31,7 @@ const ZONE_METADATA: Record<
     passRule: string;
     totalQuestions: number;
     targetPass: number;
+    maxEnemyHp: number;
     enemyColor: string;
   }
 > = {
@@ -42,6 +43,7 @@ const ZONE_METADATA: Record<
     passRule: "At least 2 of 3 correct required to descend",
     totalQuestions: 3,
     targetPass: 2,
+    maxEnemyHp: 100,
     enemyColor: "#e6b957",
   },
   twilight: {
@@ -52,6 +54,7 @@ const ZONE_METADATA: Record<
     passRule: "At least 2 of 3 correct required to descend",
     totalQuestions: 3,
     targetPass: 2,
+    maxEnemyHp: 100,
     enemyColor: "#30d6f2",
   },
   midnight: {
@@ -62,6 +65,7 @@ const ZONE_METADATA: Record<
     passRule: "At least 2 of 3 correct required to reach Point Nemo",
     totalQuestions: 3,
     targetPass: 2,
+    maxEnemyHp: 100,
     enemyColor: "#d98eaa",
   },
   boss: {
@@ -72,6 +76,7 @@ const ZONE_METADATA: Record<
     passRule: "At least 8 of 9 correct required to complete descent",
     totalQuestions: 9,
     targetPass: 8,
+    maxEnemyHp: 80,
     enemyColor: "#ff4853",
   },
   results: {
@@ -82,6 +87,7 @@ const ZONE_METADATA: Record<
     passRule: "",
     totalQuestions: 0,
     targetPass: 0,
+    maxEnemyHp: 0,
     enemyColor: "#eaf4fc",
   },
 };
@@ -109,6 +115,7 @@ export function DescentEncounter({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const zoneInfo = ZONE_METADATA[run.stage] || ZONE_METADATA.surface;
   const activeFeedback = serverFeedback || runDetail?.latestFeedback || null;
+  const enemyHp = Math.max(0, Math.min(zoneInfo.maxEnemyHp, run.enemyHp ?? zoneInfo.maxEnemyHp));
 
   // Determine active question from authoritative server snapshot if available
   let currentQuestion: PointNemoQuestion | undefined;
@@ -182,6 +189,19 @@ export function DescentEncounter({
     let animId: number;
     let t = 0;
     let lastFrame = performance.now();
+    const resizeCanvas = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.max(1, Math.round(canvas.clientWidth * dpr));
+      const height = Math.max(1, Math.round(canvas.clientHeight * dpr));
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    const resizeObserver = new ResizeObserver(resizeCanvas);
+    resizeObserver.observe(canvas);
+    resizeCanvas();
     const explorerSwim = new SpriteAnimation(bundle, "explorer.swim.right");
     const enemyAnimationByStage: Record<Exclude<DescentZone, "results">, string> = {
       surface: "blobfish.swim.left",
@@ -208,42 +228,48 @@ export function DescentEncounter({
         enemySwim?.update(dt);
         fringeheadSwim?.update(dt);
       }
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      if (!width || !height) {
+        animId = requestAnimationFrame(render);
+        return;
+      }
+      ctx.clearRect(0, 0, width, height);
       ctx.imageSmoothingEnabled = false;
 
       // Deep water gradient
-      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      const grad = ctx.createLinearGradient(0, 0, 0, height);
       grad.addColorStop(0, "#061426");
       grad.addColorStop(1, "#0b1e38");
       ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, width, height);
 
       // Depth grid
       ctx.strokeStyle = "rgba(66, 104, 135, 0.2)";
       ctx.lineWidth = 1;
-      for (let y = 14; y < canvas.height; y += 20) {
+      for (let y = 14; y < height; y += 20) {
         ctx.beginPath();
         ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
+        ctx.lineTo(width, y);
         ctx.stroke();
       }
 
       // Draw Player Submersible (Explorer)
-      const explorerScale = speciesScale(bundle, "explorer", 64);
-      const playerY = Math.round(canvas.height * 0.55 + (reducedMotion ? 0 : Math.sin(t * 1.2) * 2));
-      explorerSwim.draw(ctx, 70, playerY, explorerScale);
+      const explorerScale = speciesScale(bundle, "explorer", width < 560 ? 58 : 78);
+      const playerY = Math.round(height * 0.57 + (reducedMotion ? 0 : Math.sin(t * 1.2) * 2));
+      explorerSwim.draw(ctx, Math.round(width * 0.17), playerY, explorerScale);
 
       // Draw Enemy Silhouette / Sprite
-      const enemyX = Math.round(canvas.width - 80);
-      const enemyY = Math.round(canvas.height * 0.55 + (reducedMotion ? 0 : Math.cos(t * 0.85) * 3));
+      const enemyX = Math.round(width * 0.82);
+      const enemyY = Math.round(height * 0.57 + (reducedMotion ? 0 : Math.cos(t * 0.85) * 3));
       if (enemySwim && encounterStage) {
-        const enemyScale = speciesScale(bundle, enemySpeciesByStage[encounterStage], run.stage === "boss" ? 84 : 68);
+        const enemyScale = speciesScale(bundle, enemySpeciesByStage[encounterStage], run.stage === "boss" ? 112 : 84);
         enemySwim.draw(ctx, enemyX, enemyY, enemyScale);
       }
 
       // The prepared fringehead swim loop joins the apex scene as distant life.
       if (fringeheadSwim) {
-        fringeheadSwim.draw(ctx, Math.round(canvas.width * 0.62), Math.round(canvas.height * 0.28), speciesScale(bundle, "fringehead", 44));
+        fringeheadSwim.draw(ctx, Math.round(width * 0.62), Math.round(height * 0.28), speciesScale(bundle, "fringehead", 58));
       }
 
       if (!reducedMotion) {
@@ -252,7 +278,10 @@ export function DescentEncounter({
     };
 
     render(performance.now());
-    return () => cancelAnimationFrame(animId);
+    return () => {
+      cancelAnimationFrame(animId);
+      resizeObserver.disconnect();
+    };
   }, [bundle, run.stage, reducedMotion]);
 
   async function handleSubmit() {
@@ -315,6 +344,24 @@ export function DescentEncounter({
             aria-valuenow={run.playerHp}
           >
             <div className="encounter-health-fill fill-player" style={{ width: `${run.playerHp}%` }} />
+          </div>
+        </div>
+
+        <div className="hud-combatant-status hud-enemy-status">
+          <div className="status-label-group">
+            <span className="combatant-icon" aria-hidden="true">✦</span>
+            <span className="combatant-name">{zoneInfo.enemyName}</span>
+            <b className="combatant-val">{enemyHp}</b>
+          </div>
+          <div
+            className="encounter-health-track"
+            role="progressbar"
+            aria-label={`${zoneInfo.enemyName} health`}
+            aria-valuemin={0}
+            aria-valuemax={zoneInfo.maxEnemyHp}
+            aria-valuenow={enemyHp}
+          >
+            <div className="encounter-health-fill fill-enemy" style={{ width: `${zoneInfo.maxEnemyHp ? (enemyHp / zoneInfo.maxEnemyHp) * 100 : 0}%`, backgroundColor: zoneInfo.enemyColor }} />
           </div>
         </div>
 

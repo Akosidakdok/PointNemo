@@ -186,15 +186,41 @@ function updateRoute() {
   document.querySelector("#descent-stage-label").textContent = `· ${routeNode < 4 ? `Part ${routeNode} of 3` : "Final battle"}`;
   if (routeNode < 4) {
     const question = currentRouteQuestions[routeNode];
+    const enemyNames = ["", "Barreleye", "Gulper eel", "Fringehead"];
+    const depthLabels = ["", "Epipelagic · 200 m", "Bathypelagic · 1,200 m", "Abyssal · 3,000 m"];
     document.querySelector("#route-question-title").textContent = question.prompt;
-    document.querySelector(".question-meta span:last-child").textContent = `TOPIC · ${routeTopics[routeNode].toUpperCase()}`;
+    document.querySelector("#encounter-title").textContent = routeTopics[routeNode];
+    document.querySelector("#encounter-part-number").textContent = String(routeNode).padStart(2, "0");
+    document.querySelector("#encounter-question-number").textContent = String(routeNode).padStart(2, "0");
+    document.querySelector("#question-part-number").textContent = String(routeNode).padStart(2, "0");
+    document.querySelector("#encounter-depth").textContent = depthLabels[routeNode];
+    document.querySelector("#encounter-enemy-label").textContent = enemyNames[routeNode].toUpperCase();
+    document.querySelector("#encounter-enemy-small").textContent = enemyNames[routeNode].toUpperCase();
+    document.querySelector("#encounter-topic").textContent = `TOPIC · ${routeTopics[routeNode].toUpperCase()}`;
     document.querySelectorAll("[data-answer]").forEach((answer, index) => {
       answer.dataset.answer = index === question.correct ? "correct" : "wrong";
       answer.innerHTML = `<kbd>${String.fromCharCode(65 + index)}</kbd> ${question.options[index]}`;
+      answer.classList.remove("answer-correct", "answer-incorrect");
     });
   }
+  if (activeEncounter) document.querySelector('[data-answer]:not(:disabled)')?.focus({ preventScroll: true });
   saveCurrentInstance();
 }
+
+document.querySelector(".encounter-dialog").addEventListener("keydown", (event) => {
+  if (event.key !== "Tab") return;
+  const focusable = [...document.querySelectorAll(".encounter-dialog button:not(:disabled)")];
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+});
 
 document.querySelector("#clear-part").addEventListener("click", () => {
   if (!routePartAnswered || routeNode > 3) return;
@@ -202,7 +228,7 @@ document.querySelector("#clear-part").addEventListener("click", () => {
   activeEncounter = false;
   routePartAnswered = false;
   document.querySelector("#answer-feedback").hidden = true;
-  document.querySelectorAll("[data-answer]").forEach((answer) => { answer.disabled = false; });
+  document.querySelectorAll("[data-answer]").forEach((answer) => { answer.disabled = false; answer.classList.remove("answer-correct", "answer-incorrect"); });
   document.querySelector("#player-hp").textContent = "100 / 100 HP";
   document.querySelector("#enemy-hp").textContent = "100 / 100 HP";
   document.querySelector("#player-hp-bar").style.width = "100%";
@@ -343,6 +369,11 @@ document.querySelectorAll("[data-answer]").forEach((button) => {
     document.getElementById(`${hpId}-hp-bar`).style.width = "50%";
     if (assetBundle && !reducedMotion.matches) sceneEffects = [new SpriteAnimation(assetBundle, correct ? "effects.sonar-hit" : "effects.hull-hit")];
     document.querySelectorAll("[data-answer]").forEach((answer) => { answer.disabled = true; });
+    button.classList.add(correct ? "answer-correct" : "answer-incorrect");
+    if (!correct) {
+      const correctIndex = currentQuestion.correct;
+      document.querySelectorAll("[data-answer]")[correctIndex]?.classList.add("answer-correct");
+    }
     routePartAnswered = true;
     document.querySelector("#clear-part").disabled = false;
     saveCurrentInstance();
@@ -365,7 +396,7 @@ const cachedScales = { explorer: 1, barreleye: 1, gulper: 1, goblinLarge: 1, fri
 const scenes = [];
 const sceneDefinitions = [
   { id: "library-scene", player: true, species: "barreleye" },
-  { id: "combat-scene", player: true, species: "barreleye" },
+  { id: "combat-scene", player: true, encounter: true },
   { id: "boss-scene", species: "goblin" },
   { id: "profile-scene", player: true, playerSize: 92, playerX: 0.5, playerY: 0.56 },
   { id: "descent-route-scene", route: true, player: true },
@@ -381,7 +412,10 @@ function setupScene(canvas, definition) {
   const routeCreatures = definition.route
     ? ["barreleye.swim", "gulper.swim", "fringehead.swim", "goblin.idle.profile"].map((animation) => new SpriteAnimation(assetBundle, animation))
     : null;
-  return { canvas, context, definition, player, creature, routePlayer, routeCreatures };
+  const encounterCreatures = definition.encounter
+    ? ["barreleye.swim", "gulper.swim", "fringehead.swim"].map((animation) => new SpriteAnimation(assetBundle, animation))
+    : null;
+  return { canvas, context, definition, player, creature, routePlayer, routeCreatures, encounterCreatures };
 }
 
 function loadImage(url) {
@@ -474,6 +508,12 @@ function paintScene(scene, dt) {
     creature.update(reducedMotion.matches ? 0 : dt);
     const size = definition.species === "barreleye" ? cachedScales.barreleye : cachedScales.goblinLarge;
     drawFrame(context, assetBundle, creature.frameName, width * (player ? 0.74 : 0.56), height * 0.56, size * scale);
+  }
+  if (scene.encounterCreatures) {
+    const enemy = scene.encounterCreatures[Math.max(0, Math.min(2, routeNode - 1))];
+    enemy.update(reducedMotion.matches ? 0 : dt);
+    const enemySize = [cachedScales.barreleye, cachedScales.gulper, cachedScales.fringehead][Math.max(0, Math.min(2, routeNode - 1))];
+    drawFrame(context, assetBundle, enemy.frameName, width * 0.76, height * 0.56, enemySize * Math.min(1, height / 175) * 1.2);
   }
   sceneEffects = sceneEffects.filter((effect) => !effect.finished);
   sceneEffects.forEach((effect) => {
