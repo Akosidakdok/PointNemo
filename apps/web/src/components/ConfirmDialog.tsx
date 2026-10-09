@@ -10,6 +10,8 @@ export interface ConfirmDialogProps {
   onConfirm: () => void;
   onCancel: () => void;
   isDestructive?: boolean;
+  busy?: boolean;
+  error?: string | null;
 }
 
 export function ConfirmDialog({
@@ -21,6 +23,8 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
   isDestructive = false,
+  busy = false,
+  error = null,
 }: ConfirmDialogProps) {
   if (!isOpen) return null;
 
@@ -33,13 +37,14 @@ export function ConfirmDialog({
       maxWidth="460px"
       footer={
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-          <GameButton variant="secondary" size="md" onClick={onCancel}>
+          <GameButton variant="secondary" size="md" onClick={onCancel} disabled={busy}>
             {cancelLabel}
           </GameButton>
           <GameButton
             variant={isDestructive ? "danger" : "primary"}
             size="md"
             onClick={onConfirm}
+            disabled={busy}
           >
             {confirmLabel}
           </GameButton>
@@ -49,6 +54,7 @@ export function ConfirmDialog({
       <p style={{ color: "var(--text-main)", fontSize: "13px", lineHeight: "1.5" }}>
         {message}
       </p>
+      {error && <p role="alert">Deletion was not confirmed: {error}</p>}
     </GameModal>
   );
 }

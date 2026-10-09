@@ -161,19 +161,67 @@ function migration004(db: SqliteDatabase): void {
   `);
 }
 
+function migration005(db: SqliteDatabase): void {
+  // Rebuild only the parent table to remove its implicit UNIQUE hash index.
+  // The runner disables foreign keys before this transaction, preserving children.
+  db.exec(`
+    CREATE TABLE documents_v5 (
+      id TEXT PRIMARY KEY,
+      filename TEXT NOT NULL,
+      sha256 TEXT NOT NULL,
+      page_count INTEGER NOT NULL CHECK (page_count >= 1),
+      normalized_char_count INTEGER NOT NULL CHECK (normalized_char_count >= 0),
+      pages_json TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    INSERT INTO documents_v5 SELECT * FROM documents;
+    DROP TABLE documents;
+    ALTER TABLE documents_v5 RENAME TO documents;
+    CREATE INDEX documents_sha256 ON documents(sha256);
+
+    ALTER TABLE question_sets ADD COLUMN extractor_version TEXT NOT NULL DEFAULT 'legacy-incompatible';
+    ALTER TABLE question_sets ADD COLUMN prompt_version TEXT NOT NULL DEFAULT 'legacy-incompatible';
+    ALTER TABLE question_sets ADD COLUMN schema_version TEXT NOT NULL DEFAULT 'legacy-incompatible';
+    ALTER TABLE question_sets ADD COLUMN tokenizer_digest TEXT NOT NULL DEFAULT 'legacy-incompatible';
+    ALTER TABLE question_sets ADD COLUMN document_hash TEXT NOT NULL DEFAULT 'legacy-incompatible';
+
+    ALTER TABLE generation_jobs ADD COLUMN error_message TEXT;
+    ALTER TABLE generation_jobs ADD COLUMN error_stage TEXT;
+    ALTER TABLE generation_jobs ADD COLUMN timings_json TEXT NOT NULL DEFAULT '{}';
+    ALTER TABLE generation_jobs ADD COLUMN retry_count INTEGER NOT NULL DEFAULT 0 CHECK (retry_count >= 0);
+
+    ALTER TABLE runs ADD COLUMN updated_at TEXT NOT NULL DEFAULT '';
+    ALTER TABLE runs ADD COLUMN failure_stage TEXT;
+    UPDATE runs SET updated_at = created_at;
+  `);
+}
+
 // ---------------------------------------------------------------------------
 // Migration runner — applies only pending migrations transactionally
 // ---------------------------------------------------------------------------
 
-const MIGRATIONS = [migration001, migration002, migration003, migration004];
+const MIGRATIONS = [migration001, migration002, migration003, migration004, migration005];
 
 function runMigrations(db: SqliteDatabase): void {
   const currentVersion = db.pragma("user_version", { simple: true }) as number;
+  if (currentVersion > MIGRATIONS.length) {
+    throw new Error("The database was created by a newer Point Nemo version.");
+  }
   for (let i = currentVersion; i < MIGRATIONS.length; i++) {
-    db.transaction(() => {
-      MIGRATIONS[i]!(db);
-      db.pragma(`user_version = ${i + 1}`);
-    })();
+    const rebuildingDocuments = i === 4;
+    if (rebuildingDocuments) db.pragma("foreign_keys = OFF");
+    try {
+      db.transaction(() => {
+        MIGRATIONS[i]!(db);
+        const violations = db.pragma("foreign_key_check") as unknown[];
+        if (violations.length !== 0) {
+          throw new Error("Database migration failed its relationship check.");
+        }
+        db.pragma(`user_version = ${i + 1}`);
+      })();
+    } finally {
+      if (rebuildingDocuments) db.pragma("foreign_keys = ON");
+    }
   }
 }
 
@@ -184,8 +232,13 @@ function runMigrations(db: SqliteDatabase): void {
 export function initializeDatabase(path: string): SqliteDatabase {
   mkdirSync(dirname(path), { recursive: true });
   const db = new Database(path);
-  db.pragma("foreign_keys = ON");
-  db.pragma("journal_mode = WAL");
-  runMigrations(db);
-  return db;
+  try {
+    db.pragma("foreign_keys = ON");
+    db.pragma("journal_mode = WAL");
+    runMigrations(db);
+    return db;
+  } catch (error) {
+    db.close();
+    throw error;
+  }
 }

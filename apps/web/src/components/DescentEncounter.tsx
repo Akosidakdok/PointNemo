@@ -1,176 +1,94 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  type DescentRun,
-  type QuestionSet,
-  type PointNemoQuestion,
-  type DescentZone,
-  type RunDetail,
-  type AnswerFeedback,
-} from "@point-nemo/shared";
+  type DescentRun, type QuestionSet, type DescentZone, type RunDetail,
+  type CurrentSlot, type AnswerSubmitResponse,
+} from "../api";
+import { captureSlot, restoreLatestFeedback, type FeedbackView } from "../answerView";
 import { type AssetBundle, speciesScale, SpriteAnimation } from "../game/sprites";
 import { GameButton } from "./ui/GameButton";
+import { SourceEvidence } from "./SourceEvidence";
 
 export interface DescentEncounterProps {
   run: DescentRun;
-  runDetail?: RunDetail;
-  latestFeedback?: AnswerFeedback | null;
+  runDetail: RunDetail;
   questionSet: QuestionSet;
   bundle: AssetBundle | null;
-  onAnswerSubmit: (selectedAnswer: number) => Promise<AnswerFeedback | void>;
-  onContinue?: () => void;
+  onAnswerSubmit: (slotId: string, selectedAnswer: number) => Promise<AnswerSubmitResponse>;
+  onContinue: (run: RunDetail) => void;
+  onReturnToLibrary: () => void;
   reducedMotion?: boolean;
 }
-
-const ZONE_METADATA: Record<
-  DescentZone,
-  {
-    name: string;
-    enemyName: string;
-    depthLabel: string;
-    difficultyLabel: string;
-    passRule: string;
-    totalQuestions: number;
-    targetPass: number;
-    enemyColor: string;
-  }
-> = {
-  surface: {
-    name: "SURFACE ZONE",
-    enemyName: "CLOWNFISH",
-    depthLabel: "0M – 200M (EUPHOTIC)",
-    difficultyLabel: "EASY",
-    passRule: "At least 2 of 3 correct required to descend",
-    totalQuestions: 3,
-    targetPass: 2,
-    enemyColor: "#e6b957",
-  },
-  twilight: {
-    name: "TWILIGHT ZONE",
-    enemyName: "ANGLERFISH",
-    depthLabel: "200M – 1,000M (MESOPELAGIC)",
-    difficultyLabel: "MEDIUM",
-    passRule: "At least 2 of 3 correct required to descend",
-    totalQuestions: 3,
-    targetPass: 2,
-    enemyColor: "#30d6f2",
-  },
-  midnight: {
-    name: "MIDNIGHT ZONE",
-    enemyName: "GIANT SQUID",
-    depthLabel: "1,000M – 4,000M (BATHYPELAGIC)",
-    difficultyLabel: "HARD",
-    passRule: "At least 2 of 3 correct required to reach Point Nemo",
-    totalQuestions: 3,
-    targetPass: 2,
-    enemyColor: "#d98eaa",
-  },
-  boss: {
-    name: "POINT NEMO BOSS",
-    enemyName: "MEGALODON",
-    depthLabel: "10,935M (HADAL TRENCH APEX)",
-    difficultyLabel: "MIXED-TOPIC REVIEW",
-    passRule: "At least 8 of 9 correct required to complete descent",
-    totalQuestions: 9,
-    targetPass: 8,
-    enemyColor: "#ff4853",
-  },
-  results: {
-    name: "EXPEDITION COMPLETE",
-    enemyName: "NONE",
-    depthLabel: "BATHYAL RECOVERY",
-    difficultyLabel: "SUMMARY",
-    passRule: "",
-    totalQuestions: 0,
-    targetPass: 0,
-    enemyColor: "#eaf4fc",
-  },
+const ZONE_METADATA = {
+  surface: { name: "SURFACE ZONE", enemyName: "CLOWNFISH", depthLabel: "0–200 M", totalQuestions: 3, targetPass: 2 },
+  twilight: { name: "TWILIGHT ZONE", enemyName: "ANGLERFISH", depthLabel: "200–1,000 M", totalQuestions: 3, targetPass: 2 },
+  midnight: { name: "MIDNIGHT ZONE", enemyName: "GIANT SQUID", depthLabel: "1,000–4,000 M", totalQuestions: 3, targetPass: 2 },
+  boss: { name: "POINT NEMO BOSS", enemyName: "MEGALODON", depthLabel: "10,935 M", totalQuestions: 9, targetPass: 8 },
 };
+const stageStart = { surface: 0, twilight: 3, midnight: 6, boss: 9 };
+const optionLetters = ["A", "B", "C", "D"];
 
-export function DescentEncounter({
-  run,
-  runDetail,
-  latestFeedback,
-  questionSet,
-  bundle,
-  onAnswerSubmit,
-  onContinue,
-  reducedMotion = false,
-}: DescentEncounterProps) {
+export function DescentEncounter({ run, runDetail, questionSet, bundle, onAnswerSubmit,
+  onContinue, onReturnToLibrary, reducedMotion = false }: DescentEncounterProps) {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedbackActive, setFeedbackActive] = useState(false);
-  const [serverFeedback, setServerFeedback] = useState<AnswerFeedback | null>(latestFeedback ?? null);
-  const [lastAnswerRecord, setLastAnswerRecord] = useState<{
-    isCorrect: boolean;
-    selectedAnswer: number;
-    question: PointNemoQuestion;
-  } | null>(null);
-
+  const [feedback, setFeedback] = useState<FeedbackView | null>(() => restoreLatestFeedback(runDetail, questionSet));
+  const [pendingRun, setPendingRun] = useState<RunDetail | null>(null);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const capturedAnswer = useRef<{ slot: CurrentSlot; selectedOption: number } | null>(null);
+  const submissionLock = useRef(false);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const zoneInfo = ZONE_METADATA[run.stage] || ZONE_METADATA.surface;
-  const activeFeedback = serverFeedback || runDetail?.latestFeedback || null;
+  const displayedStage = feedback?.encounterType ?? runDetail.currentSlot?.encounterType;
+  const zoneInfo = displayedStage ? ZONE_METADATA[displayedStage] : null;
+  const currentQuestion = feedback?.question ?? runDetail.currentSlot?.question;
+  const snapshot = pendingRun ?? runDetail;
+  const questionNumber = displayedStage ? (feedback?.slotIndex ?? runDetail.currentSlotIndex) - stageStart[displayedStage] + 1 : 0;
+  const stageAttempts = (snapshot.attempts ?? []).filter((attempt) => attempt.encounterType === displayedStage);
+  const correctSoFar = stageAttempts.filter((attempt) => attempt.isCorrect).length;
 
-  // Determine active question from authoritative server snapshot if available
-  let currentQuestion: PointNemoQuestion | undefined;
-  if (runDetail?.currentSlot?.question) {
-    const q = runDetail.currentSlot.question;
-    currentQuestion = {
-      id: q.id,
-      topic: q.topicName,
-      difficulty: q.difficulty,
-      prompt: q.prompt,
-      options: q.options as [string, string, string, string],
-      answerIndex: (activeFeedback?.correctAnswerIndex ?? 0) as 0 | 1 | 2 | 3,
-      explanation: activeFeedback?.explanation ?? "",
-      sourceQuote: activeFeedback?.evidence?.[0]?.quote ?? "",
-      sourcePage: activeFeedback?.evidence?.[0]?.pageNumber ?? 1,
-    };
-  } else if ("questions" in questionSet && Array.isArray(questionSet.questions)) {
-    if (run.stage === "surface") {
-      currentQuestion = (questionSet.questions as any[]).filter((q) => q.difficulty === "easy")[run.currentQuestionIndex];
-    } else if (run.stage === "twilight") {
-      currentQuestion = (questionSet.questions as any[]).filter((q) => q.difficulty === "medium")[run.currentQuestionIndex];
-    } else if (run.stage === "midnight") {
-      currentQuestion = (questionSet.questions as any[]).filter((q) => q.difficulty === "hard")[run.currentQuestionIndex];
-    } else if (run.stage === "boss") {
-      const qId = run.shuffledBossOrder[run.currentQuestionIndex];
-      currentQuestion = (questionSet.questions as any[]).find((q) => q.id === qId);
+  async function handleSubmit() {
+    if (submissionLock.current || feedback || !runDetail.currentSlot) return;
+    if (!capturedAnswer.current) {
+      if (selectedOption === null) return;
+      capturedAnswer.current = { slot: captureSlot(runDetail.currentSlot), selectedOption };
     }
+    const captured = capturedAnswer.current;
+    submissionLock.current = true; setIsSubmitting(true); setSubmissionError(null);
+    try {
+      const result = await onAnswerSubmit(captured.slot.id, captured.selectedOption);
+      setFeedback({ slotId: captured.slot.id, slotIndex: captured.slot.slotIndex,
+        encounterType: captured.slot.encounterType, question: captured.slot.question,
+        selectedOptionIndex: captured.selectedOption, feedback: result.feedback });
+      setPendingRun(result.run);
+    } catch (error) {
+      setSubmissionError(error instanceof Error ? error.message : "The answer was not confirmed by the server.");
+    } finally { submissionLock.current = false; setIsSubmitting(false); }
   }
 
-  // Current zone attempts count & correct count
-  const stageAttempts = run.attempts.filter((a) => a.zone === run.stage);
-  const correctSoFar = stageAttempts.filter((a) => a.isCorrect).length;
-  const questionNumber = Math.min(zoneInfo.totalQuestions, run.currentQuestionIndex + 1);
+  function handleContinue() {
+    onContinue(pendingRun ?? runDetail);
+    capturedAnswer.current = null;
+    setFeedback(null); setPendingRun(null); setSelectedOption(null); setSubmissionError(null);
+  }
 
-  // Keyboard navigation for options: A/1, B/2, C/3, D/4 and Enter
   useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (feedbackActive) {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          handleDismissFeedback();
-        }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.repeat || event.altKey || event.ctrlKey || event.metaKey || isSubmitting) return;
+      if (event.target instanceof HTMLElement && event.target.closest("button,input,textarea,select,summary")) return;
+      if (feedback) {
+        if (event.key === "Enter") { event.preventDefault(); handleContinue(); }
         return;
       }
-
-      if (e.key === "1" || e.key === "a" || e.key === "A") {
-        setSelectedOption(0);
-      } else if (e.key === "2" || e.key === "b" || e.key === "B") {
-        setSelectedOption(1);
-      } else if (e.key === "3" || e.key === "c" || e.key === "C") {
-        setSelectedOption(2);
-      } else if (e.key === "4" || e.key === "d" || e.key === "D") {
-        setSelectedOption(3);
-      } else if (e.key === "Enter" && selectedOption !== null && !isSubmitting) {
-        e.preventDefault();
-        handleSubmit();
+      if (event.key === "Enter" && (selectedOption !== null || capturedAnswer.current)) {
+        event.preventDefault(); void handleSubmit(); return;
       }
+      if (capturedAnswer.current) return;
+      const index = ["1", "2", "3", "4"].indexOf(event.key);
+      const letter = optionLetters.indexOf(event.key.toUpperCase());
+      if (index !== -1 || letter !== -1) { event.preventDefault(); setSelectedOption(index !== -1 ? index : letter); }
     }
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedOption, feedbackActive, isSubmitting]);
+  }, [selectedOption, feedback, isSubmitting, pendingRun, runDetail, onAnswerSubmit, onContinue]);
 
   // Canvas drawing for combatants
   useEffect(() => {
@@ -255,205 +173,50 @@ export function DescentEncounter({
     return () => cancelAnimationFrame(animId);
   }, [bundle, run.stage, reducedMotion]);
 
-  async function handleSubmit() {
-    if (selectedOption === null || !currentQuestion || isSubmitting) return;
-
-    setIsSubmitting(true);
-    const chosen = selectedOption;
-
-    try {
-      const fb = await onAnswerSubmit(chosen);
-      if (fb) {
-        setServerFeedback(fb);
-      }
-      setLastAnswerRecord({
-        isCorrect: fb ? fb.isCorrect : chosen === currentQuestion.answerIndex,
-        selectedAnswer: chosen,
-        question: currentQuestion,
-      });
-      setFeedbackActive(true);
-    } catch (err) {
-      console.error("Failed to submit answer:", err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  function handleDismissFeedback() {
-    setFeedbackActive(false);
-    setSelectedOption(null);
-    setServerFeedback(null);
-    onContinue?.();
-  }
-
-  if (!currentQuestion) {
-    return (
-      <div className="encounter-loading-card pixel-panel">
-        <p>CALIBRATING ENCOUNTER TELEMETRY…</p>
-      </div>
-    );
-  }
-
-  const optionLetters = ["A", "B", "C", "D"];
-
+  if (!currentQuestion || !zoneInfo) return <div className="encounter-loading-card pixel-panel" role="alert">
+    <p>The server did not provide an active question. Return to the library and reopen the saved run.</p>
+    <GameButton onClick={onReturnToLibrary}>RETURN TO LIBRARY</GameButton>
+  </div>;
+  const activeFeedback = feedback?.feedback;
   return (
-    <div className="descent-encounter-view" role="region" aria-label={`${zoneInfo.name} Encounter`}>
-      {/* Top Combat Telemetry HUD */}
+    <div className="descent-encounter-view" role="region" aria-label={`${zoneInfo.name} encounter`}>
       <header className="encounter-top-hud pixel-panel">
-        <div className="hud-combatant-status">
-          <div className="status-label-group">
-            <span className="combatant-icon" aria-hidden="true">⌁</span>
-            <span className="combatant-name">SUBMERSIBLE (HULL)</span>
-            <b className="combatant-val">{run.playerHp}%</b>
-          </div>
-          <div
-            className="encounter-health-track"
-            role="progressbar"
-            aria-label="Submersible hull integrity"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={run.playerHp}
-          >
-            <div className="encounter-health-fill fill-player" style={{ width: `${run.playerHp}%` }} />
-          </div>
+        <div className="hud-combatant-status"><div className="status-label-group"><span>SUBMERSIBLE HULL</span><b>{snapshot.playerHp}%</b></div>
+          <div className="encounter-health-track" role="progressbar" aria-label="Hull integrity" aria-valuemin={0} aria-valuemax={100} aria-valuenow={snapshot.playerHp}><div className="encounter-health-fill fill-player" style={{ width: `${snapshot.playerHp}%` }} /></div>
         </div>
-
-        <div className="hud-zone-badge">
-          <span className="zone-name-title">{zoneInfo.name}</span>
-          <span className="zone-enemy-tag">{zoneInfo.enemyName} · {zoneInfo.difficultyLabel}</span>
-        </div>
-
-        <div className="hud-stats-group">
-          <div className="hud-stat-pill">
-            <span>QUESTION:</span> <b>{questionNumber} / {zoneInfo.totalQuestions}</b>
-          </div>
-          <div className="hud-stat-pill">
-            <span>SCORE:</span> <b>{correctSoFar} / {questionNumber - (feedbackActive ? 0 : 1)}</b>
-          </div>
-          <div className="hud-stat-pill target-pill">
-            <span>TARGET:</span> <b>{zoneInfo.targetPass} / {zoneInfo.totalQuestions}</b>
-          </div>
-          <div className="hud-stat-pill xp-pill">
-            <span>XP:</span> <b>{run.xp}</b>
-          </div>
+        <div className="hud-zone-badge"><span className="zone-name-title">{zoneInfo.name}</span><span className="zone-enemy-tag">{zoneInfo.enemyName}</span></div>
+        <div className="hud-stats-group"><div className="hud-stat-pill">QUESTION: <b>{questionNumber} / {zoneInfo.totalQuestions}</b></div>
+          <div className="hud-stat-pill">SCORE: <b>{correctSoFar} / {stageAttempts.length}</b></div><div className="hud-stat-pill">TARGET: <b>{zoneInfo.targetPass} / {zoneInfo.totalQuestions}</b></div>
+          <div className="hud-stat-pill xp-pill">XP: <b>{snapshot.xp}</b> · COMBO: <b>{snapshot.combo}</b></div>
+          <GameButton size="sm" disabled={isSubmitting} onClick={onReturnToLibrary}>SAVE & RETURN TO LIBRARY</GameButton>
         </div>
       </header>
-
-      {/* Center 16-Bit Combat Arena Canvas */}
-      <div className="encounter-arena-wrap pixel-panel" aria-hidden="true">
-        <canvas ref={canvasRef} width={640} height={130} className="encounter-canvas pixel-art" />
-        <div className="arena-telemetry-overlay">
-          <span>DEPTH: {zoneInfo.depthLabel}</span>
-          <span>TARGET SPECIES: {zoneInfo.enemyName}</span>
-        </div>
+      <div className="encounter-arena-wrap pixel-panel" aria-hidden="true"><canvas ref={canvasRef} width={640} height={130} className="encounter-canvas pixel-art" />
+        <div className="arena-telemetry-overlay"><span>DEPTH: {zoneInfo.depthLabel}</span><span>{zoneInfo.enemyName}</span></div>
       </div>
-
-      {/* Bottom Educational Learning Card */}
       <main className="encounter-study-panel pixel-panel" aria-live="polite">
-        <div className="study-panel-header">
-          <span className="question-topic-badge">TOPIC: {currentQuestion.topic.toUpperCase()}</span>
-          <span className="question-difficulty-tag">[{currentQuestion.difficulty.toUpperCase()}]</span>
-        </div>
-
+        {displayedStage === "boss" && <p className="correct-answer-callout">MIXED-TOPIC REVIEW: PREVIOUSLY ENCOUNTERED QUESTIONS · 8/9 TO PASS</p>}
+        <p>AI-generated questions. Review the supporting source passages after answering.</p>
+        <div className="study-panel-header"><span className="question-topic-badge">TOPIC: {currentQuestion.topicName}</span><span className="question-difficulty-tag">{currentQuestion.difficulty.toUpperCase()}</span></div>
         <h2 className="question-prompt-text">{currentQuestion.prompt}</h2>
-
-        {/* 4 Accessible Answer Choices */}
-        <div className="answers-choice-grid">
-          {currentQuestion.options.map((optionText, index) => {
-            const isSelected = selectedOption === index;
-            const letter = optionLetters[index];
-
-            return (
-              <button
-                key={index}
-                type="button"
-                disabled={feedbackActive || isSubmitting}
-                className={`answer-choice-btn ${isSelected ? "is-selected" : ""}`}
-                onClick={() => setSelectedOption(index)}
-                aria-pressed={isSelected}
-              >
-                <span className="choice-letter-badge">[{letter}]</span>
-                <span className="choice-text">{optionText}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Action Button (Submit) */}
-        {!feedbackActive ? (
-          <div className="encounter-submit-row">
-            <GameButton
-              variant="primary"
-              size="lg"
-              disabled={selectedOption === null || isSubmitting}
-              onClick={handleSubmit}
-              className="confirm-answer-btn"
-            >
-              {isSubmitting ? "RESOLVING..." : "CONFIRM ANSWER"} <kbd>ENTER</kbd>
-            </GameButton>
-            <span className="keyboard-hint">SHORTCUTS: 1, 2, 3, 4 OR A, B, C, D</span>
-          </div>
-        ) : (
-          /* Instant Source-Grounded Feedback Panel */
-          <div className={`answer-feedback-panel ${(activeFeedback ? activeFeedback.isCorrect : lastAnswerRecord?.isCorrect) ? "feedback-correct" : "feedback-incorrect"}`} role="alert">
-            <div className="feedback-result-title">
-              <span className="feedback-icon">{(activeFeedback ? activeFeedback.isCorrect : lastAnswerRecord?.isCorrect) ? "✓" : "✕"}</span>
-              <b>
-                {activeFeedback
-                  ? activeFeedback.isCorrect
-                    ? `CORRECT! (+${activeFeedback.xpAwarded} XP · ENEMY -${activeFeedback.enemyDamageTaken} HP)`
-                    : `INCORRECT (HULL -${activeFeedback.playerDamageTaken} HP)`
-                  : lastAnswerRecord?.isCorrect
-                  ? "CORRECT! (+10 XP · ENEMY -50 HP)"
-                  : "INCORRECT (HULL -50 HP)"}
-              </b>
-            </div>
-
-            {!(activeFeedback ? activeFeedback.isCorrect : lastAnswerRecord?.isCorrect) && (
-              <p className="correct-answer-callout">
-                CORRECT ANSWER:{" "}
-                <b>
-                  [
-                  {
-                    optionLetters[
-                      activeFeedback ? activeFeedback.correctAnswerIndex : currentQuestion.answerIndex
-                    ]
-                  }
-                  ]{" "}
-                  {
-                    currentQuestion.options[
-                      activeFeedback ? activeFeedback.correctAnswerIndex : currentQuestion.answerIndex
-                    ]
-                  }
-                </b>
-              </p>
-            )}
-
-            <div className="explanation-block">
-              <span className="block-label">EXPLANATION:</span>
-              <p className="explanation-text">{activeFeedback?.explanation || currentQuestion.explanation}</p>
-            </div>
-
-            {/* Mandatory Exact Source Quote & Page Citation */}
-            <div className="source-evidence-block">
-              <div className="source-evidence-header">
-                <span className="source-badge">VERIFIED SOURCE EVIDENCE</span>
-                <span className="source-page-tag">
-                  PAGE {activeFeedback?.evidence?.[0]?.pageNumber ?? currentQuestion.sourcePage}
-                </span>
-              </div>
-              <blockquote className="source-quote-text">
-                "{activeFeedback?.evidence?.[0]?.quote ?? currentQuestion.sourceQuote}"
-              </blockquote>
-            </div>
-
-            <div className="feedback-action-row">
-              <GameButton variant="primary" size="lg" onClick={handleDismissFeedback} className="continue-encounter-btn">
-                CONTINUE DESCENT ↗ <kbd>ENTER</kbd>
-              </GameButton>
-            </div>
-          </div>
-        )}
+        <div className="answers-choice-grid">{currentQuestion.options.map((option, index) => <button key={index} type="button"
+          disabled={!!feedback || isSubmitting || capturedAnswer.current !== null} className={`answer-choice-btn ${(feedback?.selectedOptionIndex ?? capturedAnswer.current?.selectedOption ?? selectedOption) === index ? "is-selected" : ""}`}
+          onClick={() => setSelectedOption(index)} aria-pressed={(feedback?.selectedOptionIndex ?? capturedAnswer.current?.selectedOption ?? selectedOption) === index}>
+          <span className="choice-letter-badge">[{optionLetters[index]}]</span><span className="choice-text">{option}</span>
+        </button>)}</div>
+        {submissionError && <div className="upload-error-banner" role="alert"><p>ANSWER NOT CONFIRMED: {submissionError}</p>
+          <p>Retry sends the same selected answer to the same question slot. You can also reopen the run from the library to read the server's saved state.</p></div>}
+        {!activeFeedback ? <div className="encounter-submit-row">
+          <GameButton variant="primary" size="lg" disabled={isSubmitting || (selectedOption === null && !capturedAnswer.current)} onClick={() => void handleSubmit()}>
+            {isSubmitting ? "WAITING FOR SERVER…" : submissionError ? "RETRY SAME ANSWER" : "CONFIRM ANSWER"}
+          </GameButton><span className="keyboard-hint">SHORTCUTS: 1–4 OR A–D · ENTER TO CONFIRM</span>
+        </div> : <div className={`answer-feedback-panel ${activeFeedback.isCorrect ? "feedback-correct" : "feedback-incorrect"}`} role="status">
+          <div className="feedback-result-title"><b>{activeFeedback.isCorrect ? `CORRECT · +${activeFeedback.xpAwarded} XP · ENEMY −${activeFeedback.enemyDamageTaken} HP` : `INCORRECT · HULL −${activeFeedback.playerDamageTaken} HP`}</b></div>
+          <p className="correct-answer-callout">CORRECT ANSWER: <b>[{optionLetters[activeFeedback.correctAnswerIndex]}] {currentQuestion.options[activeFeedback.correctAnswerIndex]}</b></p>
+          <div className="explanation-block"><span className="block-label">EXPLANATION</span><p>{activeFeedback.explanation}</p></div>
+          <SourceEvidence evidence={activeFeedback.evidence} questionSet={questionSet} />
+          <div className="feedback-action-row"><GameButton variant="primary" size="lg" onClick={handleContinue}>{pendingRun?.state && pendingRun.state !== "active" ? "VIEW RESULTS" : "CONTINUE DESCENT"}</GameButton></div>
+        </div>}
       </main>
     </div>
   );

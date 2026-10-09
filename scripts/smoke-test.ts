@@ -10,12 +10,13 @@ import { initializeDatabase } from "../apps/api/src/db.js";
 import type { ApiConfig } from "../apps/api/src/config.js";
 import type { AIQuestionSetOutput } from "@point-nemo/shared";
 import type { OllamaService } from "../apps/api/src/services/ollama.js";
+import { TOKENIZER_DIGEST } from "../apps/api/src/services/token-budget.js";
 
 const config: ApiConfig = {
   port: 0,
   databasePath: "",
   ollamaBaseUrl: "http://127.0.0.1:11434",
-  ollamaModel: "test-model",
+  ollamaModel: "qwen2.5:1.5b",
   ollamaNumCtx: 8192,
   ollamaMaxInputTokens: 4096,
   ollamaMaxOutputTokens: 3072,
@@ -58,7 +59,14 @@ async function runSmokeTest() {
         questions,
       } as AIQuestionSetOutput;
     },
-    getStatus: async () => ({ available: true, model: config.ollamaModel, message: "ready" }),
+    getStatus: async () => ({
+      available: true,
+      model: config.ollamaModel,
+      message: "ready",
+      digest: "test-model-digest",
+      tokenizerReady: true,
+      tokenizerDigest: TOKENIZER_DIGEST,
+    }),
   } as OllamaService;
 
   const app = createApp(config, db, mockOllama);

@@ -1,0 +1,4 @@
+# SHA-256 and PDF xref offsets depend on the original bytes.
+*.pdf binary
+*.txt text eol=lf
+*.expected.json text eol=lf

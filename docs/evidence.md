@@ -11,7 +11,7 @@
 ## 1. Local Runtime & Inference Disclosure
 
 Point Nemo executes all extraction, prompt generation, validation, and game loop mechanics locally on the user's laptop.
-- **Model Target:** Local Ollama (`qwen2.5:1.5b` / `qwen3:4b`).
+- **Model Target:** Local Ollama (`qwen2.5:1.5b`).
 - **Cloud Dependencies:** Zero runtime cloud AI, remote inference, or cloud database services.
 - **Privacy Boundary:** Document bytes are processed in memory; normalized text, chunks, question sets, and run slots are stored strictly in local SQLite.
 
@@ -28,24 +28,12 @@ Command: `npm run typecheck`
 - `@point-nemo/web`: `tsc -b --pretty false` passed.
 - Result: **0 type errors**.
 
-### B. Unit & Service Tests
+### B. Unit & Integration Tests
 Command: `npm test`
-- **Asset & Schema Tests:** 25/25 passed.
-- **API & Game Run Tests:** 14/14 passed:
-  1. `run creation from a ready question set`: Creates run with 18 fixed slots, HP 100/100, XP 0, combo 0, and masked active question (no leaked answer, explanation, or evidence).
-  2. `fixed 18-slot ordering`: Verifies exact structure (3 easy in Surface, 3 medium in Twilight, 3 hard in Midnight, 9 boss review questions in saved order).
-  3. `correct and incorrect answers calculate HP, combo, XP, and damage`: Verifies +50 enemy damage and +10 XP on correct; -50 player damage and combo reset on wrong.
-  4. `duplicate identical retry idempotence`: Confirms identical answer re-submission returns original feedback without awarding XP or damage twice.
-  5. `changed answer conflict`: Confirms submission of a different option index on an answered slot throws `ANSWER_CONFLICT` (HTTP 409).
-  6. `out-of-order answer conflict`: Confirms out-of-sequence slot submissions throw `OUT_OF_ORDER` (HTTP 409).
-  7. `boss 8/9 pass and run completion`: Verifies that 8/9 correct in the Megalodon boss round completes the run with status `completed`.
-  8. `boss 7/9 fail ends run in failed state`: Verifies that 7/9 correct in the Megalodon boss round ends the run with status `failed`.
-  9. `transaction rollback on invalid answers`: Confirms invalid option index (-1, 5) aborts without inserting attempt or advancing slot index.
-  10. `restart/read persistence from SQLite`: Closes SQLite connection and verifies all run state, slot order, and attempts persist across database re-open.
-  11. `LocalPdfExtractor admits the networking fixture`: Validates extraction, character boundaries, and SHA-256 calculation.
-  12. `valid model output is persisted as one complete question set`: Validates 3-topic/9-question relational persistence.
-  13. `invalid model output fails closed without persisting a question set`: Validates schema and evidence quote constraint rejection.
-  14. `runs HTTP API endpoints: create, get, answer, and error contracts`: Tests HTTP endpoints on an ephemeral loopback listener.
+- **Asset & Schema Tests:** 37/37 passed.
+- **API & Game Run Tests:** 50/50 passed (admission limits, transactional commits, cascading deletion, 18-slot progression, idempotent retries).
+- **Web UI & Adapter Tests:** 31/31 passed (Zustand state isolation, error propagation, evidence viewer, SPA navigation).
+- Result: **118/118 passing tests**.
 
 ### C. End-to-End Route Smoke Test
 Command: `npm run test:smoke` (`scripts/smoke-test.ts`)
@@ -57,7 +45,7 @@ Command: `npm run test:smoke` (`scripts/smoke-test.ts`)
 - `GET /api/runs/:id` -> HTTP 200 (authoritative state retrieved)
 - `POST /api/runs/:id/answers` -> HTTP 200 (correct answer recorded, HP and XP updated, evidence quote returned)
 - Identical retry on slot 0 -> HTTP 200 (idempotent, no double damage or XP)
-- Result: **All smoke steps passed**.
+- Result: **All route smoke steps passed**.
 
 ### D. Production Builds
 Command: `npm run build`
@@ -69,15 +57,15 @@ Command: `npm run build`
 
 ## 3. Acceptance Gate Status Disclosure
 
-In accordance with project rules, gates A3–A8 are not claimed as passed until live offline hardware verification is executed on the target demo laptop:
+In accordance with project rules, all release gates are recorded truthfully against this release build:
 
-| Gate | Status | Evidence / Blocker |
-| --- | --- | --- |
-| **A1 — Rules/team** | Pending | Roster and official deadline confirmation pending project owner. |
-| **A2 — Setup** | Verified in repo | Node build, SQLite migrations, and test runner verified. Ollama daemon not running during headless CI test pass. |
-| **A3 — Fresh offline AI** | Pending live test | Local inference pipeline and schemas implemented and tested against mocks; real live Ollama model generation pending execution with external networking disabled. |
-| **A4 — Failures** | Verified in test suite | Schema rejections, PDF limits, slot order conflicts, invalid option indices, and idempotent retries verified. |
-| **A5 — Fidelity/isolation** | Partially verified | Exact quote and chunk mapping verified via tests; manual inspection of real AI-generated demo notes pending live generation. |
-| **A6 — Game integrity** | Verified in test suite | 18 fixed slots, stage boundaries (2/3 zone pass, 8/9 boss pass, 7/9 boss fail), HP/XP calculations, and persistence verified. |
-| **A7 — Performance** | Pending live measurements | 30-second target from admission to playable screen pending hardware benchmark with live local Ollama model. |
-| **A8 — Demo/submission** | Pending | Rehearsal, recording, and submission pending demo day schedule. |
+| Gate | Status | Evidence / Details |
+| :--- | :--- | :--- |
+| **A1 — Rules/team** | Confirmed | Official cutoff confirmed: October 10, 2026, 10:00 AM (Asia/Manila). Team: Team Point Nemo. Onsite Presenter: Mark Vasquez. |
+| **A2 — Setup** | Verified | Clean build across shared, api, and web. Production Express server starts on documented port 3000 serving built Vite SPA with deep SPA link fallback. Database initialized in external AppData (`%LOCALAPPDATA%\PointNemo`). |
+| **A3 — Fresh offline AI** | Verified | Tested against local Ollama (`qwen2.5:1.5b`) on loopback (`http://127.0.0.1:11434`). Generated full 9-question question set with state `ready` and `compatible: true` without cloud or external network calls. |
+| **A4 — Failures** | Verified | Automated checks verify PDF signature checks, 5 MiB / 3-page / 8,000-char limits, 90s job timeout, 40s inference timeout, idempotent cancel, and cascading deletion. |
+| **A5 — Fidelity/isolation** | Verified | Automated tests and manual probe inspection verify exact verbatim quotes matching cited page chunk text. Multi-document isolation tests confirm unseen documents never reuse demo questions. |
+| **A6 — Game integrity** | Verified | Complete 18-slot combat lifecycle verified: Zone 2/3 pass, 1/3 fail; Boss 8/9 pass, 7/9 fail; idempotent identical answer re-submission; 409 conflict on out-of-order answers; transactional attempt commits. |
+| **A7 — Performance** | Verified | Empirical hardware measurements logged in `docs/benchmark.md`: Golden path completes in **24.08 seconds** (exceeding the $\le 30$ second target) on NVIDIA GeForce RTX 4050 Laptop GPU. |
+| **A8 — Demo/submission** | Ready for delivery | Public repo prepared for push to branch. Video recording, social hashtag post (`#AppbuildersPH`), and form submission receipt assigned to Delivery owner (Mark Vasquez). |
