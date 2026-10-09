@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#eaf4fb" />
+    <title>Point Nemo · UI Playground</title>
+    <link rel="stylesheet" href="./playground.css" />
+  </head>
+  <body>
+    <div class="app-frame">
+      <header class="topbar">
+        <a class="brand" href="#library" data-go="library" aria-label="Point Nemo UI playground home">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>POINT <b>NEMO</b></span>
+        </a>
+        <div class="topbar-tools"><button class="theme-toggle" type="button" id="theme-toggle" aria-label="Switch to dark mode">☾</button><button class="profile-shortcut" type="button" data-screen="profile" aria-label="Open profile">Profile</button></div>
+      </header>
+
+      <nav class="flow-nav" aria-label="Preview a user-flow screen">
+        <button class="nav-step active" type="button" data-screen="library" aria-current="page"><b>01</b> Library</button>
+        <button class="nav-step" type="button" data-screen="sonar"><b>02</b> Sonar</button>
+        <button class="nav-step" type="button" data-screen="seas"><b>03</b> Choose Sea</button>
+        <button class="nav-step" type="button" data-screen="descent"><b>04</b> Descent</button>
+        <button class="nav-step" type="button" data-screen="boss"><b>05</b> Lesson Boss</button>
+        <button class="nav-step" type="button" data-screen="results"><b>06</b> Results</button>
+        <span class="nav-divider" aria-hidden="true"></span>
+        <button class="nav-step" type="button" data-screen="leaderboard">Leaderboard</button>
+      </nav>
+
+      <main>
+        <section class="screen active" id="library" aria-labelledby="library-title">
+          <div class="eyebrow">LOCAL LIBRARY</div>
+          <div class="page-heading">
+            <div><h1 id="library-title">Your library</h1><p>Preview a study expedition with sample lessons. PDF processing is not connected.</p></div>
+          </div>
+
+          <section class="art-banner" aria-label="Pixel art preview of the underwater descent">
+            <canvas class="pixel-scene" id="library-scene" aria-hidden="true"></canvas>
+            <span class="depth-mark">DESCENT PREVIEW</span>
+          </section>
+
+          <div class="library-grid">
+            <section class="panel upload-panel" aria-labelledby="upload-title">
+              <div class="panel-heading"><div><h2 id="upload-title">Add a study PDF</h2><p>English, text based · file selection preview</p></div></div>
+              <label class="dropzone" for="pdf-file">
+                <span class="upload-icon" aria-hidden="true">↑</span>
+                <strong>Choose a PDF file</strong>
+                <span>No file-size or page limit · no extraction in this preview</span>
+                <span class="choose-button">Choose file</span>
+              </label>
+              <input id="pdf-file" type="file" accept="application/pdf,.pdf" />
+              <p class="file-status" id="file-status" aria-live="polite">Preview only: your file is not uploaded or processed.</p>
+            </section>
+
+            <aside class="panel saved-panel" aria-labelledby="saved-title">
+              <div class="panel-heading"><div><h2 id="saved-title">Recent</h2></div></div>
+              <article class="saved-card">
+                <div class="pdf-mark">PDF</div><div class="saved-copy"><strong>Introduction to marine biology</strong><span>3 pages · 9 questions · Ready</span></div><span class="ready-dot" aria-label="Ready"></span>
+              </article>
+              <article class="saved-card active-run">
+                <div class="resume-mark">↗</div><div class="saved-copy"><strong>Active descent · <span data-library-active-id>PN-001</span></strong><span>Introduction to Marine Biology</span></div><button class="text-button" type="button" data-go="seas">Choose sea</button>
+              </article>
+              <button class="secondary-button full-button" type="button" data-go="seas">Choose a sea <span>→</span></button>
+              <button class="secondary-button full-button" type="button" data-go="sonar">Preview Sonar loading <span>→</span></button>
+            </aside>
+          </div>
+        </section>
+
+        <section class="screen" id="sonar" aria-labelledby="sonar-title" hidden>
+          <div class="eyebrow">LOCAL PROCESSING</div>
+          <div class="page-heading"><div><h1 id="sonar-title">Preparing your descent</h1><p>Simulated processing stages for visual review. No model is running in this preview.</p></div><p class="model-info">Example model: <b>qwen2.5:1.5b</b></p></div>
+          <section class="panel sonar-panel">
+            <div class="sonar-rings" aria-hidden="true"><i></i><i></i><i></i><b>◉</b></div>
+            <p class="eyebrow center-eyebrow">SONAR STATUS <span id="sonar-count">01 / 03</span></p>
+            <h2 id="sonar-state">Extracting text</h2>
+            <p id="sonar-detail" class="muted center">Reading page text and source locations on this device.</p>
+            <ol class="stage-list" id="stage-list"><li class="current"><span>01</span> Extraction</li><li><span>02</span> Generation</li><li><span>03</span> Validation</li></ol>
+            <div class="button-row"><button class="secondary-button" type="button" data-go="library">Cancel</button><button class="primary-button" type="button" id="next-stage">Advance preview state <span>→</span></button></div>
+          </section>
+        </section>
+
+        <section class="screen" id="seas" aria-labelledby="seas-title" hidden>
+          <div class="eyebrow">LOCAL LIBRARY <i>·</i> SELECT A LESSON</div>
+          <div class="page-heading"><div><h1 id="seas-title">Choose your sea</h1><p>Each lesson opens its own map and descent run.</p></div></div>
+          <div class="sea-list">
+            <article class="panel sea-card" data-sea-card="marine-biology">
+              <div class="sea-map-thumb" aria-hidden="true"></div>
+              <div class="sea-card-copy"><p class="eyebrow">3 TOPICS · 9 QUESTIONS</p><h2>Introduction to Marine Biology</h2><p>Surface currents · Pressure &amp; adaptation · Deep-sea habitats</p><small data-sea-status="marine-biology">Active descent · PN-001</small></div>
+              <div class="sea-card-actions"><button class="secondary-button" type="button" data-sea-action="resume" data-sea-id="marine-biology">Resume</button><button class="primary-button" type="button" data-sea-action="new" data-sea-id="marine-biology">Start new descent <span>→</span></button></div>
+            </article>
+            <article class="panel sea-card" data-sea-card="deep-sea-life">
+              <div class="sea-map-thumb sea-map-thumb-alt" aria-hidden="true"></div>
+              <div class="sea-card-copy"><p class="eyebrow">3 TOPICS · 9 QUESTIONS</p><h2>Deep-Sea Life and Adaptations</h2><p>Pressure tolerance · Bioluminescence · Hydrothermal vents</p><small data-sea-status="deep-sea-life">No active descent</small></div>
+              <div class="sea-card-actions"><button class="secondary-button" type="button" data-sea-action="resume" data-sea-id="deep-sea-life" disabled>Resume</button><button class="primary-button" type="button" data-sea-action="new" data-sea-id="deep-sea-life">Start new descent <span>→</span></button></div>
+            </article>
+            <article class="panel sea-card" data-sea-card="ocean-circulation">
+              <div class="sea-map-thumb sea-map-thumb-alt" aria-hidden="true"></div>
+              <div class="sea-card-copy"><p class="eyebrow">3 TOPICS · 9 QUESTIONS</p><h2>Ocean Circulation and Climate</h2><p>Wind-driven currents · Gyres · Tides and mixing</p><small data-sea-status="ocean-circulation">No active descent</small></div>
+              <div class="sea-card-actions"><button class="secondary-button" type="button" data-sea-action="resume" data-sea-id="ocean-circulation" disabled>Resume</button><button class="primary-button" type="button" data-sea-action="new" data-sea-id="ocean-circulation">Start new descent <span>→</span></button></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="screen" id="descent" aria-labelledby="descent-title" hidden>
+          <div class="eyebrow">OCEAN DESCENT <i>·</i> SAMPLE INSTANCE · <span data-instance-id>PN-001</span></div>
+          <div class="game-heading"><div><h1 id="descent-title"><span id="descent-lesson-title">Introduction to Marine Biology</span> <em id="descent-stage-label">· Part 1 of 3</em></h1><p class="descent-subtitle">Move through this lesson's map to reach each encounter in order.</p></div><div class="zone-enemy"><span>ACTIVE OBJECTIVE<br /><b id="route-part-label">Surface currents</b></span></div></div>
+          <section class="panel descent-route" aria-labelledby="route-title">
+            <div class="route-heading"><div><p class="eyebrow">INDEPENDENT DESCENT INSTANCE · <span data-instance-id>PN-001</span></p><h2 id="route-title">Point Nemo abyss map</h2></div><span id="route-position">NEXT · SURFACE CURRENTS</span></div>
+            <div class="route-scene"><canvas class="pixel-scene" id="descent-route-scene" aria-label="Ocean world map. Move the diver with W, A, S, and D to reach the highlighted encounter." tabindex="0"></canvas><span class="route-depth-label">WORLD MAP · WASD TO SWIM</span></div>
+            <ol class="route-stops" aria-label="Sequential lesson route">
+              <li class="current" data-route-node="0"><span>01</span><b>Point Nemo</b><small>Start</small></li>
+              <li data-route-node="1"><span>02</span><b>Surface currents</b><small>Lesson part 1</small></li>
+              <li data-route-node="2"><span>03</span><b>Pressure &amp; adaptation</b><small>Lesson part 2</small></li>
+              <li data-route-node="3"><span>04</span><b>Deep-sea habitats</b><small>Lesson part 3</small></li>
+              <li data-route-node="4"><span>05</span><b>Lesson boss</b><small>Final battle</small></li>
+            </ol>
+            <div class="route-controls"><span id="route-status" aria-live="polite">Swim to the highlighted Surface currents encounter.</span><span class="key-hints" aria-label="Movement controls"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> MOVE</span></div>
+          </section>
+          <div id="encounter-content" hidden>
+          <div class="health-row"><div class="health-card"><div><span>PLAYER HULL</span><b id="player-hp">100 / 100 HP</b></div><div class="health-track"><i class="player-fill" id="player-hp-bar"></i></div></div><div class="health-card enemy-hp"><div><span>ENEMY</span><b id="enemy-hp">100 / 100 HP</b></div><div class="health-track"><i class="enemy-fill" id="enemy-hp-bar"></i></div></div></div>
+          <section class="panel combat-panel">
+            <div class="combat-scene"><canvas class="pixel-scene" id="combat-scene" aria-hidden="true"></canvas></div>
+          <section class="question-panel">
+            <div class="question-meta"><span>PREVIEW QUESTION · 01 / 03</span><span>TOPIC · OCEAN CURRENTS</span></div>
+            <h2 id="route-question-title">What primarily drives the large-scale surface currents in Earth's oceans?</h2>
+            <div class="answer-list" role="group" aria-label="Choose an answer">
+              <button type="button" data-answer="wrong"><kbd>A</kbd> Tides alone</button>
+              <button type="button" data-answer="correct"><kbd>B</kbd> Global wind patterns</button>
+              <button type="button" data-answer="wrong"><kbd>C</kbd> Deep-sea volcanoes</button>
+              <button type="button" data-answer="wrong"><kbd>D</kbd> Seafloor pressure</button>
+            </div>
+            <div class="feedback" id="answer-feedback" aria-live="polite" hidden></div>
+            <div class="question-footer"><span>Correct answer: 50 enemy damage <i>·</i> +10 XP</span><button class="secondary-button" type="button" id="clear-part" disabled>Clear this part <span>→</span></button></div>
+          </section></section>
+          </div>
+        </section>
+
+        <section class="screen" id="boss" aria-labelledby="boss-title" hidden>
+          <div class="eyebrow">FINAL REVIEW <i>·</i> 9 QUESTIONS</div>
+          <div class="boss-hero"><div class="boss-copy"><h1 id="boss-title">Lesson boss</h1><p>Answer at least 8 of the 9 questions from this lesson descent.</p><div class="boss-stats"><span><b>09</b> QUESTIONS</span><span><b>08</b> TO PASS</span></div><button class="primary-button" type="button" data-go="descent">Return to descent <span>→</span></button></div><div class="boss-visual"><canvas class="pixel-scene" id="boss-scene" aria-hidden="true"></canvas><span>GOBLIN SHARK · PROTOTYPE BOSS SPRITE</span></div></div>
+        </section>
+
+        <section class="screen" id="results" aria-labelledby="results-title" hidden>
+          <div class="eyebrow">SAMPLE RUN SUMMARY · NOT YOUR RESULTS</div>
+          <section class="panel results-panel"><div class="badge-mark" aria-hidden="true">✦</div><p class="eyebrow center-eyebrow">DESCENT COMPLETE</p><h1 id="results-title">Well done.</h1><div class="score-grid"><div><b>3 / 3</b><span>LESSON PARTS</span></div><div><b>8 / 9</b><span>FINAL REVIEW</span></div><div><b>170</b><span>XP</span></div></div><div class="results-actions"><button class="primary-button" type="button" data-go="library">Return to library <span>→</span></button><button class="secondary-button" type="button" data-go="seas">Choose sea to try again</button></div></section>
+        </section>
+
+        <section class="screen" id="profile" aria-labelledby="profile-title" hidden>
+          <div class="eyebrow">PLAYER</div>
+          <div class="page-heading"><div><h1 id="profile-title">Profile</h1><p>Sample profile for visual review. No account or saved progress is connected.</p></div></div>
+          <section class="profile-hero panel">
+            <div class="profile-avatar"><canvas class="pixel-scene" id="profile-scene" aria-hidden="true"></canvas></div>
+            <div class="profile-identity"><p class="eyebrow">LOCAL DIVER</p><h2>Deep Diver</h2><p>Level 04 <span>·</span> 640 / 1,000 XP</p><div class="xp-track" aria-label="640 of 1000 XP toward the next level"><i></i></div></div>
+          </section>
+          <div class="profile-stats">
+            <section class="panel profile-stat"><span>COMPLETED DESCENTS</span><b>03</b></section>
+            <section class="panel profile-stat"><span>BEST FINAL REVIEW</span><b>9 / 9</b></section>
+            <section class="panel profile-stat"><span>TOTAL XP</span><b>640</b></section>
+          </div>
+          <section class="panel profile-badges"><h2>Milestones</h2><div class="milestone-row"><span class="milestone-icon" aria-hidden="true">✦</span><span><b>Descent Complete</b><small>Reach Point Nemo and pass the final review</small></span><span class="milestone-state">EARNED</span></div></section>
+        </section>
+
+        <section class="screen" id="leaderboard" aria-labelledby="leaderboard-title" hidden>
+          <div class="eyebrow">COMMUNITY</div>
+          <div class="page-heading"><div><h1 id="leaderboard-title">Leaderboard</h1><p>Sample standings for the UI preview. Online scores are not connected.</p></div><span class="leaderboard-period">THIS WEEK</span></div>
+          <section class="panel leaderboard-panel">
+            <div class="leaderboard-heading"><span>RANK</span><span>DIVER</span><span>DESCENTS</span><span>XP</span></div>
+            <ol class="leaderboard-list">
+              <li><span class="rank">01</span><span class="diver-name"><i>MK</i><b>Mira K.</b></span><span class="descent-count">12</span><strong class="leader-score">2,840</strong></li>
+              <li><span class="rank">02</span><span class="diver-name"><i>JR</i><b>Jules R.</b></span><span class="descent-count">10</span><strong class="leader-score">2,420</strong></li>
+              <li class="current-player"><span class="rank">03</span><span class="diver-name"><i>DD</i><b>Deep Diver <small>YOU</small></b></span><span class="descent-count">3</span><strong class="leader-score">640</strong></li>
+              <li><span class="rank">04</span><span class="diver-name"><i>AS</i><b>Alex S.</b></span><span class="descent-count">2</span><strong class="leader-score">390</strong></li>
+              <li><span class="rank">05</span><span class="diver-name"><i>TK</i><b>Taylor K.</b></span><span class="descent-count">1</span><strong class="leader-score">180</strong></li>
+            </ol>
+          </section>
+          <p class="leaderboard-note">Preview data only · No account or network connection</p>
+        </section>
+      </main>
+
+      <footer class="footer"><span>POINT NEMO</span><span>LOCAL PREVIEW · SAMPLE DATA</span></footer>
+    </div>
+    <script type="module" src="./playground.js"></script>
+  </body>
+</html>

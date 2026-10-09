@@ -11,9 +11,9 @@ Point Nemo is a local-first study expedition. Students travel from Point Nemo th
 
 From the repository root:
 
-```powershell
+```cmd
 npm install
-Copy-Item .env.example .env
+copy .env.example .env
 npm run dev
 ```
 
@@ -21,12 +21,20 @@ Open [http://127.0.0.1:5173](http://127.0.0.1:5173). The Express API listens on 
 
 To verify the codebase, run TypeScript typechecks, tests, smoke tests, and build:
 
-```powershell
+```cmd
 npm run typecheck
 npm test
 npm run test:smoke
 npm run build
 ```
+
+### Standalone UI playground
+
+```cmd
+npm run dev:playground --workspace=@point-nemo/web
+```
+
+Open [http://127.0.0.1:5174](http://127.0.0.1:5174). This separate preview starts at Local Library and uses sample lessons, in-memory descent instances, and sample Profile/Leaderboard pages. It does not call the API, process PDFs, authenticate users, or persist progress. The main React app retains its local explorer login/signup and guest entry. See [the playground handoff](docs/product/UI_PLAYGROUND_HANDOFF.md) for scope and integration boundaries.
 
 ## Local AI configuration
 
@@ -43,7 +51,7 @@ Change `OLLAMA_BASE_URL` or `OLLAMA_MODEL` in your `.env` as needed. All inferen
 
 ## What is included
 
-- **Local Document Intake**: Accepts text-based PDFs up to 5 MiB, 3 pages, and 8,000 characters. `POST /api/documents` admits the file, `GET /api/jobs/:id` reports bounded job status, and `GET /api/question-sets/:id` returns the persisted 3-topic/9-question set with source evidence.
+- **Local Document Intake**: Accepts text-based PDFs with at least 300 extracted characters; current admission has no upper file-size, page-count, or extracted-character limit. `POST /api/documents` admits the file, `GET /api/jobs/:id` reports bounded job status, and `GET /api/question-sets/:id` returns the persisted 3-topic/9-question set with source evidence.
 - **Authoritative Game Run Backend**:
   - `POST /api/runs`: Creates an authoritative run from a ready question set with 18 fixed, persisted slots.
     - 3 easy questions (Surface: Clownfish)
