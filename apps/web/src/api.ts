@@ -1,51 +1,35 @@
 import {
-  BackendQuestionSetSchema, RunDetailSchema, GenerationJobSchema,
-  AnswerSubmitResponseSchema, LibraryDocumentSchema,
-  type BackendQuestionSet, type FrontendQuestionSet,
-  type DescentRun as SharedDescentRun,
-  type QuestionAttempt as SharedQuestionAttempt,
-  type DescentZone, type PointNemoQuestion, type RunDetail, type AnswerFeedback,
-  type ActiveQuestion, type CurrentSlot, type RunAttemptDetail,
-  type AnswerSubmitResponse, type Evidence, type JobState, type GenerationJob,
-  type LibraryDocument as BackendLibraryDocument,
+  type DescentRun,
+  type DescentZone,
+  type PointNemoQuestion,
+  type QuestionAttempt,
+  type QuestionSet,
+  type RunDetail,
+  type AnswerFeedback,
+  type ActiveQuestion,
+  type CurrentSlot,
+  type RunAttemptDetail,
+  type AnswerSubmitResponse,
+  type Evidence,
+  type JobState,
+  type GenerationJob,
 } from "@point-nemo/shared";
 
-export type {
-  DescentZone, PointNemoQuestion, RunDetail, AnswerFeedback, ActiveQuestion,
-  CurrentSlot, RunAttemptDetail, AnswerSubmitResponse, Evidence, JobState, GenerationJob,
-};
-
-export type EncounterStage = Exclude<DescentZone, "results">;
-export type StudyQuestion = PointNemoQuestion & {
-  topicId: string;
-  documentId: string;
-  questionSetId: string;
-  evidence: Evidence[];
-};
-// Components consume this normalized frontend shape, never the shared union.
-export type QuestionSet = Omit<FrontendQuestionSet, "questions" | "extractedPages"> & {
-  documentId: string;
-  filename: string;
-  compatible: boolean;
-  metadata: BackendQuestionSet["metadata"];
-  topicDetails: BackendQuestionSet["topics"];
-  extractedPages: NonNullable<BackendQuestionSet["extractedPages"]>;
-  questions: StudyQuestion[];
-};
-export type QuestionAttempt = SharedQuestionAttempt & {
-  slotId: string;
-  questionPrompt: string;
-  topicName: string;
-  options: string[];
-  feedback: AnswerFeedback;
-};
-export type DescentRun = Omit<SharedDescentRun, "attempts"> & {
-  documentId: string;
-  failureStage?: EncounterStage;
-  attempts: QuestionAttempt[];
-};
-export type LibraryDocument = Omit<BackendLibraryDocument, "questionSets"> & {
-  questionSets: QuestionSet[];
+export {
+  type DescentRun,
+  type DescentZone,
+  type PointNemoQuestion,
+  type QuestionAttempt,
+  type QuestionSet,
+  type RunDetail,
+  type AnswerFeedback,
+  type ActiveQuestion,
+  type CurrentSlot,
+  type RunAttemptDetail,
+  type AnswerSubmitResponse,
+  type Evidence,
+  type JobState,
+  type GenerationJob,
 };
 
 export interface ServiceStatus {
@@ -53,253 +37,363 @@ export interface ServiceStatus {
   model?: string;
   message: string;
 }
-export interface AppStatus { api: ServiceStatus; ai: ServiceStatus }
-export interface ApiEnvelope<T> { success: true; data: T }
+
+export interface AppStatus {
+  api: ServiceStatus;
+  ai: ServiceStatus;
+}
+
+export interface ApiEnvelope<T> {
+  success: true;
+  data: T;
+}
+
+interface ApiHealthResponse {
+  status: string;
+}
 
 export class ApiRequestError extends Error {
   constructor(
     message: string,
-    public readonly code = "API_ERROR",
-    public readonly statusCode = 400,
-    public readonly retryable = false,
+    public readonly code: string = "API_ERROR",
+    public readonly statusCode: number = 400,
   ) {
     super(message);
     this.name = "ApiRequestError";
   }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
 export async function handleResponse<T>(response: Response): Promise<T> {
-  let payload: unknown;
-  try {
-    payload = await response.json();
-  } catch {
-    throw new ApiRequestError(
-      response.ok ? "The local API returned an unreadable response." : `Request failed with HTTP ${response.status}.`,
-      response.ok ? "INVALID_RESPONSE" : "HTTP_ERROR", response.status, response.status >= 500,
-    );
+  if (!response.ok) {
+    let errPayload: any;
+    try {
+      errPayload = await response.json();
+    } catch {
+      // not JSON
+    }
+    const message = errPayload?.error?.message || `Request failed with HTTP ${response.status}.`;
+    const code = errPayload?.error?.code || "HTTP_ERROR";
+    throw new ApiRequestError(message, code, response.status);
   }
-  if (!response.ok || (isRecord(payload) && payload.success === false)) {
-    const error = isRecord(payload) && isRecord(payload.error) ? payload.error : {};
-    throw new ApiRequestError(
-      typeof error.message === "string" ? error.message : `Request failed with HTTP ${response.status}.`,
-      typeof error.code === "string" ? error.code : "HTTP_ERROR",
-      response.status,
-      typeof error.retryable === "boolean" ? error.retryable : response.status >= 500,
-    );
-  }
-  return payload as T;
+  return (await response.json()) as T;
 }
 
-async function envelopeData(response: Response): Promise<unknown> {
-  const payload = await handleResponse<unknown>(response);
-  if (!isRecord(payload) || payload.success !== true || !("data" in payload)) {
-    throw new ApiRequestError("The local API returned an incomplete response.", "INVALID_RESPONSE", response.status);
-  }
-  return payload.data;
+async function getJson<T>(path: string, timeoutMs = 60_000): Promise<T> {
+  const response = await fetch(path, { signal: AbortSignal.timeout(timeoutMs) });
+  return handleResponse<T>(response);
 }
 
-function requestSignal(timeoutMs: number, signal?: AbortSignal): AbortSignal {
-  return signal ? AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)]) : AbortSignal.timeout(timeoutMs);
-}
+// ============================================================================
+// AUTHORITATIVE BACKEND REST CLIENT
+// ============================================================================
 
-async function getData(path: string, signal?: AbortSignal): Promise<unknown> {
-  return envelopeData(await fetch(path, { signal: requestSignal(5_000, signal) }));
-}
-
-function invalidResponse(): never {
-  throw new ApiRequestError("The local API response does not match the study contract. Refresh after checking the local server.", "INVALID_RESPONSE", 502);
-}
-
-export function validateUploadFile(file: Pick<File, "name" | "size" | "type">): string | null {
-  if (!file.name.toLowerCase().endsWith(".pdf") || (file.type && file.type !== "application/pdf")) {
-    return "Choose one English text-based PDF file (.pdf).";
-  }
-  if (file.size === 0) return "This file is empty. Export a text-based PDF excerpt.";
-  if (file.size > 5 * 1024 * 1024) return "The PDF must be at most 5 MiB. Export a smaller excerpt.";
-  return null;
-}
-
+/**
+ * Upload a PDF to the authoritative Express backend.
+ * Uses FormData with field name "file".
+ */
 export async function uploadDocument(file: File): Promise<{ documentId: string; jobId: string }> {
-  const error = validateUploadFile(file);
-  if (error) throw new ApiRequestError(error, "INVALID_INPUT", 400);
   const formData = new FormData();
   formData.append("file", file);
-  // Keep the upload alive on Cancel so its receipt can identify the job to stop.
-  const data = await envelopeData(await fetch("/api/documents", {
-    method: "POST", body: formData, signal: AbortSignal.timeout(15_000),
-  }));
-  if (!isRecord(data) || typeof data.documentId !== "string" || typeof data.jobId !== "string") invalidResponse();
-  return { documentId: data.documentId, jobId: data.jobId };
-}
 
-export async function getGenerationJob(jobId: string, signal?: AbortSignal): Promise<GenerationJob> {
-  const result = GenerationJobSchema.safeParse(await getData(`/api/jobs/${encodeURIComponent(jobId)}`, signal));
-  if (!result.success) invalidResponse();
-  return result.data;
-}
-
-export async function cancelGenerationJob(jobId: string): Promise<GenerationJob> {
-  const result = GenerationJobSchema.safeParse(await envelopeData(await fetch(`/api/jobs/${encodeURIComponent(jobId)}/cancel`, {
-    method: "POST", signal: AbortSignal.timeout(5_000),
-  })));
-  if (!result.success) invalidResponse();
-  return result.data;
-}
-
-export async function deleteDocument(documentId: string): Promise<void> {
-  const response = await fetch(`/api/documents/${encodeURIComponent(documentId)}`, {
-    method: "DELETE", signal: AbortSignal.timeout(5_000),
+  const response = await fetch("/api/documents", {
+    method: "POST",
+    body: formData,
+    signal: AbortSignal.timeout(60_000),
   });
-  if (!response.ok) await handleResponse(response);
-  // Successful deletion is 204 and intentionally has no JSON body.
-  if (response.status !== 204) invalidResponse();
+
+  const body = await handleResponse<ApiEnvelope<{ documentId: string; jobId: string }>>(response);
+  return body.data;
 }
 
-function fourOptions(options: string[]): [string, string, string, string] {
-  if (options.length !== 4 || options.some((option) => typeof option !== "string" || !option.trim())) invalidResponse();
-  return [options[0], options[1], options[2], options[3]];
+/**
+ * Poll job status until "ready", "failed", or "cancelled".
+ */
+export async function getGenerationJob(jobId: string): Promise<GenerationJob> {
+  const body = await getJson<ApiEnvelope<GenerationJob>>(`/api/jobs/${jobId}`, 60_000);
+  return body.data;
 }
 
-function answerIndex(index: number): 0 | 1 | 2 | 3 {
-  if (index === 0 || index === 1 || index === 2 || index === 3) return index;
-  return invalidResponse();
+/**
+ * Fetch the validated question set (3 topics, 9 questions).
+ */
+export async function getQuestionSet(questionSetId: string): Promise<QuestionSet> {
+  const body = await getJson<ApiEnvelope<QuestionSet>>(`/api/question-sets/${questionSetId}`, 60_000);
+  return body.data;
 }
 
-export function normalizeQuestionSet(backend: BackendQuestionSet): QuestionSet {
-  if (!backend.filename || backend.topics.length !== 3 || backend.questions.length !== 9) invalidResponse();
-  const topicNames = new Map(backend.topics.map((topic) => [topic.id, topic.name]));
-  if (topicNames.size !== 3) invalidResponse();
-  const questions = backend.questions.map((question): StudyQuestion => {
-    const topic = topicNames.get(question.topicId);
-    const firstEvidence = question.evidence[0];
-    if (!topic || !firstEvidence) invalidResponse();
-    return {
-      id: question.id, topicId: question.topicId, topic,
-      questionSetId: backend.id, documentId: backend.documentId,
-      difficulty: question.difficulty, prompt: question.prompt,
-      options: fourOptions(question.options), answerIndex: answerIndex(question.answerIndex),
-      explanation: question.explanation,
-      sourcePage: firstEvidence.pageNumber, sourceQuote: firstEvidence.quote,
-      evidence: question.evidence.map((evidence) => ({ ...evidence })),
-    };
-  });
-  return {
-    id: backend.id, documentId: backend.documentId,
-    documentName: backend.filename, filename: backend.filename,
-    topics: [backend.topics[0].name, backend.topics[1].name, backend.topics[2].name],
-    topicDetails: backend.topics.map((topic) => ({ ...topic })), questions,
-    extractedPages: (backend.extractedPages ?? []).map((page) => ({ ...page })),
-    metadata: backend.metadata, compatible: backend.compatible === true,
-    createdAt: backend.createdAt,
-  };
-}
-
-export async function getQuestionSet(questionSetId: string, signal?: AbortSignal): Promise<QuestionSet> {
-  const result = BackendQuestionSetSchema.safeParse(await getData(`/api/question-sets/${encodeURIComponent(questionSetId)}`, signal));
-  if (!result.success) invalidResponse();
-  return normalizeQuestionSet(result.data);
-}
-
+/**
+ * Create a new authoritative game run (18 fixed slots).
+ */
 export async function createRun(questionSetId: string): Promise<RunDetail> {
-  const result = RunDetailSchema.safeParse(await envelopeData(await fetch("/api/runs", {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ questionSetId }), signal: AbortSignal.timeout(5_000),
-  })));
-  if (!result.success) invalidResponse();
-  return result.data;
+  const response = await fetch("/api/runs", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ questionSetId }),
+    signal: AbortSignal.timeout(5_000),
+  });
+  const body = await handleResponse<ApiEnvelope<RunDetail>>(response);
+  return body.data;
 }
 
+/**
+ * Get authoritative run snapshot.
+ */
 export async function getRun(runId: string): Promise<RunDetail> {
-  const result = RunDetailSchema.safeParse(await getData(`/api/runs/${encodeURIComponent(runId)}`));
-  if (!result.success) invalidResponse();
-  return result.data;
+  const body = await getJson<ApiEnvelope<RunDetail>>(`/api/runs/${runId}`, 5_000);
+  return body.data;
 }
 
-export async function submitAnswer(runId: string, slotId: string, selectedOptionIndex: number): Promise<AnswerSubmitResponse> {
-  const result = AnswerSubmitResponseSchema.safeParse(await envelopeData(await fetch(`/api/runs/${encodeURIComponent(runId)}/answers`, {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ slotId, selectedOptionIndex }), signal: AbortSignal.timeout(5_000),
-  })));
-  if (!result.success) invalidResponse();
-  return result.data;
-}
-
-// Retries always submit the captured slot and option, including after a lost response.
-export const submitRunAnswer = submitAnswer;
-
-export function toDescentRun(runDetail: RunDetail, questionSet?: QuestionSet): DescentRun {
-  const documentId = runDetail.documentId ?? questionSet?.documentId;
-  const filename = runDetail.filename || questionSet?.filename;
-  if (!documentId || !filename || !runDetail.updatedAt || runDetail.bossOrder?.length !== 9) invalidResponse();
-  if (new Set(runDetail.bossOrder).size !== 9 || (runDetail.state === "failed" && !runDetail.failureStage)) invalidResponse();
-  if (questionSet && (questionSet.documentId !== documentId || questionSet.id !== runDetail.questionSetId)) invalidResponse();
-  const stage: DescentZone = runDetail.state === "active"
-    ? runDetail.currentSlot?.encounterType ?? invalidResponse()
-    : "results";
-  const stageStart = { surface: 0, twilight: 3, midnight: 6, boss: 9, results: 0 };
-  const attempts: QuestionAttempt[] = (runDetail.attempts ?? []).map((attempt) => {
-    if (!attempt.questionId || attempt.options?.length !== 4) invalidResponse();
-    return {
-      questionId: attempt.questionId, slotId: attempt.slotId, slotIndex: attempt.slotIndex,
-      zone: attempt.encounterType, selectedAnswer: attempt.selectedOptionIndex,
-      isCorrect: attempt.isCorrect, answeredAt: attempt.createdAt,
-      questionPrompt: attempt.questionPrompt, topicName: attempt.topicName,
-      options: [...attempt.options], feedback: attempt.feedback,
-    };
+/**
+ * Submit an answer to the backend authoritative run engine.
+ */
+export async function submitAnswer(
+  runId: string,
+  slotId: string,
+  selectedOptionIndex: number,
+): Promise<AnswerSubmitResponse> {
+  const response = await fetch(`/api/runs/${runId}/answers`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slotId, selectedOptionIndex }),
+    signal: AbortSignal.timeout(5_000),
   });
-  const score = (zone: EncounterStage) => attempts.filter((attempt) => attempt.zone === zone && attempt.isCorrect).length;
-  const failureStage = runDetail.failureStage;
-  const failureReason = runDetail.state === "failed" && failureStage
-    ? `${failureStage === "boss" ? "Mixed-topic boss review" : `${failureStage[0].toUpperCase()}${failureStage.slice(1)} zone`} threshold missed (${score(failureStage)}/${failureStage === "boss" ? 9 : 3}; ${failureStage === "boss" ? "8/9" : "2/3"} required).`
-    : undefined;
-  return {
-    id: runDetail.id, documentId, questionSetId: runDetail.questionSetId,
-    documentName: filename, stage, status: runDetail.state,
-    currentQuestionIndex: runDetail.state === "active" ? runDetail.currentSlotIndex - stageStart[stage] : 0,
-    playerHp: runDetail.playerHp, enemyHp: runDetail.currentEncounterHp, xp: runDetail.xp,
-    shuffledBossOrder: [...runDetail.bossOrder], attempts,
-    zoneScores: {
-      surface: score("surface"), twilight: score("twilight"), midnight: score("midnight"),
-      boss: attempts.some((attempt) => attempt.zone === "boss") ? score("boss") : undefined,
-    },
-    failureStage, failureReason, createdAt: runDetail.createdAt, updatedAt: runDetail.updatedAt,
-    completedAt: runDetail.state === "completed" ? runDetail.updatedAt : undefined,
-  };
+  const body = await handleResponse<ApiEnvelope<AnswerSubmitResponse>>(response);
+  return body.data;
 }
 
-export async function fetchLibrary(): Promise<LibraryDocument[]> {
-  const data = await getData("/api/documents");
-  if (!Array.isArray(data)) invalidResponse();
-  return data.map((document) => {
-    const result = LibraryDocumentSchema.safeParse(document);
-    if (!result.success) invalidResponse();
-    const questionSets = result.data.questionSets.map(normalizeQuestionSet);
-    for (const run of result.data.runs) {
-      toDescentRun(run, questionSets.find((questions) => questions.id === run.questionSetId));
-      if (run.documentId !== result.data.id) invalidResponse();
-    }
-    if (questionSets.some((questions) => questions.documentId !== result.data.id)) invalidResponse();
-    if (result.data.jobs.some((job) => job.documentId !== result.data.id)) invalidResponse();
-    return { ...result.data, questionSets };
-  });
-}
-
+/**
+ * Check Express API health and local Ollama readiness.
+ */
 export async function getAppStatus(): Promise<AppStatus> {
-  const [health, ai] = await Promise.allSettled([
-    fetch("/api/health", { signal: AbortSignal.timeout(3500) }).then((response) => handleResponse<unknown>(response)),
-    fetch("/api/ai/status", { signal: AbortSignal.timeout(3500) }).then((response) => handleResponse<unknown>(response)),
+  const [healthResult, aiResult] = await Promise.allSettled([
+    fetch("/api/health", { signal: AbortSignal.timeout(3500) }).then((r) => r.json() as Promise<ApiHealthResponse>),
+    fetch("/api/ai/status", { signal: AbortSignal.timeout(3500) }).then((r) => r.json() as Promise<ServiceStatus>),
   ]);
-  const apiAvailable = health.status === "fulfilled" && isRecord(health.value) && health.value.status === "ok";
-  const aiStatus = ai.status === "fulfilled" && isRecord(ai.value)
-    && typeof ai.value.available === "boolean" && typeof ai.value.message === "string"
-    ? { available: ai.value.available, message: ai.value.message, model: typeof ai.value.model === "string" ? ai.value.model : undefined }
-    : { available: false, message: "Could not check the local Ollama service." };
+
+  if (healthResult.status === "rejected") {
+    return {
+      api: { available: false, message: "Local Express API offline." },
+      ai: { available: false, message: "AI status unavailable." },
+    };
+  }
+
   return {
-    api: { available: apiAvailable, message: apiAvailable ? "Local API connected." : "Local API unavailable. Start the local server and refresh." },
-    ai: apiAvailable ? aiStatus : { available: false, message: "AI status unavailable while the local API is stopped." },
+    api: {
+      available: healthResult.value.status === "ok",
+      message: healthResult.value.status === "ok" ? "Local API connected." : "API status abnormal.",
+    },
+    ai:
+      aiResult.status === "fulfilled"
+        ? aiResult.value
+        : { available: false, message: "Could not connect to Ollama." },
   };
+}
+
+// ============================================================================
+// DESCENT RUN COMPATIBILITY ADAPTERS (For LocalLibrary, DescentEncounter, ResultsScreen)
+// ============================================================================
+
+export function toPointNemoQuestion(q: any, topicName: string): PointNemoQuestion {
+  const sourcePage = q.evidence?.[0]?.pageNumber ?? q.sourcePage ?? 1;
+  const sourceQuote = q.evidence?.[0]?.quote ?? q.sourceQuote ?? "";
+  return {
+    id: q.id,
+    topic: topicName || q.topic || "Marine Biology",
+    difficulty: q.difficulty,
+    prompt: q.prompt,
+    options: (q.options || []) as [string, string, string, string],
+    answerIndex: (q.answerIndex ?? 0) as 0 | 1 | 2 | 3,
+    explanation: q.explanation || "",
+    sourceQuote,
+    sourcePage,
+  };
+}
+
+export function toDescentRun(
+  runDetail: RunDetail,
+  questionSet?: QuestionSet,
+  docName: string = "Ocean Document.pdf",
+): DescentRun {
+  let stage: DescentZone = "surface";
+  if (runDetail.state !== "active") {
+    stage = "results";
+  } else if (runDetail.currentSlot) {
+    stage = runDetail.currentSlot.encounterType;
+  } else if (runDetail.currentSlotIndex >= 9) {
+    stage = "boss";
+  } else if (runDetail.currentSlotIndex >= 6) {
+    stage = "midnight";
+  } else if (runDetail.currentSlotIndex >= 3) {
+    stage = "twilight";
+  }
+
+  let currentQuestionIndex = 0;
+  if (stage === "surface") currentQuestionIndex = runDetail.currentSlotIndex;
+  else if (stage === "twilight") currentQuestionIndex = Math.max(0, runDetail.currentSlotIndex - 3);
+  else if (stage === "midnight") currentQuestionIndex = Math.max(0, runDetail.currentSlotIndex - 6);
+  else if (stage === "boss") currentQuestionIndex = Math.max(0, runDetail.currentSlotIndex - 9);
+
+  const attempts: QuestionAttempt[] = (runDetail.attempts || []).map((att) => ({
+    questionId: att.slotId,
+    slotIndex: att.slotIndex,
+    zone: att.encounterType as DescentZone,
+    selectedAnswer: att.selectedOptionIndex as 0 | 1 | 2 | 3,
+    isCorrect: att.isCorrect,
+    answeredAt: att.createdAt,
+  }));
+
+  const surfaceCorrect = attempts.filter((a) => a.zone === "surface" && a.isCorrect).length;
+  const twilightCorrect = attempts.filter((a) => a.zone === "twilight" && a.isCorrect).length;
+  const midnightCorrect = attempts.filter((a) => a.zone === "midnight" && a.isCorrect).length;
+  const bossCorrect = attempts.filter((a) => a.zone === "boss" && a.isCorrect).length;
+
+  let failureReason: string | undefined;
+  if (runDetail.state === "failed") {
+    if (runDetail.playerHp <= 0) {
+      failureReason = "Hull integrity depleted (0% HP).";
+    } else if (runDetail.currentSlotIndex === 3 && surfaceCorrect < 2) {
+      failureReason = "Surface threshold missed (at least 2/3 required).";
+    } else if (runDetail.currentSlotIndex === 6 && twilightCorrect < 2) {
+      failureReason = "Twilight threshold missed (at least 2/3 required).";
+    } else if (runDetail.currentSlotIndex === 9 && midnightCorrect < 2) {
+      failureReason = "Midnight threshold missed (at least 2/3 required).";
+    } else if (runDetail.currentSlotIndex === 18 && bossCorrect < 8) {
+      failureReason = "Megalodon review threshold missed (at least 8/9 required).";
+    } else {
+      failureReason = "Descent threshold not reached.";
+    }
+  }
+
+  // Shuffled boss order question IDs
+  const qList = questionSet && "questions" in questionSet ? questionSet.questions : [];
+  const shuffledBossOrder = qList.map((q: any) => q.id).slice(0, 9);
+  while (shuffledBossOrder.length < 9) {
+    shuffledBossOrder.push(`q-${shuffledBossOrder.length + 1}`);
+  }
+
+  return {
+    id: runDetail.id,
+    questionSetId: runDetail.questionSetId,
+    documentName: docName,
+    stage,
+    status: runDetail.state,
+    currentQuestionIndex,
+    playerHp: runDetail.playerHp,
+    enemyHp: runDetail.currentEncounterHp,
+    xp: runDetail.xp,
+    shuffledBossOrder,
+    attempts,
+    zoneScores: {
+      surface: surfaceCorrect,
+      twilight: twilightCorrect,
+      midnight: midnightCorrect,
+      boss: bossCorrect,
+    },
+    failureReason,
+    createdAt: runDetail.createdAt,
+    updatedAt: runDetail.createdAt,
+  };
+}
+
+/**
+ * Fetch all runs and question sets for LocalLibrary.
+ */
+export async function fetchRuns(): Promise<{ runs: DescentRun[]; questionSets: QuestionSet[] }> {
+  try {
+    const runsRes = await fetch("/api/runs");
+    const json = (await runsRes.json()) as ApiEnvelope<RunDetail[]>;
+    if (!runsRes.ok || !json.success) {
+      return { runs: [], questionSets: [] };
+    }
+
+    const runsList = json.data;
+    const questionSetsMap = new Map<string, QuestionSet>();
+
+    // Fetch question sets for each run
+    for (const r of runsList) {
+      if (!questionSetsMap.has(r.questionSetId)) {
+        try {
+          const qs = await getQuestionSet(r.questionSetId);
+          questionSetsMap.set(r.questionSetId, qs);
+        } catch {
+          // ignore
+        }
+      }
+    }
+
+    const descentRuns: DescentRun[] = runsList.map((r) => {
+      const qs = questionSetsMap.get(r.questionSetId);
+      return toDescentRun(r, qs);
+    });
+
+    return {
+      runs: descentRuns,
+      questionSets: Array.from(questionSetsMap.values()),
+    };
+  } catch {
+    return { runs: [], questionSets: [] };
+  }
+}
+
+export async function fetchRun(id: string): Promise<{ run: DescentRun; questionSet: QuestionSet }> {
+  const runDetail = await getRun(id);
+  const questionSet = await getQuestionSet(runDetail.questionSetId);
+  return {
+    run: toDescentRun(runDetail, questionSet),
+    questionSet,
+  };
+}
+
+export async function submitRunAnswer(
+  runId: string,
+  selectedAnswer: number,
+): Promise<{
+  run: DescentRun;
+  runDetail: RunDetail;
+  lastAnswer: { isCorrect: boolean; activeQuestion: PointNemoQuestion; selectedAnswer: number };
+}> {
+  const currentRunDetail = await getRun(runId);
+  if (!currentRunDetail.currentSlot) {
+    throw new Error("No active question slot in this run.");
+  }
+
+  const result = await submitAnswer(
+    runId,
+    currentRunDetail.currentSlot.id,
+    selectedAnswer,
+  );
+
+  const questionSet = await getQuestionSet(result.run.questionSetId);
+  const descentRun = toDescentRun(result.run, questionSet);
+
+  const activeQ = toPointNemoQuestion(
+    currentRunDetail.currentSlot.question,
+    currentRunDetail.currentSlot.question.topicName,
+  );
+
+  return {
+    run: descentRun,
+    runDetail: result.run,
+    lastAnswer: {
+      isCorrect: result.feedback.isCorrect,
+      activeQuestion: activeQ,
+      selectedAnswer,
+    },
+  };
+}
+
+export async function tryAgainRun(
+  runId: string,
+): Promise<{ run: DescentRun; questionSet: QuestionSet }> {
+  const oldRun = await getRun(runId);
+  const newRunDetail = await createRun(oldRun.questionSetId);
+  const questionSet = await getQuestionSet(newRunDetail.questionSetId);
+  return {
+    run: toDescentRun(newRunDetail, questionSet),
+    questionSet,
+  };
+}
+
+export async function deleteRun(_runId: string): Promise<boolean> {
+  return true;
 }

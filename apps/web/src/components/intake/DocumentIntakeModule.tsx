@@ -243,6 +243,19 @@ export function DocumentIntakeModule({
                     Ensure local Ollama service is active (`ollama serve`) with model `qwen2.5:1.5b`.
                   </p>
                 )}
+                <div style={{ marginTop: "12px", display: "flex", gap: "10px" }}>
+                  <button
+                    type="button"
+                    className="primary-button"
+                    style={{ fontSize: "11px", padding: "6px 12px" }}
+                    onClick={() => {
+                      setIsProcessing(false);
+                      onProcessingFinished();
+                    }}
+                  >
+                    Continue with Catalog Expedition →
+                  </button>
+                </div>
               </div>
             )}
 

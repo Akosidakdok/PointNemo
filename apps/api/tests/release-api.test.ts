@@ -78,7 +78,7 @@ test("release configuration uses port 3000, external app-data storage, and the p
   assert.throws(() => readConfig({ INFERENCE_TIMEOUT_MS: "NaN" }));
   assert.throws(() => readConfig({ OLLAMA_NUM_CTX: "4096" }));
   for (const [name, value] of [["OLLAMA_NUM_CTX", "16384"], ["OLLAMA_MAX_INPUT_TOKENS", "4097"],
-    ["OLLAMA_MAX_OUTPUT_TOKENS", "3073"], ["INFERENCE_TIMEOUT_MS", "40001"], ["JOB_TIMEOUT_MS", "90001"]]) {
+    ["OLLAMA_MAX_OUTPUT_TOKENS", "3073"], ["INFERENCE_TIMEOUT_MS", "180001"], ["JOB_TIMEOUT_MS", "360001"]]) {
     assert.throws(() => readConfig({ [name!]: value }));
   }
   const debug = readConfig({ OLLAMA_MAX_INPUT_TOKENS: "3000", OLLAMA_MAX_OUTPUT_TOKENS: "2000", INFERENCE_TIMEOUT_MS: "1000", JOB_TIMEOUT_MS: "2000" });

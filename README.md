@@ -17,7 +17,7 @@ copy .env.example .env
 npm run dev
 ```
 
-Open [http://127.0.0.1:5173](http://127.0.0.1:5173). The Express API listens on port `3001`; Vite proxies `/api` requests to it. The API initializes SQLite on first start at `apps/api/data/point-nemo.sqlite`.
+Open [http://127.0.0.1:5173](http://127.0.0.1:5173). In development mode, Vite proxies `/api` requests to the API on port `3000` (or `API_PORT`); in production, `npm start` serves the built app on port `3000`. The API initializes SQLite in your local AppData directory (`%LOCALAPPDATA%\PointNemo\point-nemo.sqlite`).
 
 To verify the codebase, run TypeScript typechecks, tests, smoke tests, and build:
 
@@ -41,17 +41,17 @@ Open [http://127.0.0.1:5174](http://127.0.0.1:5174). This separate preview start
 The checked-in `.env.example` contains local defaults:
 
 ```dotenv
-API_PORT=3001
-DATABASE_PATH=./data/point-nemo.sqlite
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=qwen3:4b
+API_PORT=3000
+DATABASE_PATH=
+OLLAMA_BASE_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=qwen2.5:1.5b
 ```
 
 Change `OLLAMA_BASE_URL` or `OLLAMA_MODEL` in your `.env` as needed. All inference calls are dispatched to your local Ollama loopback host. No document text, prompts, or answers are ever sent to remote or cloud AI endpoints.
 
 ## What is included
 
-- **Local Document Intake**: Accepts text-based PDFs with at least 300 extracted characters; current admission has no upper file-size, page-count, or extracted-character limit. `POST /api/documents` admits the file, `GET /api/jobs/:id` reports bounded job status, and `GET /api/question-sets/:id` returns the persisted 3-topic/9-question set with source evidence.
+- **Local Document Intake**: Accepts English text-based PDFs within strict admission bounds: maximum 5 MiB (5,242,880 bytes), at most 3 pages, at least 300 non-whitespace characters, and at most 8,000 normalized NFC characters. Scans and embedded images are rejected to guarantee source-grounded active recall. `POST /api/documents` admits the file, `GET /api/jobs/:id` reports bounded job status, and `GET /api/question-sets/:id` returns the persisted 3-topic/9-question set with source evidence.
 - **Authoritative Game Run Backend**:
   - `POST /api/runs`: Creates an authoritative run from a ready question set with 18 fixed, persisted slots.
     - 3 easy questions (Surface: Clownfish)
