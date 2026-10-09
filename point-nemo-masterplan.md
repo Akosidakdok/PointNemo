@@ -2,6 +2,8 @@
 
 **Revision 2 — October 9, 2026 — Asia/Manila (UTC+8).** This revision addresses findings F01–F10 in the [validation report](<C:/Users/Mark Vasquez/Documents/Point nemo/point-nemo-validation-report.md>). It defines implementation contracts, acceptance gates, and submission work. Implementation, benchmarks, registration, and submission remain pending; decisions below are not completed test results.
 
+**Document authority:** this masterplan is the current product and hackathon source of truth. It supersedes the earlier [project setup design](<C:/Users/Mark Vasquez/Documents/Point nemo/docs/superpowers/specs/2026-10-09-point-nemo-design.md>) wherever they conflict, especially its deferred upload/generation flow, DOCX/PPTX scope, browser-only sample state, and route direction. The setup design remains a historical record of the first scaffold proposal.
+
 ## 1. Product goal and MVP boundary
 
 Point Nemo turns a student's short, text-based PDF notes into an ocean-themed study game on their own laptop. The student uploads an excerpt, receives questions tied to its source text, answers through three depth zones, and completes a mixed-topic boss review. Feedback explains each answer and shows its supporting passage. Saved progress lets the student resume offline after setup.
@@ -18,6 +20,18 @@ Point Nemo turns a student's short, text-based PDF notes into an ocean-themed st
 These exclusions are product decisions. The merged guide does not prescribe flashcards or summary reviewers.
 
 **Submission-description draft:** “Point Nemo turns short PDF notes into an ocean study adventure, with locally generated questions, source-linked explanations, and progress saved on the student's laptop.” Publish this as working behavior only after the corresponding acceptance gates pass.
+
+### Hackathon critical path
+
+Do work in this order and stop lower-priority work whenever a higher tier is not demonstrably working:
+
+| Priority | Required outcome |
+| --- | --- |
+| **P0 — submission blocker** | Confirm rules/team; public reproducible repository; one supported PDF produces a valid source-grounded set through local Ollama; a complete simple win/loss game works; offline proof, README, disclosure, video/posts, and submission evidence exist |
+| **P1 — reliability** | Saved runs, idempotent answers, clear invalid-input/model errors, cancellation, document deletion, second-document isolation, and measured cold/warm performance |
+| **P2 — presentation** | Ocean polish, extra transitions, richer library/history views, and nonessential animation |
+
+The full contracts below describe the intended finished MVP. If time forces a cut, remove P2 first and disclose any missing P1 behavior. Never cut P0, source fidelity, truthful labels, or required submission work. A limitation must be visible in the README and demo; an unimplemented feature must not be described as working.
 
 ## 2. Event references and rules to confirm
 
