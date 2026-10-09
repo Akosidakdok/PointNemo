@@ -1,50 +1,145 @@
 import { z } from "zod";
 
-export const SubjectSchema = z.object({
+// Document admission & metadata
+export const DocumentSchema = z.object({
   id: z.string().uuid(),
-  name: z.string().trim().min(1),
-  description: z.string().default(""),
+  filename: z.string(),
+  sha256: z.string(),
+  pageCount: z.number().int().min(1),
+  normalizedCharacterCount: z.number().int().min(0),
+  createdAt: z.string().datetime(),
 });
+export type Document = z.infer<typeof DocumentSchema>;
+
+// Generation Job
+export const JobStateSchema = z.enum([
+  "extracting",
+  "generating",
+  "validating",
+  "ready",
+  "failed",
+  "cancelled",
+]);
+export type JobState = z.infer<typeof JobStateSchema>;
+
+export const GenerationJobSchema = z.object({
+  id: z.string().uuid(),
+  documentId: z.string().uuid(),
+  state: JobStateSchema,
+  questionSetId: z.string().uuid().optional(),
+  errorCode: z.string().optional(),
+  elapsedTimeMs: z.number().int().min(0).optional(),
+  createdAt: z.string().datetime(),
+});
+export type GenerationJob = z.infer<typeof GenerationJobSchema>;
+
+// Evidence, Questions, Topics, QuestionSet
+export const EvidenceSchema = z.object({
+  pageNumber: z.number().int().min(1),
+  chunkId: z.string(),
+  quote: z.string().min(20).max(400),
+});
+export type Evidence = z.infer<typeof EvidenceSchema>;
 
 export const TopicSchema = z.object({
   id: z.string().uuid(),
-  subjectId: z.string().uuid(),
-  title: z.string().trim().min(1),
-  description: z.string().default(""),
+  name: z.string().min(1),
 });
+export type Topic = z.infer<typeof TopicSchema>;
 
-export const StudyContentSchema = z.object({
-  subject: SubjectSchema,
-  topic: TopicSchema,
-  content: z.string().trim().min(1),
-});
+export const QuestionDifficultySchema = z.enum(["easy", "medium", "hard"]);
+export type QuestionDifficulty = z.infer<typeof QuestionDifficultySchema>;
 
-export const ProgressSchema = z.object({
+export const QuestionSchema = z.object({
   id: z.string().uuid(),
   topicId: z.string().uuid(),
-  status: z.enum(["not-started", "in-progress", "completed"]),
-  completedLessons: z.number().int().min(0),
-  updatedAt: z.iso.datetime(),
+  difficulty: QuestionDifficultySchema,
+  prompt: z.string().min(1).max(300),
+  options: z.array(z.string().min(1).max(160)).length(4),
+  answerIndex: z.number().int().min(0).max(3),
+  explanation: z.string().min(1).max(600),
+  evidence: z.array(EvidenceSchema).min(1).max(2),
+});
+export type Question = z.infer<typeof QuestionSchema>;
+
+// AI output structure
+export const AIQuestionOutputSchema = z.object({
+  topicName: z.string().min(1),
+  difficulty: QuestionDifficultySchema,
+  prompt: z.string().min(1).max(300),
+  options: z.array(z.string().min(1).max(160)).length(4),
+  answerIndex: z.number().int().min(0).max(3),
+  explanation: z.string().min(1).max(600),
+  evidence: z.array(EvidenceSchema).min(1).max(2),
 });
 
-export const GeneratedQuestionSchema = z.object({
+export const AIQuestionSetOutputSchema = z.object({
+  topics: z.array(z.object({
+    name: z.string().min(1)
+  })).length(3),
+  questions: z.array(AIQuestionOutputSchema).length(9),
+});
+
+export const QuestionSetSchema = z.object({
   id: z.string().uuid(),
-  prompt: z.string().trim().min(1),
-  options: z.array(z.string().trim().min(1)).min(2),
-  answerIndex: z.number().int().min(0),
-  explanation: z.string().default(""),
-}).refine((question) => question.answerIndex < question.options.length, {
-  message: "answerIndex must refer to an available option",
-  path: ["answerIndex"],
+  documentId: z.string().uuid(),
+  topics: z.array(TopicSchema).length(3),
+  questions: z.array(QuestionSchema).length(9),
+  createdAt: z.string().datetime(),
 });
+export type QuestionSet = z.infer<typeof QuestionSetSchema>;
 
-export const GeneratedQuestionsSchema = z.array(GeneratedQuestionSchema);
-export const GeneratedQuestionResponseSchema = z.object({
-  questions: GeneratedQuestionsSchema,
+// Game state engine
+export const RunStateSchema = z.enum(["active", "completed", "failed"]);
+export type RunState = z.infer<typeof RunStateSchema>;
+
+export const RunSlotSchema = z.object({
+  id: z.string().uuid(),
+  runId: z.string().uuid(),
+  questionId: z.string().uuid(),
+  slotIndex: z.number().int().min(0),
+  encounterType: z.enum(["surface", "twilight", "midnight", "boss"]),
 });
+export type RunSlot = z.infer<typeof RunSlotSchema>;
 
-export type Subject = z.infer<typeof SubjectSchema>;
-export type Topic = z.infer<typeof TopicSchema>;
-export type StudyContent = z.infer<typeof StudyContentSchema>;
-export type Progress = z.infer<typeof ProgressSchema>;
-export type GeneratedQuestion = z.infer<typeof GeneratedQuestionSchema>;
+export const AnswerFeedbackSchema = z.object({
+  isCorrect: z.boolean(),
+  correctAnswerIndex: z.number().int().min(0).max(3),
+  explanation: z.string(),
+  evidence: z.array(EvidenceSchema),
+  playerDamageTaken: z.number().int(),
+  enemyDamageTaken: z.number().int(),
+  xpAwarded: z.number().int(),
+});
+export type AnswerFeedback = z.infer<typeof AnswerFeedbackSchema>;
+
+export const AttemptSchema = z.object({
+  id: z.string().uuid(),
+  runId: z.string().uuid(),
+  slotId: z.string().uuid(),
+  selectedOptionIndex: z.number().int().min(0).max(3),
+  feedback: AnswerFeedbackSchema,
+  createdAt: z.string().datetime(),
+});
+export type Attempt = z.infer<typeof AttemptSchema>;
+
+export const RunSchema = z.object({
+  id: z.string().uuid(),
+  questionSetId: z.string().uuid(),
+  state: RunStateSchema,
+  playerHp: z.number().int().min(0).max(100),
+  currentEncounterHp: z.number().int().min(0).max(100),
+  xp: z.number().int().min(0),
+  combo: z.number().int().min(0),
+  currentSlotIndex: z.number().int().min(0),
+  createdAt: z.string().datetime(),
+});
+export type Run = z.infer<typeof RunSchema>;
+
+// Standard API Error
+export const ApiErrorSchema = z.object({
+  code: z.string(),
+  message: z.string(),
+  retryable: z.boolean(),
+});
+export type ApiError = z.infer<typeof ApiErrorSchema>;

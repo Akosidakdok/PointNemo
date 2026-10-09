@@ -1,7 +1,5 @@
 import {
-  GeneratedQuestionResponseSchema,
-  type GeneratedQuestion,
-  type StudyContent,
+  AIQuestionSetOutputSchema,
 } from "@point-nemo/shared";
 import type { ApiConfig } from "../config.js";
 import { ServiceUnavailableError } from "../errors.js";
@@ -47,7 +45,7 @@ export class OllamaService {
     }
   }
 
-  async generateQuestions(input: StudyContent): Promise<GeneratedQuestion[]> {
+  async generateQuestions(input: string): Promise<any> {
     let response: Response;
     try {
       response = await fetch(`${this.config.ollamaBaseUrl}/api/chat`, {
@@ -63,7 +61,7 @@ export class OllamaService {
               role: "system",
               content: "Create three multiple-choice study questions. Return a JSON object with a questions array. Each question must have id (UUID), prompt, options (at least two strings), answerIndex (zero-based integer), and explanation.",
             },
-            { role: "user", content: JSON.stringify(input) },
+            { role: "user", content: input },
           ],
         }),
       });
@@ -94,6 +92,7 @@ export class OllamaService {
       throw new ServiceUnavailableError("OLLAMA_INVALID_JSON", "Ollama returned malformed JSON; try the request again or select a different model.");
     }
 
-    return GeneratedQuestionResponseSchema.parse(generated).questions;
+    // Temporary parse until Phase 4 completes this fully
+    return AIQuestionSetOutputSchema.parse(generated);
   }
 }
