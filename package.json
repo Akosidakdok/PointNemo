@@ -12,7 +12,8 @@
     "build": "npm run build --workspace=@point-nemo/shared && npm run build --workspace=@point-nemo/api && npm run build --workspace=@point-nemo/web",
     "typecheck": "npm run build --workspace=@point-nemo/shared && npm run typecheck --workspaces --if-present",
     "assets": "node --env-file-if-exists=.env tools/generate-asset.mjs",
-    "test": "node --test"
+    "test": "node --test",
+    "preview:assets": "node tools/preview-assets.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",

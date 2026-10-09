@@ -1,5 +1,7 @@
 # PointNemo — frontend design handoff
 
+> **Prepared asset update:** Use [`assets/prepared/runtime/manifest.json`](assets/prepared/runtime/manifest.json) and its accompanying PNG atlases for gameplay. The [prepared-assets guide](assets/prepared/README.md) includes transparent sprites, aligned anchors, animation sequences, independent water/buoy assets, and a browser preview. The source-art observations below describe the original generated sheets; sprite preparation has now been completed for the prototype bundle.
+
 ## Task and visual direction
 
 Build the PointNemo frontend/PWA to visually match the three existing pixel-art assets listed below. These images are the visual reference for the interface, environment, character, and enemy treatment. Follow the team's chosen framework and gameplay requirements; this handoff specifies presentation and asset integration, not new game mechanics.

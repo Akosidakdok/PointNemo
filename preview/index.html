@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PointNemo • Asset preview</title>
+  <style>
+    :root{color-scheme:dark;font-family:ui-monospace,Consolas,monospace;background:#061426;color:#eaf4fc}
+    *{box-sizing:border-box}body{margin:0;padding:24px;max-width:1500px;margin-inline:auto}
+    h1{font-size:24px;margin:0 0 10px}p{color:#a1b5cc;line-height:1.5}header{margin-bottom:24px}
+    button,select{font:inherit;padding:10px;border:2px solid #426887;background:#0b1e38;color:#eaf4fc}
+    button{cursor:pointer}button:focus-visible,select:focus-visible{outline:3px solid #30d6f2;outline-offset:3px}
+    #controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:16px 0}
+    #grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+    article{border:2px solid #426887;background:#0b1e38;padding:12px;box-shadow:4px 4px #030912}
+    h2{font-size:15px;margin:4px 0 12px;color:#30d6f2}canvas{display:block;width:100%;height:auto;image-rendering:pixelated}
+    small{display:block;color:#a1b5cc;margin-top:12px;min-height:30px;font-size:11px;overflow-wrap:anywhere}
+    #water{width:100%;max-height:420px;object-fit:contain;border:2px solid #426887;margin-bottom:24px}
+    #status{color:#30d6f2}#status.error{color:#ff4853}
+    @media(max-width:500px){body{padding:12px}h1{font-size:20px}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>POINTNEMO / ASSET PREVIEW</h1>
+    <p>Transparent sprites, aligned anchors, swimming loops and ability sequences.</p>
+    <div id="controls">
+      <button id="pause" type="button">Pause</button>
+      <button id="replay" type="button">Replay abilities</button>
+      <label>Background <select id="background"><option value="water">Ocean</option><option value="checker">Checkerboard</option><option value="white">White</option></select></label>
+      <label><input type="checkbox" id="anchors" checked> Show anchors</label>
+    </div>
+    <p id="status" role="status">Loading prepared assets…</p>
+  </header>
+  <canvas id="water" width="960" height="320" aria-label="Mirrored ocean water with one red buoy"></canvas>
+  <main id="grid"></main>
+  <script type="module">
+    import {loadAssetBundle, SpriteAnimation, drawFrame, speciesScale, drawWater} from '/src/assets/sprites.js';
+    const status=document.querySelector('#status');
+    try {
+      const bundle=await loadAssetBundle('/assets/prepared/runtime/manifest.json');
+      const choices=[
+        ['Explorer • down','explorer.swim.down'],['Explorer • left','explorer.swim.left'],
+        ['Explorer • right','explorer.swim.right'],['Explorer • up','explorer.swim.up'],
+        ['Blobfish • overhead','blobfish.swim.down'],['Blobfish • left','blobfish.swim.left'],
+        ['Blobfish • right','blobfish.swim.right'],['Barreleye • swimming','barreleye.swim'],
+        ['Barreleye • focus','barreleye.focus'],['Gulper • swimming','gulper.swim'],
+        ['Gulper • jaw expansion','gulper.expand'],['Goblin • overhead','goblin.swim'],
+        ['Goblin • jaw lunge','goblin.lunge'],['Fringehead • swimming','fringehead.swim'],
+        ['Fringehead • flare','fringehead.flare'],
+      ];
+      const cards=choices.map(([label,name])=>{
+        const article=document.createElement('article');const heading=document.createElement('h2');heading.textContent=label;
+        const canvas=document.createElement('canvas');canvas.width=256;canvas.height=220;canvas.setAttribute('aria-label',label);
+        const info=document.createElement('small');article.append(heading,canvas,info);document.querySelector('#grid').append(article);
+        const player=new SpriteAnimation(bundle,name);const species=name.split('.')[0];
+        return {canvas,info,player,scale:speciesScale(bundle,species,species==='gulper'?140:100)};
+      });
+      // Every environmental asset/variant is visible separately; no animation implied.
+      for(const name of Object.keys(bundle.manifest.aliases)){
+        const article=document.createElement('article');const heading=document.createElement('h2');heading.textContent=name;
+        const canvas=document.createElement('canvas');canvas.width=256;canvas.height=220;canvas.setAttribute('aria-label',name);
+        const info=document.createElement('small');info.textContent='Environment / static variant';article.append(heading,canvas,info);
+        document.querySelector('#grid').append(article);
+        const f=bundle.manifest.frames[bundle.manifest.aliases[name]];
+        cards.push({canvas,info,frame:name,scale:Math.min(140/f.source.width,140/f.source.height)});
+      }
+      status.textContent=`Ready: ${Object.keys(bundle.manifest.frames).length} frames • ${Object.keys(bundle.manifest.animations).length} animations • ${Object.keys(bundle.manifest.atlases).length-1} transparent atlases`;
+      let paused=matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const pause=document.querySelector('#pause');pause.textContent=paused?'Play':'Pause';
+      pause.onclick=()=>{paused=!paused;pause.textContent=paused?'Play':'Pause'};
+      document.querySelector('#replay').onclick=()=>cards.forEach(c=>c.player?.play(c.player.name,{restart:true}));
+      const anchors=document.querySelector('#anchors');const background=document.querySelector('#background');
+      const water=document.querySelector('#water');const wctx=water.getContext('2d');
+      drawWater(wctx,bundle.images.water,water.width,water.height,320);
+      drawFrame(wctx,bundle,'buoy',480,160,speciesScale(bundle,'buoy',130));
+      let previous=performance.now();
+      function tick(now){
+        const dt=Math.min((now-previous)/1000,0.1);previous=now;
+        for(const card of cards){
+          if(!paused)card.player?.update(dt);
+          const ctx=card.canvas.getContext('2d');ctx.clearRect(0,0,256,220);
+          if(background.value==='water')drawWater(ctx,bundle.images.water,256,220,320);
+          else if(background.value==='white'){ctx.fillStyle='#fff';ctx.fillRect(0,0,256,220)}
+          else for(let y=0;y<220;y+=16)for(let x=0;x<256;x+=16){ctx.fillStyle=(x/16+y/16)%2?'#334155':'#64748b';ctx.fillRect(x,y,16,16)}
+          const frame=card.player?.frameName??card.frame;
+          drawFrame(ctx,bundle,frame,128,100,card.scale);
+          if(anchors.checked){ctx.strokeStyle='#ff4853';ctx.beginPath();ctx.moveTo(121,100);ctx.lineTo(135,100);ctx.moveTo(128,93);ctx.lineTo(128,107);ctx.stroke()}
+          if(card.player)card.info.textContent=`${frame}${card.player.finished?' • finished':''}`;
+        }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+      window.assetPreview={bundle,cards};
+    }catch(error){status.textContent=error.message;status.classList.add('error');console.error(error)}
+  </script>
+</body>
+</html>

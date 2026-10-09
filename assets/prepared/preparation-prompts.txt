@@ -1,0 +1,16 @@
+Built-in image generation tool used for all image edits.
+
+EXPLORER BACKGROUND EXTRACTION
+Use case: background-extraction. Edit target: the supplied pixel-art sprite sheet. Remove ONLY the white background and replace it with genuine alpha transparency. Preserve every sprite, its colors, pale internal highlights, dark outlines, details, pose, position, dimensions, spacing, and the layout exactly. Do not redraw, rescale, add, delete or move any sprite. Keep all environmental square tiles opaque inside their square boundaries. Completely transparent empty space between sprites, no checkerboard baked into pixels, no white halo or drop shadow. This is a production sprite atlas cleanup.
+
+BLOBFISH BACKGROUND EXTRACTION
+Use case: background-extraction. Edit target: the supplied pixel-art sprite sheet. Remove ONLY the white background and replace it with genuine alpha transparency. Preserve every sprite, its colors, pale internal highlights, dark outlines, details, pose, position, dimensions, spacing, and the layout exactly. Do not redraw, rescale, add, delete or move any sprite. Keep all environmental square tiles opaque inside their square boundaries. Completely transparent empty space between sprites, no checkerboard baked into pixels, no white halo or drop shadow. This is a production sprite atlas cleanup.
+
+CREATURES BACKGROUND EXTRACTION
+Use case: background-extraction. Edit target: the supplied pixel-art sprite sheet. Remove ONLY the white background and replace it with genuine alpha transparency. Preserve every sprite, its colors, pale internal highlights, dark outlines, details, pose, position, dimensions, spacing, and the layout exactly. Do not redraw, rescale, add, delete or move any sprite. Keep all environmental square tiles opaque inside their square boundaries. Completely transparent empty space between sprites, no checkerboard baked into pixels, no white halo or drop shadow. This is a production sprite atlas cleanup.
+
+WATER SEPARATION
+Use case: precise-object-edit. Edit the supplied dark ocean pixel-art image into a WATER-ONLY game background tile. Remove the central red buoy AND all red glow, reflections and red ripples, filling that area with matching dark indigo/slate-blue water wavelets. Preserve the palette, pixel scale, top-down perspective, sparse wave shapes, and 16-bit style. No objects, land, red pixels, lights, frame, vignette, or text. Make the square water texture seamless on all four edges; specifically keep a narrow uniform dark indigo edge band of the same color on all edges, allowing smooth repetition while preserving interior wavelets. Opaque background.
+
+BUOY EXTRACTION
+Use case: background-extraction. From the supplied ocean game image, extract ONLY the single red navigational buoy with its immediate faint red aura and localized red ripple reflection into a genuine transparent-background sprite. Keep its pixel-art design, dark outline, small tower, bright red signal lamp, circular floating base, top-down RPG perspective, original scale, and red palette. Remove all surrounding blue ocean wavelets. Keep the buoy and compact red glow centered with generous transparent padding; no other objects, text, grid, white background or checkerboard baked into pixels. Crisp pixel edges and stepped red highlights.
