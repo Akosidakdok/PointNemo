@@ -2,19 +2,17 @@ import { OceanBackdrop } from "./OceanBackdrop";
 import { ExplorerHero } from "./ExplorerHero";
 import { ExpeditionStatus } from "./ExpeditionStatus";
 import { AuthPanel } from "./AuthPanel";
-import { type AuthenticatedUser } from "./auth.types";
+import { type LocalExplorer } from "./auth.types";
 
 export interface AuthPageProps {
-  onAuthSuccess: (user: AuthenticatedUser) => void;
-  onGuestAccess: () => void;
+  onContinue: (user: LocalExplorer) => void;
   onOpenSettings: () => void;
   reducedMotion: boolean;
   onToggleReducedMotion: () => void;
 }
 
 export function AuthPage({
-  onAuthSuccess,
-  onGuestAccess,
+  onContinue,
   onOpenSettings,
   reducedMotion,
   onToggleReducedMotion,
@@ -55,7 +53,7 @@ export function AuthPage({
         <header className="auth-title-section">
           <div className="rpg-title-badge">
             <span className="beacon-pixel-dot" aria-hidden="true" />
-            <span>DEEP SEA EDUCATIONAL DESCENT</span>
+            <span>STUDY ON THIS LAPTOP · ONE LOCAL USER</span>
           </div>
 
           <h1 className="rpg-main-title">POINT NEMO</h1>
@@ -73,7 +71,7 @@ export function AuthPage({
 
         {/* Authentication Terminal Panel (Levels 5 - 7) */}
         <section className="auth-panel-wrapper" aria-label="Expedition Identification Terminal">
-          <AuthPanel onSuccess={onAuthSuccess} onGuestAccess={onGuestAccess} />
+          <AuthPanel onSuccess={onContinue} />
         </section>
 
         {/* Bottom Coordinates Flavor */}

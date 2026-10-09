@@ -303,6 +303,48 @@ main { flex: 1; padding: 36px 0 52px; }
 :root[data-theme="dark"] .depth-mark, :root[data-theme="dark"] .boss-visual > span { border-color: rgba(188,224,245,.26); background: rgba(7,27,48,.72); color: #eaf6ff; }
 :root[data-theme="dark"] .choose-button, :root[data-theme="dark"] .pdf-mark, :root[data-theme="dark"] .resume-mark, :root[data-theme="dark"] .badge-mark { background: rgba(220,241,255,.06); }
 :root.theme-transitioning *, :root.theme-transitioning *::before, :root.theme-transitioning *::after { transition: color .42s ease, background-color .42s ease, border-color .42s ease, box-shadow .42s ease, backdrop-filter .42s ease !important; }
+.encounter-overlay { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: clamp(12px, 3vw, 28px); overflow: auto; background: rgba(8, 29, 47, .76); backdrop-filter: blur(12px) saturate(115%); }
+.encounter-overlay[hidden] { display: none; }
+body:has(.encounter-overlay:not([hidden])) { overflow: hidden; }
+.encounter-dialog { width: min(100%, 900px); max-height: calc(100vh - 32px); overflow: auto; padding: clamp(16px, 2.4vw, 25px); border: 1px solid rgba(220, 241, 255, .7); border-radius: 16px; background: linear-gradient(145deg, rgba(250, 254, 255, .96), rgba(228, 242, 251, .96)); color: #18354a; box-shadow: 0 24px 80px rgba(0, 15, 29, .38); animation: battle-arrive .22s ease-out both; }
+.encounter-header { display: flex; justify-content: space-between; align-items: end; gap: 14px; margin-bottom: 16px; }
+.encounter-header .eyebrow { margin-bottom: 5px; }
+.encounter-header h2 { margin: 0; font-size: clamp(22px, 3vw, 30px); letter-spacing: -.035em; }
+.encounter-context { display: grid; gap: 6px; color: #52728a; text-align: right; font: 10px var(--mono); letter-spacing: .06em; }
+.encounter-context b { color: #1d78a8; }
+.battle-layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(190px, .7fr); gap: 12px; }
+.encounter-dialog .combat-scene { min-height: 205px; aspect-ratio: 16 / 8; height: auto; border: 1px solid rgba(91, 151, 186, .28); border-radius: 12px; background: linear-gradient(180deg, #b8dff0 0%, #81b5d0 54%, #417b9b 100%); }
+.combat-scene::after { content: ""; position: absolute; inset: 48% 0 0; pointer-events: none; background: linear-gradient(180deg, transparent, rgba(5, 38, 60, .2)); }
+.combat-scene .pixel-scene { position: absolute; inset: 0; width: 100%; height: 100%; }
+.arena-caption, .arena-enemy { position: absolute; z-index: 1; padding: 5px 8px; border: 1px solid rgba(255,255,255,.48); border-radius: 5px; background: rgba(8, 39, 58, .45); color: #f3fbff; font: 9px var(--mono); letter-spacing: .07em; backdrop-filter: blur(6px); }
+.arena-caption { top: 10px; left: 10px; }
+.arena-enemy { right: 10px; bottom: 10px; }
+.encounter-dialog .health-row { display: grid; grid-template-columns: 1fr; align-content: start; gap: 8px; margin: 0; }
+.encounter-dialog .health-card { padding: 12px; border-color: rgba(91, 151, 186, .24); background: rgba(255,255,255,.55); }
+.health-card > div:first-child { display: flex; justify-content: space-between; gap: 8px; color: #537188; font: 9px var(--mono); }
+.health-card > div:first-child b { color: #193d56; font-size: 11px; }
+.health-card small { display: block; margin-top: 7px; color: #68869b; font: 9px var(--mono); letter-spacing: .05em; }
+.combat-hint { margin: 0; padding: 10px 12px; border: 1px solid rgba(91,151,186,.2); border-radius: 9px; color: #57768a; background: rgba(255,255,255,.36); font-size: 10px; line-height: 1.55; }
+.combat-hint b { color: #1d78a8; font-weight: 600; }
+.encounter-dialog .question-panel { margin-top: 13px; padding: 16px; border-color: rgba(91,151,186,.24); background: rgba(255,255,255,.58); box-shadow: none; }
+.question-panel h3 { max-width: 700px; margin: 12px 0 15px; color: #18354a; font-size: clamp(17px, 2vw, 20px); line-height: 1.4; font-weight: 650; }
+.encounter-dialog .answer-list button { background: rgba(246,251,255,.86); }
+.encounter-dialog .answer-list button:hover:not(:disabled) { box-shadow: 0 0 0 2px rgba(54,140,187,.1); }
+.encounter-dialog .answer-list button:disabled { opacity: .78; }
+.encounter-dialog .answer-list button.answer-correct { border-color: #43a888; background: rgba(221, 247, 237, .9); }
+.encounter-dialog .answer-list button.answer-incorrect { border-color: #d88476; background: rgba(255, 235, 230, .9); }
+.encounter-dialog .feedback { margin-top: 10px; }
+.encounter-dialog .question-footer { margin-top: 13px; }
+:root[data-theme="dark"] .encounter-overlay { background: rgba(1, 11, 21, .82); }
+:root[data-theme="dark"] .encounter-dialog { border-color: rgba(175, 215, 240, .25); background: linear-gradient(145deg, rgba(17, 48, 72, .98), rgba(7, 25, 43, .98)); color: #e9f5fc; box-shadow: 0 24px 80px rgba(0,0,0,.56); }
+:root[data-theme="dark"] .encounter-header h2, :root[data-theme="dark"] .question-panel h3 { color: #e9f5fc; }
+:root[data-theme="dark"] .encounter-context, :root[data-theme="dark"] .health-card > div:first-child, :root[data-theme="dark"] .health-card small, :root[data-theme="dark"] .combat-hint { color: #adc9dc; }
+:root[data-theme="dark"] .encounter-context b, :root[data-theme="dark"] .combat-hint b { color: #8bd2f4; }
+:root[data-theme="dark"] .encounter-dialog .health-card, :root[data-theme="dark"] .combat-hint, :root[data-theme="dark"] .encounter-dialog .question-panel, :root[data-theme="dark"] .encounter-dialog .answer-list button { border-color: rgba(165,210,237,.2); background: rgba(7, 29, 48, .66); }
+:root[data-theme="dark"] .health-card > div:first-child b { color: #e9f5fc; }
+:root[data-theme="dark"] .encounter-dialog .answer-list button.answer-correct { background: rgba(23, 91, 78, .62); }
+:root[data-theme="dark"] .encounter-dialog .answer-list button.answer-incorrect { background: rgba(112, 52, 49, .6); }
+@keyframes battle-arrive { from { opacity: 0; transform: translateY(10px) scale(.99); } to { opacity: 1; transform: none; } }
 @media (max-width: 680px) {
   .app-frame { width: min(100% - 28px, 520px); }
   .flow-nav { margin: 12px -4px 0; padding: 8px; }
@@ -356,6 +398,17 @@ main { flex: 1; padding: 36px 0 52px; }
   .diver-name { gap: 6px; }
   .diver-name i { width: 25px; height: 25px; }
   .diver-name b, .descent-count, .leader-score { font-size: 10px; }
+  .encounter-overlay { place-items: start center; padding: 8px; }
+  .encounter-dialog { max-height: calc(100dvh - 16px); padding: 13px; border-radius: 12px; }
+  .encounter-header { align-items: start; flex-direction: column; gap: 7px; margin-bottom: 11px; }
+  .encounter-context { grid-template-columns: 1fr 1fr; width: 100%; text-align: left; font-size: 9px; }
+  .battle-layout { grid-template-columns: 1fr; gap: 8px; }
+  .encounter-dialog .combat-scene { min-height: 150px; aspect-ratio: 16 / 7; }
+  .encounter-dialog .health-row { grid-template-columns: 1fr 1fr; gap: 7px; }
+  .encounter-dialog .health-card { padding: 9px; }
+  .combat-hint { grid-column: 1 / -1; }
+  .encounter-dialog .question-panel { margin-top: 9px; padding: 12px; }
+  .question-panel h3 { margin: 10px 0 12px; font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }

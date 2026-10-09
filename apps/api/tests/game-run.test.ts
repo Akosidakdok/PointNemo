@@ -42,8 +42,9 @@ function seedQuestionSet(database: SqliteDatabase): SeedData {
   `).run(documentId);
 
   database.prepare(`
-    INSERT INTO question_sets (id, document_id, model_tag, model_digest, settings_hash)
-    VALUES (?, ?, 'qwen2.5:1.5b', 'digest-1', 'settings-1')
+    INSERT INTO question_sets (id, document_id, model_tag, model_digest, settings_hash,
+      extractor_version, prompt_version, schema_version, tokenizer_digest, document_hash)
+    VALUES (?, ?, 'qwen2.5:1.5b', 'digest-1', 'settings-1', 'test-extractor', 'test-prompt', 'test-schema', 'test-tokenizer', 'hash-test')
   `).run(questionSetId, documentId);
 
   const insertTopic = database.prepare(`
@@ -323,6 +324,7 @@ test("boss 8/9 pass and run completion", async () => {
       assert.equal(currentRun.currentSlotIndex, 3);
       assert.equal(currentRun.playerHp, 100); // reset
       assert.equal(currentRun.currentEncounterHp, 100); // reset
+      assert.equal(currentRun.combo, 0);
 
       // Twilight: answer 2 correct, 1 wrong (2/3 -> passes)
       for (let i = 3; i < 6; i++) {
@@ -334,6 +336,7 @@ test("boss 8/9 pass and run completion", async () => {
       assert.equal(currentRun.state, "active");
       assert.equal(currentRun.currentSlotIndex, 6);
       assert.equal(currentRun.playerHp, 100); // reset
+      assert.equal(currentRun.combo, 0);
 
       // Midnight: answer 2 correct, 1 wrong (2/3 -> passes)
       for (let i = 6; i < 9; i++) {
@@ -346,6 +349,7 @@ test("boss 8/9 pass and run completion", async () => {
       assert.equal(currentRun.currentSlotIndex, 9);
       assert.equal(currentRun.playerHp, 100); // reset
       assert.equal(currentRun.currentEncounterHp, 80); // boss starts at 80 HP!
+      assert.equal(currentRun.combo, 0);
 
       // Boss (slots 9..17): answer 8 correct, 1 wrong (8/9 -> passes!)
       let lastSlotId = "";
@@ -359,6 +363,7 @@ test("boss 8/9 pass and run completion", async () => {
 
       assert.equal(currentRun.state, "completed");
       assert.equal(currentRun.currentSlotIndex, 18);
+      assert.equal(currentRun.failureStage, undefined);
       assert.equal(currentRun.currentSlot, undefined);
 
       // Retrying final slot identical answer returns original feedback and completed run
@@ -392,10 +397,15 @@ test("boss 7/9 fail ends run in failed state", async () => {
         const answer = i === 10 || i === 11 ? 1 : 0; // 2 mistakes
         const res = service.submitAnswer(currentRun.id, slot.id, answer);
         currentRun = res.run;
+        if (i === 11) {
+          assert.equal(currentRun.playerHp, 0);
+          assert.equal(currentRun.state, "active", "Boss must present all nine slots despite zero player HP.");
+        }
       }
 
       assert.equal(currentRun.state, "failed");
       assert.equal(currentRun.currentSlotIndex, 18);
+      assert.equal(currentRun.failureStage, "boss");
     } finally {
       db.close();
     }
@@ -435,6 +445,9 @@ test("restart/read persistence from SQLite", async () => {
   await withDatabase(async (databasePath) => {
     let runId: string;
     let slot1Id: string;
+    let firstSlotId: string;
+    let savedBossOrder: string[] | undefined;
+    let savedUpdatedAt: string | undefined;
 
     // First session: start run and answer 1 question
     {
@@ -444,8 +457,11 @@ test("restart/read persistence from SQLite", async () => {
         const service1 = new GameRunService(db1);
         const run1 = service1.createRun(seed.questionSetId);
         runId = run1.id;
+        firstSlotId = run1.currentSlot!.id;
         const res = service1.submitAnswer(runId, run1.currentSlot!.id, 0);
         slot1Id = res.run.currentSlot!.id;
+        savedBossOrder = res.run.bossOrder;
+        savedUpdatedAt = res.run.updatedAt;
         assert.equal(res.run.xp, 10);
         assert.equal(res.run.currentSlotIndex, 1);
       } finally {
@@ -468,6 +484,16 @@ test("restart/read persistence from SQLite", async () => {
         assert.equal(restoredRun.currentSlot?.id, slot1Id);
         assert.equal(restoredRun.attempts?.length, 1);
         assert.equal(restoredRun.attempts?.[0]?.isCorrect, true);
+        assert.equal(restoredRun.documentId !== undefined, true);
+        assert.equal(restoredRun.filename, "test.pdf");
+        assert.equal(restoredRun.slots?.length, 18);
+        assert.deepEqual(restoredRun.bossOrder, savedBossOrder);
+        assert.equal(restoredRun.updatedAt, savedUpdatedAt);
+        assert.equal(restoredRun.attempts?.[0]?.questionId, restoredRun.slots?.[0]?.questionId);
+        assert.equal(restoredRun.attempts?.[0]?.options?.length, 4);
+        const retry = service2.submitAnswer(runId, firstSlotId, 0);
+        assert.deepEqual(retry.run, restoredRun, "Retry after reopening must preserve the complete snapshot.");
+        assert.deepEqual(retry.feedback, restoredRun.latestFeedback);
 
         // Continue playing in new session
         const nextTurn = service2.submitAnswer(runId, slot1Id, 0);
@@ -477,5 +503,96 @@ test("restart/read persistence from SQLite", async () => {
         db2.close();
       }
     }
+  });
+});
+
+for (const [stageIndex, stage] of (["surface", "twilight", "midnight"] as const).entries()) {
+  for (const passes of [true, false]) {
+    test(`${stage}: ${passes ? "2/3 passes" : "1/3 fails"} after all three slots despite zero HP`, async () => {
+      await withDatabase(async (databasePath) => {
+        const db = initializeDatabase(databasePath);
+        try {
+          const seed = seedQuestionSet(db);
+          const service = new GameRunService(db);
+          let run = service.createRun(seed.questionSetId);
+          for (let i = 0; i < stageIndex * 3; i++) {
+            run = service.submitAnswer(run.id, run.currentSlot!.id, 0).run;
+          }
+          for (let i = 0; i < 2; i++) {
+            run = service.submitAnswer(run.id, run.currentSlot!.id, passes ? 0 : 1).run;
+          }
+          assert.equal(run.state, "active");
+          assert.equal(passes ? run.currentEncounterHp : run.playerHp, 0);
+          assert.equal(run.currentSlot?.encounterType, stage);
+          run = service.submitAnswer(run.id, run.currentSlot!.id, passes ? 1 : 0).run;
+          assert.equal(run.state, passes ? "active" : "failed");
+          assert.equal(run.currentSlotIndex, (stageIndex + 1) * 3);
+          assert.equal(run.attempts?.length, (stageIndex + 1) * 3);
+          if (passes) {
+            assert.equal(run.playerHp, 100);
+            assert.equal(run.currentEncounterHp, stage === "midnight" ? 80 : 100);
+            assert.equal(run.combo, 0);
+            assert.equal(run.failureStage, undefined);
+          } else {
+            assert.equal(run.currentSlot, undefined);
+            assert.equal(run.failureStage, stage);
+            const retry = service.submitAnswer(run.id, run.attempts!.at(-1)!.slotId, 0);
+            assert.deepEqual(retry.run, run);
+          }
+        } finally { db.close(); }
+      });
+    });
+  }
+}
+
+test("boss consumes the ninth slot after eight early correct answers reduce enemy HP to zero", async () => {
+  await withDatabase(async (databasePath) => {
+    const db = initializeDatabase(databasePath);
+    try {
+      const service = new GameRunService(db);
+      let run = service.createRun(seedQuestionSet(db).questionSetId);
+      for (let i = 0; i < 17; i++) run = service.submitAnswer(run.id, run.currentSlot!.id, 0).run;
+      assert.equal(run.state, "active");
+      assert.equal(run.currentEncounterHp, 0);
+      assert.equal(run.currentSlotIndex, 17);
+      const finalSlotId = run.currentSlot!.id;
+      run = service.submitAnswer(run.id, finalSlotId, 1).run;
+      assert.equal(run.state, "completed");
+      assert.equal(run.attempts?.length, 18);
+      assert.equal(run.xp, 170);
+      const retry = service.submitAnswer(run.id, finalSlotId, 1);
+      assert.deepEqual(retry.run, run);
+      assert.equal(retry.feedback.isCorrect, false);
+    } finally { db.close(); }
+  });
+});
+
+test("legacy metadata and incompatible game rules cannot start or advance a run", async () => {
+  await withDatabase(async (databasePath) => {
+    const db = initializeDatabase(databasePath);
+    try {
+      const seed = seedQuestionSet(db);
+      const service = new GameRunService(db);
+      const run = service.createRun(seed.questionSetId);
+      db.prepare("UPDATE runs SET rules_version = 'old-rules' WHERE id = ?").run(run.id);
+      assert.throws(() => service.requireCompatibleRun(run.id), { code: "RUN_INCOMPATIBLE" });
+      assert.throws(() => service.submitAnswer(run.id, run.currentSlot!.id, 0), { code: "RUN_INCOMPATIBLE" });
+      db.prepare("UPDATE question_sets SET prompt_version = 'legacy-incompatible' WHERE id = ?").run(seed.questionSetId);
+      assert.throws(() => service.createRun(seed.questionSetId), { code: "QUESTION_SET_INCOMPATIBLE" });
+      assert.equal(service.getRun(run.id).attempts?.length, 0);
+    } finally { db.close(); }
+  });
+});
+
+test("state update failure rolls back both the accepted attempt and score", async () => {
+  await withDatabase(async (databasePath) => {
+    const db = initializeDatabase(databasePath);
+    try {
+      const service = new GameRunService(db);
+      const run = service.createRun(seedQuestionSet(db).questionSetId);
+      db.exec("CREATE TRIGGER reject_run_update BEFORE UPDATE ON runs BEGIN SELECT RAISE(ABORT, 'controlled test failure'); END;");
+      assert.throws(() => service.submitAnswer(run.id, run.currentSlot!.id, 0));
+      assert.deepEqual(service.getRun(run.id), run);
+    } finally { db.close(); }
   });
 });

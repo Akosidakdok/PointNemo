@@ -1,316 +1,247 @@
 import { createHash, randomUUID } from "node:crypto";
-import Database from "better-sqlite3";
 import { ZodError } from "zod";
-import {
-  AIQuestionSetOutputSchema,
-  JobStateSchema,
-  QuestionSetSchema,
-  type AIQuestionSetOutput,
-  type GenerationJob,
-  type QuestionSet,
-} from "@point-nemo/shared";
+import { AIQuestionSetOutputSchema, BackendQuestionSetSchema, InsufficientSourceSchema, JobStateSchema,
+  type AIQuestionSetOutput, type BackendQuestionSet, type GenerationJob, type GenerationMetadata, type LibraryDocument } from "@point-nemo/shared";
 import type { ApiConfig } from "../config.js";
-import { BadRequestError, BusyError, NotFoundError } from "../errors.js";
+import { ApiError, BadRequestError, BusyError, ConflictError, NotFoundError, ServiceUnavailableError } from "../errors.js";
 import type { SqliteDatabase } from "../db.js";
-import { LocalPdfExtractor, type DocumentExtractor, type ExtractedDocument, type UploadedDocument } from "./document-extractor.js";
-import { OllamaService } from "./ollama.js";
+import { admitPdf, LocalPdfExtractor, type DocumentExtractor, type ExtractedDocument, type UploadedDocument } from "./document-extractor.js";
+import { OllamaService, generationMessages } from "./ollama.js";
+import { generationMetadata, isCompatibleMetadata } from "./generation-metadata.js";
+import { checkTokenBudget, localTokenizer, tokenizerStatus, type TokenCounter } from "./token-budget.js";
+import { GameRunService } from "./game-run.js";
 
-interface SourceChunk {
-  pageNumber: number;
-  chunkId: string;
-  text: string;
+interface SourceChunk { pageNumber: number; chunkId: string; text: string }
+interface JobRow { id: string; document_id: string; state: string; question_set_id: string | null; error_code: string | null;
+  error_message: string | null; error_stage: "extracting" | "generating" | "validating" | null; started_at: string; finished_at: string | null;
+  cancel_requested: number; retry_count: number; timings_json: string }
+interface SetRow { id: string; document_id: string; created_at: string; model_tag: string; model_digest: string; settings_hash: string;
+  document_hash: string; extractor_version: string; prompt_version: string; schema_version: string; tokenizer_digest: string; filename: string; pages_json: string; sha256: string }
+
+export function sqliteTimestampToIso(value: string): string {
+  return new Date(value.includes("T") ? value : `${value.replace(" ", "T")}Z`).toISOString();
 }
-
-interface JobRow {
-  id: string;
-  document_id: string;
-  state: string;
-  question_set_id: string | null;
-  error_code: string | null;
-  started_at: string;
-  finished_at: string | null;
-}
-
-interface QuestionSetRow {
-  id: string;
-  document_id: string;
-  created_at: string;
-}
-
-function sqliteTimestampToIso(value: string): string {
-  const normalized = value.includes("T") ? value : `${value.replace(" ", "T")}Z`;
-  return new Date(normalized).toISOString();
-}
-
-function normalizedName(value: string): string {
-  return value.trim().toLocaleLowerCase();
-}
-
+function key(value: string): string { return value.normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase(); }
+function stemKey(value: string): string { return key(value).replace(/[^\p{L}\p{N}\s]/gu, "").trim(); }
 function parseChunks(pagesJson: string): SourceChunk[] {
-  let value: unknown;
-  try {
-    value = JSON.parse(pagesJson);
-  } catch {
-    throw new BadRequestError("INVALID_SOURCE", "Extracted source text is not readable.");
+  const pages: unknown = JSON.parse(pagesJson);
+  if (!Array.isArray(pages) || pages.some((p) => !p || typeof p.pageNumber !== "number" || typeof p.chunkId !== "string" || typeof p.text !== "string")) {
+    throw new BadRequestError("INVALID_SOURCE", "Extracted source pages are invalid.");
   }
-  if (!Array.isArray(value)) {
-    throw new BadRequestError("INVALID_SOURCE", "Extracted source text has an invalid shape.");
-  }
-  return value.map((chunk) => {
-    if (!chunk || typeof chunk !== "object") {
-      throw new BadRequestError("INVALID_SOURCE", "Extracted source text has an invalid chunk.");
-    }
-    const candidate = chunk as Record<string, unknown>;
-    if (
-      typeof candidate.pageNumber !== "number" ||
-      typeof candidate.chunkId !== "string" ||
-      typeof candidate.text !== "string"
-    ) {
-      throw new BadRequestError("INVALID_SOURCE", "Extracted source text is missing page or chunk metadata.");
-    }
-    return {
-      pageNumber: candidate.pageNumber,
-      chunkId: candidate.chunkId,
-      text: candidate.text,
-    };
-  });
+  return pages as SourceChunk[];
 }
 
-function validateGeneratedOutput(output: unknown, pagesJson: string): AIQuestionSetOutput {
+export function validateGeneratedOutput(output: unknown, pagesJson: string): AIQuestionSetOutput {
+  if (InsufficientSourceSchema.safeParse(output).success) throw new BadRequestError("INSUFFICIENT_SOURCE", "The source does not support three distinct topics and nine reliable questions. Export a richer text excerpt.");
   const parsed = AIQuestionSetOutputSchema.parse(output);
-  const pages = parseChunks(pagesJson);
-  const topicNames = new Set<string>();
-  for (const topic of parsed.topics) {
-    const key = normalizedName(topic.name);
-    if (!key || topicNames.has(key)) {
-      throw new BadRequestError("INVALID_MODEL_OUTPUT", "The model returned duplicate or empty topics.");
-    }
-    topicNames.add(key);
-  }
-
-  const coverage = new Set<string>();
+  const pages = parseChunks(pagesJson), topics = new Set(parsed.topics.map((topic) => key(topic.name)));
+  if (topics.size !== 3) throw new BadRequestError("INVALID_MODEL_OUTPUT", "The model returned duplicate topics.");
+  const coverage = new Set<string>(), stems = new Set<string>();
   for (const question of parsed.questions) {
-    const topicKey = normalizedName(question.topicName);
-    if (!topicNames.has(topicKey)) {
-      throw new BadRequestError("INVALID_MODEL_OUTPUT", "A question references a topic outside the generated set.");
-    }
-
-    const coverageKey = `${topicKey}:${question.difficulty}`;
-    if (coverage.has(coverageKey)) {
-      throw new BadRequestError("INVALID_MODEL_OUTPUT", "The model returned duplicate topic and difficulty coverage.");
-    }
-    coverage.add(coverageKey);
-
-    const options = question.options.map((option) => normalizedName(option));
-    if (new Set(options).size !== options.length) {
-      throw new BadRequestError("INVALID_MODEL_OUTPUT", "The model returned duplicate answer options.");
-    }
-
+    const topic = key(question.topicName), coverageKey = `${topic}:${question.difficulty}`, stem = stemKey(question.prompt);
+    if (!topics.has(topic) || coverage.has(coverageKey)) throw new BadRequestError("INVALID_MODEL_OUTPUT", "Every topic needs exactly one easy, medium, and hard question.");
+    if (!stem || stems.has(stem)) throw new BadRequestError("DUPLICATE_QUESTION", "The model returned duplicate question stems.");
+    const uniqueOptions = new Set(question.options.map(key));
+    if (uniqueOptions.size !== 4) throw new BadRequestError("INVALID_MODEL_OUTPUT", `In ${question.topicName} (${question.difficulty}), all four answer options must be distinct.`);
+    coverage.add(coverageKey); stems.add(stem);
     for (const evidence of question.evidence) {
-      const chunk = pages.find((candidate) => candidate.chunkId === evidence.chunkId);
-      if (!chunk || chunk.pageNumber !== evidence.pageNumber || !chunk.text.includes(evidence.quote.trim())) {
-        throw new BadRequestError("SOURCE_EVIDENCE_INVALID", "A generated evidence quote was not found in its source chunk.");
-      }
+      const chunk = pages.find((page) => page.chunkId === evidence.chunkId && page.pageNumber === evidence.pageNumber);
+      const cleanQuote = evidence.quote.normalize("NFC").trim().replace(/\s+/g, " ");
+      if (!chunk || (!chunk.text.includes(evidence.quote) && !chunk.text.includes(cleanQuote))) throw new BadRequestError("SOURCE_EVIDENCE_INVALID", "An evidence quote is not an exact passage in its cited page and chunk of this document.");
     }
   }
-
-  if (coverage.size !== 9 || parsed.topics.some((topic) => !["easy", "medium", "hard"].every((difficulty) => coverage.has(`${normalizedName(topic.name)}:${difficulty}`)))) {
-    throw new BadRequestError("INVALID_MODEL_OUTPUT", "The model did not return one easy, medium, and hard question for each topic.");
-  }
+  if (coverage.size !== 9) throw new BadRequestError("INVALID_MODEL_OUTPUT", "The model returned incomplete topic/difficulty coverage.");
   return parsed;
 }
 
-function sourcePrompt(extracted: ExtractedDocument): string {
-  return parseChunks(extracted.pagesJson)
-    .map((chunk) => `[Page ${chunk.pageNumber} | ${chunk.chunkId}]\n${chunk.text}`)
-    .join("\n\n");
+const repairable = new Set(["INVALID_MODEL_OUTPUT", "OLLAMA_INVALID_JSON", "SOURCE_EVIDENCE_INVALID", "DUPLICATE_QUESTION"]);
+function safeError(error: unknown): { code: string; message: string } {
+  if (error instanceof ZodError) return { code: "INVALID_MODEL_OUTPUT", message: "The model returned invalid question fields, counts, or lengths." };
+  if (error instanceof ApiError) return { code: error.code, message: error.message };
+  return { code: "GENERATION_FAILED", message: "Local generation failed. Check local setup and retry this document." };
+}
+async function abortable<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  signal.throwIfAborted();
+  let abort: (() => void) | undefined;
+  try { return await Promise.race([promise, new Promise<never>((_, reject) => {
+    abort = () => reject(signal.reason); signal.addEventListener("abort", abort, { once: true });
+  })]); } finally { if (abort) signal.removeEventListener("abort", abort); }
 }
 
 export class GenerationJobService {
   private activeJobId: string | null = null;
+  private readonly controllers = new Map<string, AbortController>();
+  private modelDigest = "";
 
-  constructor(
-    private readonly database: SqliteDatabase,
-    private readonly config: ApiConfig,
-    private readonly extractor: DocumentExtractor = new LocalPdfExtractor(),
-    private readonly ollama: OllamaService = new OllamaService(config),
-  ) {}
+  constructor(private readonly database: SqliteDatabase, private readonly config: ApiConfig,
+    private readonly extractor: DocumentExtractor = new LocalPdfExtractor(), private readonly ollama: OllamaService = new OllamaService(config),
+    private readonly tokenCounter?: TokenCounter) {
+    this.database.prepare(`UPDATE generation_jobs SET error_stage = state, state = 'failed', error_code = 'INTERRUPTED_JOB',
+      error_message = 'The app stopped before this job finished. Upload again to retry.', finished_at = ?
+      WHERE state IN ('extracting','generating','validating')`).run(new Date().toISOString());
+  }
 
   async enqueue(file: UploadedDocument): Promise<{ documentId: string; jobId: string }> {
-    if (this.activeJobId) {
-      throw new BusyError("GENERATION_BUSY", "Another document is being processed. Wait for it to finish before uploading again.");
-    }
-
-    const documentId = randomUUID();
-    const jobId = randomUUID();
+    admitPdf(file);
+    if (this.activeJobId) throw new BusyError("GENERATION_BUSY", "Another document is being processed. Cancel it or wait before uploading.");
+    const documentId = randomUUID(), jobId = randomUUID(), createdAt = new Date().toISOString();
+    const hash = createHash("sha256").update(file.buffer).digest("hex");
     this.database.transaction(() => {
-      this.database.prepare(`
-        INSERT INTO documents (id, filename, sha256, page_count, normalized_char_count, pages_json)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(documentId, file.originalName.slice(0, 255), `pending-${documentId}`, 1, 0, "[]");
-      this.database.prepare(`
-        INSERT INTO generation_jobs (id, document_id, state)
-        VALUES (?, ?, 'extracting')
-      `).run(jobId, documentId);
+      this.database.prepare("INSERT INTO documents (id,filename,sha256,page_count,normalized_char_count,pages_json,created_at) VALUES (?,?,?,1,0,'[]',?)")
+        .run(documentId, file.originalName.replace(/^.*[\\/]/, "").slice(0, 255), hash, createdAt);
+      this.database.prepare("INSERT INTO generation_jobs (id,document_id,state,started_at) VALUES (?,?,'extracting',?)").run(jobId, documentId, createdAt);
     })();
-
     this.activeJobId = jobId;
-    void this.run(jobId, documentId, file).finally(() => {
-      if (this.activeJobId === jobId) this.activeJobId = null;
+    const controller = new AbortController(); this.controllers.set(jobId, controller);
+    void this.run(jobId, documentId, file, controller).finally(() => {
+      this.controllers.delete(jobId); if (this.activeJobId === jobId) this.activeJobId = null;
     });
     return { documentId, jobId };
   }
 
   getJob(id: string): GenerationJob {
-    const row = this.database.prepare(`
-      SELECT id, document_id, state, question_set_id, error_code, started_at, finished_at
-      FROM generation_jobs WHERE id = ?
-    `).get(id) as JobRow | undefined;
+    const row = this.database.prepare("SELECT * FROM generation_jobs WHERE id=?").get(id) as JobRow | undefined;
     if (!row) throw new NotFoundError("JOB_NOT_FOUND", "Generation job was not found.");
-
-    const start = new Date(sqliteTimestampToIso(row.started_at)).getTime();
-    const finish = row.finished_at ? new Date(sqliteTimestampToIso(row.finished_at)).getTime() : Date.now();
-    return {
-      id: row.id,
-      documentId: row.document_id,
-      state: JobStateSchema.parse(row.state),
-      questionSetId: row.question_set_id ?? undefined,
-      errorCode: row.error_code ?? undefined,
-      elapsedTimeMs: Math.max(0, finish - start),
-      createdAt: sqliteTimestampToIso(row.started_at),
-    };
+    const start = Date.parse(sqliteTimestampToIso(row.started_at)), finish = row.finished_at ? Date.parse(sqliteTimestampToIso(row.finished_at)) : Date.now();
+    return { id: row.id, documentId: row.document_id, state: JobStateSchema.parse(row.state), questionSetId: row.question_set_id ?? undefined,
+      errorCode: row.error_code ?? undefined, errorMessage: row.error_message ?? undefined, errorStage: row.error_stage ?? undefined,
+      elapsedTimeMs: Math.max(0, finish - start), createdAt: sqliteTimestampToIso(row.started_at), retryCount: row.retry_count, timings: JSON.parse(row.timings_json) };
   }
 
-  getQuestionSet(id: string): QuestionSet {
-    const set = this.database.prepare(`
-      SELECT id, document_id, created_at FROM question_sets WHERE id = ?
-    `).get(id) as QuestionSetRow | undefined;
-    if (!set) throw new NotFoundError("QUESTION_SET_NOT_FOUND", "Question set was not found.");
-
-    const topics = this.database.prepare(`
-      SELECT id, name FROM topics_p0 WHERE question_set_id = ? ORDER BY rowid
-    `).all(id) as Array<{ id: string; name: string }>;
-    const questions = this.database.prepare(`
-      SELECT id, topic_id, difficulty, prompt, options_json, answer_index, explanation, evidence_json
-      FROM questions_p0 WHERE question_set_id = ? ORDER BY rowid
-    `).all(id) as Array<{
-      id: string;
-      topic_id: string;
-      difficulty: "easy" | "medium" | "hard";
-      prompt: string;
-      options_json: string;
-      answer_index: number;
-      explanation: string;
-      evidence_json: string;
-    }>;
-
-    return QuestionSetSchema.parse({
-      id: set.id,
-      documentId: set.document_id,
-      topics,
-      questions: questions.map((question) => ({
-        id: question.id,
-        topicId: question.topic_id,
-        difficulty: question.difficulty,
-        prompt: question.prompt,
-        options: JSON.parse(question.options_json),
-        answerIndex: question.answer_index,
-        explanation: question.explanation,
-        evidence: JSON.parse(question.evidence_json),
-      })),
-      createdAt: sqliteTimestampToIso(set.created_at),
-    });
-  }
-
-  private async run(jobId: string, documentId: string, file: UploadedDocument): Promise<void> {
-    try {
-      const extracted = await this.withJobTimeout(this.extractor.extractText(file));
-      this.database.prepare(`
-        UPDATE documents
-        SET sha256 = ?, page_count = ?, normalized_char_count = ?, pages_json = ?
-        WHERE id = ?
-      `).run(extracted.sha256, extracted.pageCount, extracted.normalizedCharCount, extracted.pagesJson, documentId);
-      this.setJobState(jobId, "generating");
-
-      const output = await this.withJobTimeout(this.ollama.generateQuestions(sourcePrompt(extracted)));
-      this.setJobState(jobId, "validating");
-      const validated = validateGeneratedOutput(output, extracted.pagesJson);
-      const questionSetId = this.persistQuestionSet(documentId, jobId, validated);
-      this.database.prepare(`
-        UPDATE generation_jobs SET state = 'ready', question_set_id = ?, finished_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(questionSetId, jobId);
-    } catch (error) {
-      const errorCode = error instanceof ZodError
-        ? "INVALID_MODEL_OUTPUT"
-        : error instanceof Error && "code" in error && typeof error.code === "string"
-          ? error.code
-          : error instanceof Error && error.message === "JOB_TIMEOUT"
-            ? "JOB_TIMEOUT"
-            : "GENERATION_FAILED";
-      this.database.prepare(`
-        UPDATE generation_jobs SET state = 'failed', error_code = ?, finished_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(errorCode, jobId);
+  cancelJob(id: string): GenerationJob {
+    const job = this.getJob(id);
+    if (["extracting", "generating", "validating"].includes(job.state)) {
+      this.database.prepare("UPDATE generation_jobs SET state='cancelled',cancel_requested=1,finished_at=? WHERE id=? AND state IN ('extracting','generating','validating')")
+        .run(new Date().toISOString(), id);
+      this.controllers.get(id)?.abort(new BadRequestError("JOB_CANCELLED", "Generation was cancelled."));
     }
+    return this.getJob(id);
   }
 
-  private setJobState(jobId: string, state: "extracting" | "generating" | "validating"): void {
-    this.database.prepare("UPDATE generation_jobs SET state = ? WHERE id = ?").run(state, jobId);
-  }
-
-  private persistQuestionSet(documentId: string, jobId: string, output: AIQuestionSetOutput): string {
-    const questionSetId = randomUUID();
-    const topicIds = new Map<string, string>();
-    for (const topic of output.topics) topicIds.set(normalizedName(topic.name), randomUUID());
-    const settingsHash = createHash("sha256").update(JSON.stringify({
-      model: this.config.ollamaModel,
-      context: this.config.ollamaNumCtx,
-      maxOutput: this.config.ollamaMaxOutputTokens,
-    })).digest("hex");
-
+  deleteDocument(id: string): void {
+    const jobs = this.database.prepare("SELECT id FROM generation_jobs WHERE document_id=?").all(id) as Array<{id:string}>;
+    for (const job of jobs) this.cancelJob(job.id);
     this.database.transaction(() => {
-      this.database.prepare(`
-        INSERT INTO question_sets (id, document_id, model_tag, model_digest, settings_hash)
-        VALUES (?, ?, ?, ?, ?)
-      `).run(questionSetId, documentId, this.config.ollamaModel, "unknown", settingsHash);
-      const insertTopic = this.database.prepare(`
-        INSERT INTO topics_p0 (id, question_set_id, name) VALUES (?, ?, ?)
-      `);
-      for (const topic of output.topics) insertTopic.run(topicIds.get(normalizedName(topic.name)), questionSetId, topic.name.trim());
-
-      const insertQuestion = this.database.prepare(`
-        INSERT INTO questions_p0
-          (id, question_set_id, topic_id, difficulty, prompt, options_json, answer_index, explanation, evidence_json)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-      for (const question of output.questions) {
-        insertQuestion.run(
-          randomUUID(),
-          questionSetId,
-          topicIds.get(normalizedName(question.topicName)),
-          question.difficulty,
-          question.prompt.trim(),
-          JSON.stringify(question.options.map((option) => option.trim())),
-          question.answerIndex,
-          question.explanation.trim(),
-          JSON.stringify(question.evidence),
-        );
-      }
-      this.database.prepare("UPDATE generation_jobs SET question_set_id = ? WHERE id = ?").run(questionSetId, jobId);
+      this.database.prepare("DELETE FROM runs WHERE question_set_id IN (SELECT id FROM question_sets WHERE document_id=?)").run(id);
+      this.database.prepare("DELETE FROM question_sets WHERE document_id=?").run(id);
+      this.database.prepare("DELETE FROM documents WHERE id=?").run(id);
     })();
-    return questionSetId;
   }
 
-  private async withJobTimeout<T>(promise: Promise<T>): Promise<T> {
-    let timeoutId: NodeJS.Timeout | undefined;
-    const timeout = new Promise<never>((_, reject) => {
-      timeoutId = setTimeout(() => reject(new Error("JOB_TIMEOUT")), this.config.jobTimeoutMs);
-    });
+  getQuestionSet(id: string): BackendQuestionSet {
+    const row = this.database.prepare("SELECT q.*,d.filename,d.pages_json,d.sha256 FROM question_sets q JOIN documents d ON d.id=q.document_id WHERE q.id=?").get(id) as SetRow | undefined;
+    if (!row) throw new NotFoundError("QUESTION_SET_NOT_FOUND", "Question set was not found.");
+    const topics = this.database.prepare("SELECT id,name FROM topics_p0 WHERE question_set_id=? ORDER BY rowid").all(id);
+    const rows = this.database.prepare("SELECT * FROM questions_p0 WHERE question_set_id=? ORDER BY rowid").all(id) as Array<{id:string;topic_id:string;difficulty:string;prompt:string;options_json:string;answer_index:number;explanation:string;evidence_json:string}>;
+    const metadata: GenerationMetadata = { documentHash: row.document_hash, extractorVersion: row.extractor_version, promptVersion: row.prompt_version,
+      schemaVersion: row.schema_version, tokenizerDigest: row.tokenizer_digest, modelTag: row.model_tag, modelDigest: row.model_digest,
+      settingsHash: row.settings_hash, createdAt: sqliteTimestampToIso(row.created_at) };
+    const tokenizer = tokenizerStatus();
+    return BackendQuestionSetSchema.parse({ id: row.id, documentId: row.document_id, filename: row.filename, topics, extractedPages: parseChunks(row.pages_json), metadata,
+      compatible: metadata.documentHash === row.sha256 && isCompatibleMetadata(metadata, this.config, this.modelDigest, this.tokenCounter?.digest ?? tokenizer.digest ?? ""),
+      questions: rows.map((q) => ({id:q.id,topicId:q.topic_id,difficulty:q.difficulty,prompt:q.prompt,options:JSON.parse(q.options_json),answerIndex:q.answer_index,explanation:q.explanation,evidence:JSON.parse(q.evidence_json)})),
+      createdAt: sqliteTimestampToIso(row.created_at) });
+  }
+
+  async requireCompatibleQuestionSet(id: string): Promise<void> {
+    const status = await this.ollama.getStatus(); this.modelDigest = status.digest ?? this.modelDigest;
+    if (!this.getQuestionSet(id).compatible) throw new ConflictError("INCOMPATIBLE_SAVED_SET", "These saved questions use a different source or runtime version. Upload the document for fresh generation.");
+  }
+
+  async listDocuments(): Promise<LibraryDocument[]> {
+    const status = await this.ollama.getStatus(); this.modelDigest = status.digest ?? this.modelDigest;
+    const documents = this.database.prepare("SELECT * FROM documents ORDER BY created_at DESC,rowid DESC").all() as Array<{id:string;filename:string;sha256:string;page_count:number;normalized_char_count:number;created_at:string}>;
+    const game = new GameRunService(this.database), allRuns = game.listRuns();
+    return documents.map((d) => {
+      const sets = this.database.prepare("SELECT id FROM question_sets WHERE document_id=? ORDER BY created_at DESC,rowid DESC").all(d.id) as Array<{id:string}>;
+      const jobIds = this.database.prepare("SELECT id FROM generation_jobs WHERE document_id=? ORDER BY started_at DESC,rowid DESC").all(d.id) as Array<{id:string}>;
+      const runs = allRuns.filter((run) => run.documentId === d.id), jobs = jobIds.map((j) => this.getJob(j.id));
+      const createdAt = sqliteTimestampToIso(d.created_at), updatedAt = [createdAt, ...runs.map((r) => r.updatedAt ?? r.createdAt), ...jobs.map((j) => new Date(Date.parse(j.createdAt) + (j.elapsedTimeMs ?? 0)).toISOString())].sort().at(-1)!;
+      return { id:d.id,filename:d.filename,sha256:d.sha256,pageCount:d.page_count,normalizedCharacterCount:d.normalized_char_count,createdAt,updatedAt,
+        questionSets:sets.map((s) => this.getQuestionSet(s.id)), runs, jobs };
+    }).sort((a,b) => b.updatedAt.localeCompare(a.updatedAt));
+  }
+
+  private checkActive(jobId: string, signal: AbortSignal, deadline: number): void {
+    signal.throwIfAborted();
+    if (Date.now() >= deadline) throw new ServiceUnavailableError("JOB_TIMEOUT", "The complete generation job exceeded 90 seconds. Export a smaller excerpt and retry.");
+    const row = this.database.prepare("SELECT state,cancel_requested FROM generation_jobs WHERE id=?").get(jobId) as {state:string;cancel_requested:number} | undefined;
+    if (!row || row.cancel_requested || ["cancelled","failed","ready"].includes(row.state)) throw new BadRequestError("JOB_CANCELLED", "Generation was cancelled or deleted.");
+  }
+
+  private async run(jobId: string, documentId: string, file: UploadedDocument, controller: AbortController): Promise<void> {
+    const start = Date.now(), deadline = start + this.config.jobTimeoutMs, signal = controller.signal;
+    const timer = setTimeout(() => controller.abort(new ServiceUnavailableError("JOB_TIMEOUT", "The complete generation job exceeded 90 seconds. Export a smaller excerpt and retry.")), this.config.jobTimeoutMs);
+    const timings: Record<string, number> = {};
+    let stage: "extracting" | "generating" | "validating" = "extracting";
+    let stageStart = start;
+    const transition = (next: typeof stage) => {
+      this.checkActive(jobId, signal, deadline); stage = next; stageStart = Date.now();
+      this.database.prepare("UPDATE generation_jobs SET state=? WHERE id=?").run(next, jobId);
+    };
     try {
-      return await Promise.race([promise, timeout]);
+      const extracted = await abortable(this.extractor.extractText(file, signal), signal);
+      this.checkActive(jobId, signal, deadline); timings.extractionMs = Date.now() - stageStart;
+      // Raw PDFs are never retained. Only normalized pages and the original byte hash remain.
+      const documentHash = createHash("sha256").update(file.buffer).digest("hex"); file.buffer = Buffer.alloc(0);
+      this.database.prepare("UPDATE documents SET page_count=?,normalized_char_count=?,pages_json=? WHERE id=?")
+        .run(extracted.pageCount, extracted.normalizedCharCount, extracted.pagesJson, documentId);
+      transition("generating");
+      const status = await abortable(this.ollama.getStatus(signal), signal);
+      this.checkActive(jobId, signal, deadline);
+      if (!status.available || !status.digest) throw new ServiceUnavailableError("OLLAMA_UNAVAILABLE", status.message);
+      this.modelDigest = status.digest;
+      const counter = this.tokenCounter ?? localTokenizer();
+      const source = parseChunks(extracted.pagesJson).map((p) => `[Page ${p.pageNumber} | ${p.chunkId}]\n${p.text}`).join("\n\n");
+      let feedback: string | undefined, validated: AIQuestionSetOutput | undefined;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        this.checkActive(jobId, signal, deadline);
+        timings[attempt ? "repairInputTokens" : "inputTokens"] = checkTokenBudget(generationMessages(source, feedback), this.config.ollamaMaxInputTokens, counter);
+        const inferenceStart = Date.now();
+        try {
+          const attemptSignal = AbortSignal.any([signal, AbortSignal.timeout(this.config.inferenceTimeoutMs)]);
+          const output = await abortable(this.ollama.generateQuestions(source, { signal: attemptSignal, repairFeedback: feedback }), attemptSignal)
+            .catch((error: unknown) => { if (signal.aborted) throw signal.reason; if (attemptSignal.aborted) throw new ServiceUnavailableError("INFERENCE_TIMEOUT", "Local inference exceeded its 40-second attempt limit."); throw error; });
+          timings.generationMs = (timings.generationMs ?? 0) + Date.now() - inferenceStart;
+          transition("validating"); validated = validateGeneratedOutput(output, extracted.pagesJson);
+          break;
+        } catch (error) {
+          timings.generationMs = timings.generationMs ?? Date.now() - inferenceStart;
+          const safe = safeError(error);
+          if (attempt !== 0 || !repairable.has(safe.code)) throw error;
+          this.checkActive(jobId, signal, deadline);
+          feedback = `${safe.code}: ${safe.message}`;
+          this.database.prepare("UPDATE generation_jobs SET retry_count=1 WHERE id=?").run(jobId);
+          transition("generating");
+        }
+      }
+      if (!validated) throw new BadRequestError("INVALID_MODEL_OUTPUT", "The model did not produce a complete valid set.");
+      this.checkActive(jobId, signal, deadline);
+      const metadata = generationMetadata(this.config, status.digest, counter.digest, documentHash);
+      this.persistQuestionSet(documentId, jobId, validated, metadata, () => this.checkActive(jobId, signal, deadline));
+      timings.validationStorageMs = Date.now() - stageStart;
+    } catch (error) {
+      const safe = safeError(error);
+      this.database.prepare(`UPDATE generation_jobs SET state='failed',error_code=?,error_message=?,error_stage=?,finished_at=?
+        WHERE id=? AND state IN ('extracting','generating','validating')`).run(safe.code, safe.message, stage, new Date().toISOString(), jobId);
     } finally {
-      if (timeoutId) clearTimeout(timeoutId);
+      clearTimeout(timer); file.buffer = Buffer.alloc(0); timings.totalMs = Date.now() - start;
+      try { this.database.prepare("UPDATE generation_jobs SET timings_json=? WHERE id=?").run(JSON.stringify(timings), jobId); } catch { /* App shutdown may already have closed the database. */ }
     }
+  }
+
+  private persistQuestionSet(documentId: string, jobId: string, output: AIQuestionSetOutput, metadata: GenerationMetadata, check: () => void): void {
+    const setId = randomUUID(), topics = new Map(output.topics.map((t) => [key(t.name), randomUUID()]));
+    this.database.transaction(() => {
+      check();
+      this.database.prepare(`INSERT INTO question_sets (id,document_id,model_tag,model_digest,settings_hash,extractor_version,prompt_version,schema_version,tokenizer_digest,document_hash,created_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?)`).run(setId,documentId,metadata.modelTag,metadata.modelDigest,metadata.settingsHash,metadata.extractorVersion,metadata.promptVersion,metadata.schemaVersion,metadata.tokenizerDigest,metadata.documentHash,metadata.createdAt);
+      const insertTopic = this.database.prepare("INSERT INTO topics_p0 (id,question_set_id,name) VALUES (?,?,?)");
+      for (const t of output.topics) insertTopic.run(topics.get(key(t.name)),setId,t.name);
+      const insertQuestion = this.database.prepare(`INSERT INTO questions_p0 (id,question_set_id,topic_id,difficulty,prompt,options_json,answer_index,explanation,evidence_json) VALUES (?,?,?,?,?,?,?,?,?)`);
+      for (const q of output.questions) insertQuestion.run(randomUUID(),setId,topics.get(key(q.topicName)),q.difficulty,q.prompt,JSON.stringify(q.options),q.answerIndex,q.explanation,JSON.stringify(q.evidence));
+      check();
+      this.database.prepare("UPDATE generation_jobs SET state='ready',question_set_id=?,finished_at=? WHERE id=?").run(setId,new Date().toISOString(),jobId);
+    })();
   }
 }

@@ -9,7 +9,7 @@ import {
 import type { SqliteDatabase } from "../db.js";
 import { BadRequestError, ConflictError, NotFoundError } from "../errors.js";
 
-const RULES_VERSION = "1.0";
+export const RULES_VERSION = "1.0";
 
 interface RunRow {
   id: string;
@@ -22,6 +22,10 @@ interface RunRow {
   current_slot_index: number;
   rules_version: string;
   created_at: string;
+  updated_at: string;
+  failure_stage: "surface" | "twilight" | "midnight" | "boss" | null;
+  document_id: string;
+  filename: string;
 }
 
 interface SlotRow {
@@ -56,6 +60,8 @@ interface AttemptRow {
   feedback_json: string;
   prompt: string;
   topic_name: string;
+  question_id: string;
+  options_json: string;
   created_at: string;
 }
 
@@ -78,6 +84,35 @@ function shuffleArray<T>(items: T[]): T[] {
 export class GameRunService {
   constructor(private readonly database: SqliteDatabase) {}
 
+  private requireSetMetadata(questionSetId: string): void {
+    const set = this.database.prepare(`
+      SELECT qs.model_tag, qs.model_digest, qs.settings_hash, qs.extractor_version,
+             qs.prompt_version, qs.schema_version, qs.tokenizer_digest,
+             qs.document_hash, d.sha256 AS source_hash
+      FROM question_sets qs JOIN documents d ON d.id = qs.document_id
+      WHERE qs.id = ?
+    `).get(questionSetId) as Record<string, string> | undefined;
+    if (!set) throw new NotFoundError("QUESTION_SET_NOT_FOUND", "Question set was not found.");
+    if (
+      Object.values(set).some((value) => !value || value === "legacy-incompatible") ||
+      set.document_hash !== set.source_hash || set.model_tag !== "qwen2.5:1.5b"
+    ) {
+      throw new ConflictError("QUESTION_SET_INCOMPATIBLE", "Generate a fresh question set with the current local setup.");
+    }
+  }
+
+  requireCompatibleRun(runId: string): void {
+    const run = this.database.prepare("SELECT state, rules_version, question_set_id FROM runs WHERE id = ?")
+      .get(runId) as Pick<RunRow, "state" | "rules_version" | "question_set_id"> | undefined;
+    if (!run) throw new NotFoundError("RUN_NOT_FOUND", "Run was not found.");
+    if (run.state === "active") {
+      if (run.rules_version !== RULES_VERSION) {
+        throw new ConflictError("RUN_INCOMPATIBLE", "This saved run uses different game rules. Start a new run.");
+      }
+      this.requireSetMetadata(run.question_set_id);
+    }
+  }
+
   listRuns(): RunDetail[] {
     const rows = this.database.prepare(`
       SELECT id FROM runs ORDER BY created_at DESC
@@ -86,12 +121,7 @@ export class GameRunService {
   }
 
   createRun(questionSetId: string): RunDetail {
-    const questionSet = this.database.prepare(`
-      SELECT id FROM question_sets WHERE id = ?
-    `).get(questionSetId);
-    if (!questionSet) {
-      throw new NotFoundError("QUESTION_SET_NOT_FOUND", "Question set was not found.");
-    }
+    this.requireSetMetadata(questionSetId);
 
     const questions = this.database.prepare(`
       SELECT q.id, q.question_set_id, q.topic_id, q.difficulty, q.prompt,
@@ -116,6 +146,13 @@ export class GameRunService {
         "INVALID_QUESTION_SET",
         "Question set must contain exactly 3 easy, 3 medium, and 3 hard questions.",
       );
+    }
+
+    const topicIds = new Set(questions.map((q) => q.topic_id));
+    const coverage = new Set(questions.map((q) => `${q.topic_id}:${q.difficulty}`));
+    const stems = new Set(questions.map((q) => q.prompt.trim().replace(/\s+/g, " ").toLowerCase()));
+    if (topicIds.size !== 3 || coverage.size !== 9 || stems.size !== 9) {
+      throw new BadRequestError("INVALID_QUESTION_SET", "Questions must cover three distinct topics and difficulty pairs.");
     }
 
     // Boss reuses all 9 questions in a shuffled order
@@ -173,9 +210,9 @@ export class GameRunService {
 
     this.database.transaction(() => {
       this.database.prepare(`
-        INSERT INTO runs (id, question_set_id, state, player_hp, current_encounter_hp, xp, combo, current_slot_index, rules_version)
-        VALUES (?, ?, 'active', 100, 100, 0, 0, 0, ?)
-      `).run(runId, questionSetId, RULES_VERSION);
+        INSERT INTO runs (id, question_set_id, state, player_hp, current_encounter_hp, xp, combo, current_slot_index, rules_version, updated_at)
+        VALUES (?, ?, 'active', 100, 100, 0, 0, 0, ?, ?)
+      `).run(runId, questionSetId, RULES_VERSION, new Date().toISOString());
 
       const insertSlot = this.database.prepare(`
         INSERT INTO run_slots (id, run_id, question_id, slot_index, encounter_type)
@@ -192,9 +229,11 @@ export class GameRunService {
 
   getRun(id: string): RunDetail {
     const run = this.database.prepare(`
-      SELECT id, question_set_id, state, player_hp, current_encounter_hp,
-             xp, combo, current_slot_index, rules_version, created_at
-      FROM runs WHERE id = ?
+      SELECT r.id, r.question_set_id, r.state, r.player_hp, r.current_encounter_hp,
+             r.xp, r.combo, r.current_slot_index, r.rules_version, r.created_at,
+             r.updated_at, r.failure_stage, qs.document_id, d.filename
+      FROM runs r JOIN question_sets qs ON qs.id = r.question_set_id
+      JOIN documents d ON d.id = qs.document_id WHERE r.id = ?
     `).get(id) as RunRow | undefined;
 
     if (!run) {
@@ -243,7 +282,7 @@ export class GameRunService {
     const attemptsRows = this.database.prepare(`
       SELECT ra.id, ra.slot_id, rs.slot_index, rs.encounter_type,
              ra.selected_option_index, ra.is_correct, ra.feedback_json,
-             q.prompt, t.name as topic_name, ra.created_at
+             q.id AS question_id, q.options_json, q.prompt, t.name as topic_name, ra.created_at
       FROM run_attempts ra
       JOIN run_slots rs ON ra.slot_id = rs.id
       JOIN questions_p0 q ON rs.question_id = q.id
@@ -255,6 +294,10 @@ export class GameRunService {
     const attempts: RunAttemptDetail[] = attemptsRows.map((row) => ({
       id: row.id,
       slotId: row.slot_id,
+      questionId: row.question_id,
+      options: JSON.parse(row.options_json),
+      prompt: row.prompt,
+      topic: row.topic_name,
       slotIndex: row.slot_index,
       encounterType: row.encounter_type,
       selectedOptionIndex: row.selected_option_index,
@@ -266,10 +309,26 @@ export class GameRunService {
     }));
 
     const latestAttempt = attempts[attempts.length - 1];
+    const slotRows = this.database.prepare(`
+      SELECT id, run_id, question_id, slot_index, encounter_type FROM run_slots
+      WHERE run_id = ? ORDER BY slot_index
+    `).all(id) as SlotRow[];
+    const slots = slotRows.map((slot) => ({
+      id: slot.id, runId: slot.run_id, questionId: slot.question_id,
+      slotIndex: slot.slot_index, encounterType: slot.encounter_type,
+    }));
 
     return RunDetailSchema.parse({
       id: run.id,
       questionSetId: run.question_set_id,
+      documentId: run.document_id,
+      documentName: run.filename,
+      filename: run.filename,
+      updatedAt: sqliteTimestampToIso(run.updated_at || run.created_at),
+      failureStage: run.failure_stage ?? undefined,
+      bossOrder: slots.filter((slot) => slot.encounterType === "boss").map((slot) => slot.questionId),
+      slots,
+      status: run.state,
       state: run.state,
       playerHp: run.player_hp,
       currentEncounterHp: run.current_encounter_hp,
@@ -297,6 +356,15 @@ export class GameRunService {
     ) {
       throw new BadRequestError("INVALID_OPTION_INDEX", "Selected option index must be an integer between 0 and 3.");
     }
+
+    return this.database.transaction(() => this.recordAnswer(runId, slotId, selectedOptionIndex)).immediate();
+  }
+
+  private recordAnswer(
+    runId: string,
+    slotId: string,
+    selectedOptionIndex: number,
+  ): { feedback: AnswerFeedback; run: RunDetail } {
 
     const run = this.database.prepare(`
       SELECT id, question_set_id, state, player_hp, current_encounter_hp,
@@ -338,6 +406,7 @@ export class GameRunService {
     if (run.state !== "active") {
       throw new BadRequestError("RUN_NOT_ACTIVE", "Run is already finished.");
     }
+    this.requireCompatibleRun(runId);
 
     // Check slot ordering
     if (slot.slot_index !== run.current_slot_index) {
@@ -377,13 +446,13 @@ export class GameRunService {
     let nextPlayerHp = Math.max(0, run.player_hp - playerDamageTaken);
     let nextEncounterHp = Math.max(0, run.current_encounter_hp - enemyDamageTaken);
     const nextXp = run.xp + xpAwarded;
-    const nextCombo = isCorrect ? run.combo + 1 : 0;
+    let nextCombo = isCorrect ? run.combo + 1 : 0;
     const nextSlotIndex = run.current_slot_index + 1;
     let nextState: "active" | "completed" | "failed" = "active";
 
     const attemptId = randomUUID();
 
-    this.database.transaction(() => {
+    {
       // Insert attempt
       this.database.prepare(`
         INSERT INTO run_attempts (id, run_id, slot_id, selected_option_index, is_correct, feedback_json)
@@ -398,6 +467,7 @@ export class GameRunService {
           // Pass Surface -> advance to Twilight (reset HP and combo)
           nextPlayerHp = 100;
           nextEncounterHp = 100;
+          nextCombo = 0;
           nextState = "active";
         } else {
           nextState = "failed";
@@ -409,6 +479,7 @@ export class GameRunService {
           // Pass Twilight -> advance to Midnight (reset HP and combo)
           nextPlayerHp = 100;
           nextEncounterHp = 100;
+          nextCombo = 0;
           nextState = "active";
         } else {
           nextState = "failed";
@@ -420,6 +491,7 @@ export class GameRunService {
           // Pass Midnight -> advance to Boss (starting HP 80, player HP 100)
           nextPlayerHp = 100;
           nextEncounterHp = 80;
+          nextCombo = 0;
           nextState = "active";
         } else {
           nextState = "failed";
@@ -437,10 +509,11 @@ export class GameRunService {
 
       this.database.prepare(`
         UPDATE runs
-        SET state = ?, player_hp = ?, current_encounter_hp = ?, xp = ?, combo = ?, current_slot_index = ?
+        SET state = ?, player_hp = ?, current_encounter_hp = ?, xp = ?, combo = ?, current_slot_index = ?, updated_at = ?, failure_stage = ?
         WHERE id = ?
-      `).run(nextState, nextPlayerHp, nextEncounterHp, nextXp, nextCombo, nextSlotIndex, runId);
-    })();
+      `).run(nextState, nextPlayerHp, nextEncounterHp, nextXp, nextCombo, nextSlotIndex,
+        new Date().toISOString(), nextState === "failed" ? slot.encounter_type : null, runId);
+    }
 
     return {
       feedback,

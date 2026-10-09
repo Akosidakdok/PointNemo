@@ -1,108 +1,148 @@
-%PDF-1.3
-%ˇˇˇˇ
-7 0 obj
-<<
-/Type /Page
-/Parent 1 0 R
-/MediaBox [0 0 612 792]
-/Contents 5 0 R
-/Resources 6 0 R
-/UserUnit 1
->>
-endobj
-6 0 obj
-<<
-/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
-/Font <<
-/F1 8 0 R
->>
-/ColorSpace <<
->>
->>
-endobj
-5 0 obj
-<<
-/Length 880
-/Filter /FlateDecode
->>
-stream
-xú≠Vªé‰8Ã˚+Ù„ïH™h‹ó0Ÿ‚Ç?≤ˆˇìI€›nÔ,∆áf∫≠∂D≤XUTI9ÂÙRRN⁄(çﬂo?nÂ¥ˆım],I)°iW•∑Ô∑/ñdﬂñ€∑WôQUTáTrz≈¢4§óR”+ﬁ—0C)¥bÜ†`B≈¨ˆmTR˛'Ω˝u˚„Ìˆ˜g@Î˝sUÜT(bg40e.¸ÔêjNØî•’LY
-¢Ñ™¨â]_k◊7úÍ/ò∑(8D°åÊˇe†i—äjÎêà†°*QÜƒ+Ü±Àﬁä5µ∑ÿ˜.œ˝yöáÑΩ|ã•†lâQff@h*÷€C#Â´Äuô‰m—Î2Fm«“ÜÙBñ‰Ñ¢¢ÜÉX=é‘˝µ@ƒ~µnMvîUµj≈CôlıÜíatõ≠.‹òhÊ¬‡ﬁ>˝ØùÄ¡ò¬ƒ˝ˇı]©'≠83rcÌTﬂºß˝ﬁÌﬁôÙX˚!Ôg¶Eˆ(ˆº’„Á•‰∏ &K§Ië≤⁄y<$W—˚˙i‹ÚS¡æ”}á"ù˚‚Óòœ#’]Âì:eÙ`"su
-â`q®Ω2áWQÆ¨MŸ5QªöîRú≤EU± ÉÇY£7$öŸ;…Õ\&k´7ºÄ÷Êånáú±ÊºJbDª∑íÚÅZìf;a€9‘Çà*X~G≥´‘æ≥N.Åﬁ™•—5;5WIÖ!ÀÂhóÓ'Ü√§∫¯IançÒ¸i{Ùb@±X¨"J^√ﬁ≠ÃùjrëÓXòÙÀÑﬁΩ‹√HÙ•ﬁ›”ãªÆí¢]—O©ÑT“W©R/õπ„|fˇzö´Æ˜Yuâ—Û>ÒzÎL§∞Á˜§óÕﬁº˚5Œ4aåÉœèÕz/qŸæ·}∑ƒ`%¶}‡Ã1—vÕıøB˙÷	üQı0/ùµ#C©jH‚˛ºaa+'ÜØ7ë∏;hvx.hDY±o˚∞“ûÅ}ò0!–ìëMà®˝vﬁﬁ‰uÙW∏®Æ„•µ´'˛∫≤¶Îıqr´≠áU∏rç~2…xBhŸrå:v#æﬂ∑ÿ1Û4πZEq=íW>4aq«=r>ì√b €EÒ*(˙”Ñu«ˆÀ¶ÕÆh|\≥"‚âØFÔ5C>ò≈?\ì&
-endstream
-endobj
-10 0 obj
-(PDFKit)
-endobj
-11 0 obj
-(PDFKit)
-endobj
-12 0 obj
-(D:20261009152820Z)
-endobj
-9 0 obj
-<<
-/Producer 10 0 R
-/Creator 11 0 R
-/CreationDate 12 0 R
->>
-endobj
-8 0 obj
-<<
-/Type /Font
-/BaseFont /Helvetica
-/Subtype /Type1
-/Encoding /WinAnsiEncoding
->>
-endobj
-4 0 obj
-<<
->>
-endobj
-3 0 obj
-<<
-/Type /Catalog
-/Pages 1 0 R
-/Names 2 0 R
->>
-endobj
+%PDF-1.4
 1 0 obj
-<<
-/Type /Pages
-/Count 1
-/Kids [7 0 R]
->>
+<< /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<<
-/Dests <<
-  /Names [
-]
->>
->>
+<< /Type /Pages /Kids [4 0 R 6 0 R 8 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 753 >>
+stream
+BT
+/F1 16 Tf
+1 0 0 1 54 738 Tm
+(Topic 1: IP Addressing) Tj
+/F1 12 Tf
+18 TL
+1 0 0 1 54 706 Tm
+(An IP address identifies a network interface and helps routers) Tj
+T*
+(direct packets to a destination. IPv4 uses 32 bits, typically) Tj
+T*
+(formatted as four decimal numbers \(e.g., 192.168.1.1\). IPv6 uses 128) Tj
+T*
+(bits, represented in hexadecimal.) Tj
+T*
+() Tj
+T*
+(Each IPv4 decimal number represents an 8-bit octet and ranges from 0) Tj
+T*
+(to 255. The four octets together account for the 32 bits in an IPv4) Tj
+T*
+(address.) Tj
+T*
+() Tj
+T*
+(A router examines the destination IP address when choosing where to) Tj
+T*
+(forward a packet. An address tells the network where to deliver) Tj
+T*
+(data; it does not describe the contents of that data.) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 754 >>
+stream
+BT
+/F1 16 Tf
+1 0 0 1 54 738 Tm
+(Topic 2: DNS) Tj
+/F1 12 Tf
+18 TL
+1 0 0 1 54 706 Tm
+(DNS translates human-readable domain names into IP addresses. For) Tj
+T*
+(example, a fictional lookup for study.example can return 192.0.2.25) Tj
+T*
+(to the client.) Tj
+T*
+() Tj
+T*
+(A DNS resolver receives a name lookup from a client and obtains the) Tj
+T*
+(requested record. An A record contains an IPv4 address. An AAAA) Tj
+T*
+(record contains an IPv6 address.) Tj
+T*
+() Tj
+T*
+(A DNS cache keeps a previous lookup result for the record's time to) Tj
+T*
+(live \(TTL\). Reusing an unexpired cached answer avoids another) Tj
+T*
+(lookup. Once that lifetime expires, the resolver must obtain a) Tj
+T*
+(current answer rather than treating the expired entry as fresh.) Tj
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 9 0 R >>
+endobj
+9 0 obj
+<< /Length 839 >>
+stream
+BT
+/F1 16 Tf
+1 0 0 1 54 738 Tm
+(Topic 3: HTTP) Tj
+/F1 12 Tf
+18 TL
+1 0 0 1 54 706 Tm
+(HTTP is an application-layer protocol used to exchange requests and) Tj
+T*
+(responses. In its client-server model, a client sends a request and) Tj
+T*
+(a server returns a response.) Tj
+T*
+() Tj
+T*
+(A GET request asks for a representation of a resource. In this) Tj
+T*
+(synthetic example, GET /notes requests the study notes stored at the) Tj
+T*
+(/notes path. A POST request submits data to a resource for) Tj
+T*
+(processing.) Tj
+T*
+() Tj
+T*
+(An HTTP response includes a status code and may include a body.) Tj
+T*
+(Status code 200 means the request succeeded. Status code 404 means) Tj
+T*
+(the requested resource was not found. The client can use the status) Tj
+T*
+(code to distinguish a successful /notes response from a missing) Tj
+T*
+(resource.) Tj
+ET
+endstream
 endobj
 xref
-0 13
+0 10
 0000000000 65535 f 
-0000001531 00000 n 
-0000001588 00000 n 
-0000001469 00000 n 
-0000001448 00000 n 
-0000000238 00000 n 
-0000000131 00000 n 
-0000000015 00000 n 
-0000001351 00000 n 
-0000001276 00000 n 
-0000001190 00000 n 
-0000001215 00000 n 
-0000001240 00000 n 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000127 00000 n 
+0000000222 00000 n 
+0000000348 00000 n 
+0000001151 00000 n 
+0000001277 00000 n 
+0000002081 00000 n 
+0000002207 00000 n 
 trailer
-<<
-/Size 13
-/Root 3 0 R
-/Info 9 0 R
-/ID [<905f54133b999d85ebfbe8c870be24d7> <905f54133b999d85ebfbe8c870be24d7>]
->>
+<< /Size 10 /Root 1 0 R >>
 startxref
-1635
+3096
 %%EOF

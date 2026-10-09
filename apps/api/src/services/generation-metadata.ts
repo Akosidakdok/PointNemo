@@ -1,0 +1,25 @@
+import { createHash } from "node:crypto";
+import { createRequire } from "node:module";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import type { GenerationMetadata } from "@point-nemo/shared";
+import type { ApiConfig } from "../config.js";
+import { PROMPT_VERSION, SCHEMA_VERSION } from "./ollama.js";
+
+const require = createRequire(import.meta.url);
+const parserPackage = JSON.parse(readFileSync(resolve(dirname(require.resolve("pdf-parse")), "../../../package.json"), "utf8")) as {version:string};
+export const EXTRACTOR_VERSION = `pdf-parse@${parserPackage.version}/point-nemo-worker-v2`;
+export function settingsHash(config: ApiConfig): string {
+  return createHash("sha256").update(JSON.stringify({ model: config.ollamaModel, num_ctx: config.ollamaNumCtx,
+    input: config.ollamaMaxInputTokens, num_predict: config.ollamaMaxOutputTokens, reserved: 1024,
+    temperature: 0, seed: 0, raw: true, inferenceTimeoutMs: config.inferenceTimeoutMs, jobTimeoutMs: config.jobTimeoutMs,
+  })).digest("hex");
+}
+export function generationMetadata(config: ApiConfig, modelDigest: string, tokenizerDigest: string, documentHash: string, createdAt = new Date().toISOString()): GenerationMetadata {
+  return { documentHash, extractorVersion: EXTRACTOR_VERSION, promptVersion: PROMPT_VERSION, schemaVersion: SCHEMA_VERSION,
+    tokenizerDigest, modelTag: config.ollamaModel, modelDigest, settingsHash: settingsHash(config), createdAt };
+}
+export function isCompatibleMetadata(metadata: GenerationMetadata, config: ApiConfig, modelDigest: string, tokenizerDigest: string): boolean {
+  const expected = generationMetadata(config, modelDigest, tokenizerDigest, metadata.documentHash, metadata.createdAt);
+  return Boolean(modelDigest && tokenizerDigest && metadata.documentHash && Object.entries(expected).every(([key, value]) => metadata[key as keyof GenerationMetadata] === value));
+}
