@@ -1,272 +1,139 @@
-# PointNemo Web App — Product Flow Handoff
+# Point Nemo — Hackathon MVP Web App Flow
 
-**Audience:** Product, UX/UI, frontend, backend, and local AI teams  
-**Status:** Proposed end-to-end product flow; current implementation status is at the end  
-**Product principle:** A learner adds trusted course material, PointNemo turns it into source-grounded study activities locally, and progress through those activities advances an undersea expedition.
+**Audience:** Product, UX, frontend, backend, QA, and local AI teams
+**Scope:** Strict single-device hackathon MVP, aligned to `point-nemo-masterplan.md`
+**Product promise:** Turn one short English PDF into a source-grounded, replayable ocean descent using local processing and local storage.
 
-## 1. Product decisions for the first release
+## MVP boundaries
 
-- PointNemo is a local-first study app. Learner material is stored on the device and sent only to the configured local Ollama service for AI processing. Do not imply cloud backup or cross-device sync.
-- The experience starts with **Sign up** or **Log in**. For the first local release, these actions create or select a device-local learner profile. Do not collect email/password or promise account recovery until a hosted identity provider is chosen.
-- A lesson is the central unit of work. A lesson groups its source materials, extracted content, generated study set, map destination, learning activity history, and mastery progress.
-- AI output stays a draft until it passes validation and the learner approves it. A passing JSON schema alone does not establish factual accuracy.
-- Lessons are selectable from the map when they are ready. Course order can suggest a route; it does not block a learner from choosing another ready lesson by default.
+- One learner on one laptop. No sign-up, log-in, profile switching, or account recovery.
+- One admitted PDF per generation run. No cloud upload, cloud inference, cloud sync, or multi-device service.
+- Runtime inference uses local Ollama with `qwen2.5:1.5b`. After setup and model download, the study flow works without internet access.
+- Persist validated source material, generated questions, attempts, and run progression in local SQLite. The source PDF itself is handled in memory during extraction and is not retained by default.
+- The only study experience in scope is the three-zone descent followed by its boss review. Expedition maps, standalone review or flashcard modes, leaderboards, and broad dashboard routing are deferred.
 
-## 2. Primary navigation
-
-| Destination | Purpose | Main action |
-| --- | --- | --- |
-| Dashboard (Home) | Resume the expedition and surface the next useful study action | Start Challenge, continue a lesson, or review due cards |
-| Lessons | Lesson library and source-material workspace | Create a lesson, import material, inspect AI processing, open a lesson |
-| Map | Choose a ready lesson and see expedition progress | Open a lesson node |
-| Review | Recall practice across lessons, starting with due or missed material | Start a short review session |
-| Flash Cards | Focused card-by-card practice | Reveal, rate recall, and schedule the next review |
-| Stats | See learning progress as expedition/player attributes and compare within a cohort | Inspect mastery, consistency, route progress, or leaderboard |
-
-Keep the same destinations on desktop and mobile. On narrow screens, use a compact bottom navigation for Dashboard, Lessons, Map, Review, and Stats; place Flash Cards inside Review or expose it as a clear mode selector there. Account/profile and settings remain accessible from the header.
-
-## 3. End-to-end learner journey
+## Linear user journey
 
 ```mermaid
-flowchart TD
-    A[Sign up or log in] --> B[Dashboard: expedition overview]
-    B --> C[Lessons: library]
-    B --> X[Start Challenge]
-    X --> Y{Ready lesson available?}
-    Y -- Yes --> Z[Open recommended lesson challenge]
-    Y -- No --> D
-    Z --> O
-    C --> D[Create lesson and add reference material]
-    D --> E[Validate file and extract text locally]
-    E --> F[Local AI drafts lesson study set]
-    F --> G{Assurance gates pass?}
-    G -- No --> H[Show issue, retry or edit source]
-    H --> E
-    G -- Yes --> I[Preview and approve generated content]
-    I --> J[Publish lesson to library and map]
-    J --> K[Choose lesson on expedition map]
-    K --> L[Study lesson]
-    L --> M[Review quiz]
-    L --> N[Flash Cards]
-    M --> O[Update mastery and schedule review]
-    N --> O
-    O --> P[Update player stats and route]
-    P --> B
-    P -. optional .-> Q[View cohort leaderboard]
-    Q --> B
+flowchart LR
+    A[1. Local library] --> B[Choose one English text-based PDF]
+    B --> C{File within limits and readable?}
+    C -- No --> D[Explain limit or extraction issue]
+    D --> A
+    C -- Yes --> E[2. Sonar: Extraction]
+    E --> F[Sonar: Generation with local Ollama]
+    F --> G[Sonar: Validation]
+    G --> H{Exactly 9 questions valid and source-grounded?}
+    H -- No --> I[Show specific error and bounded retry]
+    I --> A
+    H -- Yes --> J[3. Surface: Clownfish, 3 Easy]
+    J -->|2 of 3 correct| K[Twilight: Anglerfish, 3 Medium]
+    K -->|2 of 3 correct| L[Midnight: Giant Squid, 3 Hard]
+    L -->|2 of 3 correct| M[4. Point Nemo: Megalodon, shuffled 9-question review]
+    J -->|Fail| N[5. Results: mistakes, save, retry]
+    K -->|Fail| N
+    L -->|Fail| N
+    M -->|8 of 9 correct| O[Descent Complete badge]
+    M -->|Fail| N
+    O --> P[Save result and progression to local SQLite]
+    N --> P
 ```
 
-### Step 1 — Sign up or log in
+### 1. Library & Document Upload
 
-1. Show **Create profile** and **Log in** entry points.
-2. For the local release, create a device-local profile with a display name and optional avatar. Logging in selects an existing profile on that device; profile unlock protection can be added without making it a cloud account.
-3. Explain that the profile and study data live on this device. Provide a clear profile switch and local data export/delete controls in settings.
-4. After profile selection, open the Dashboard. A new profile enters the empty state with one action: **Create your first lesson**.
+The app opens directly to a local library screen. There are no account screens or general-purpose dashboard. The primary action is **Upload PDF**; the library also lists the learner's saved documents, generated question sets, active run, and past attempts.
 
-### Dashboard — quick access and Start Challenge
+Accept one English, text-based PDF per run with these strict limits:
 
-The Dashboard is the default landing page after login and the return point after study sessions. It answers three questions immediately: what can I continue, what is ready to practice, and what is my next expedition step?
-
-Show these quick-access items near the top:
-
-- **Continue lesson:** reopen the last active lesson at its saved position.
-- **Review due:** start a short Review session from due or previously missed questions.
-- **Flash Cards due:** open the due-card queue.
-- **Add material:** open the Lessons library with the import action ready.
-- **Open map:** browse ready lessons and route progress.
-
-Feature one **Next expedition** card with the recommended ready lesson, its mastery/readiness, and a prominent **Start Challenge** button. Start Challenge launches a short, lesson-specific challenge session and follows this routing:
-
-1. If a last-active lesson is ready, open its challenge directly.
-2. Otherwise, if ready lessons exist, show a compact lesson picker with the recommended lesson selected; choosing a lesson opens its challenge.
-3. If no lesson is ready, open Lessons and start the first-material flow. Explain that a lesson becomes challengeable after its study set passes the assurance gates and is approved.
-
-The challenge uses approved lesson questions, gives answer feedback with source references, and updates attempts/mastery on completion. Offer **Continue lesson**, **Try another challenge**, and **Return to Dashboard** on the result view. Do not send a learner into a failed/in-progress generation job from this button.
-
-### Step 2 — Lessons library
-
-Lessons is both the course library and the place to manage source materials. Organize it as:
-
-```text
-Library
-  Subject / course
-    Lesson
-      Reference materials
-      Extracted source text
-      Generated study set
-      Learning activity and mastery
-```
-
-Each lesson card shows its title, subject, material count, processing/readiness state, mastery, and next action. The lesson detail page has these sections:
-
-- **Overview:** learning goals, estimated duration, readiness, and progress.
-- **Materials:** imported files, extraction state, source locations, and remove/replace actions.
-- **Study set:** AI-generated notes, key concepts, questions, and flash cards. Each generated item links back to its source material or excerpt when available.
-- **Practice:** launch Review or Flash Cards for this lesson.
-- **Progress:** attempts, topics to revisit, and mastery history.
-
-Creating a lesson requires a title and subject. The learner can add one or more supported files, or create the lesson shell first and import material later. Keep the original source file locally and show its filename, type, and import date.
-
-### Step 3 — Import and process materials
-
-1. The learner chooses a file from the device and assigns it to a lesson.
-2. Validate file type and size before processing. The first supported formats are PDF, DOCX, and PPTX; the UI lists accepted formats and explains any import failure in plain language.
-3. Store the file locally, extract text locally, and retain page/slide/section locations where the parser provides them.
-4. Show a processing timeline: **File checked → Text extracted → Source reviewed → Study set drafted → Assurance checks → Ready for review**.
-5. Run the configured Ollama model against extracted lesson content only. Show the selected model, progress, and cancellation action. An unavailable model does not block the rest of the app; explain how to restart processing after Ollama is available.
-
-### Step 4 — Local AI assurance gate
-
-The AI pipeline creates draft notes, key concepts, review questions, and flash cards. Content remains unpublished until every required gate passes:
-
-| Gate | Requirement | Failure behavior |
-| --- | --- | --- |
-| File gate | Allowed type, size within configured limit, readable file | Reject the file and explain the allowed formats or recovery step |
-| Extraction gate | Nonempty extracted text with usable source locations where possible | Keep the original file, mark extraction failed, let the learner retry or replace it |
-| Scope gate | Prompt contains only this lesson's extracted material and generation instructions | Stop the job; do not include other lessons or hidden app data |
-| Structure gate | Generated response matches shared schemas; answer indexes and card fields are valid | Reject malformed output and allow a bounded retry |
-| Source gate | Each factual item has a source excerpt or location, or is clearly marked as an unsupported draft | Hold unsupported items for edit/removal; do not label them source-grounded |
-| Quality gate | Questions have one defensible answer, plausible distractors, readable wording, and no duplicates | Flag questionable items for learner review; allow edit, regenerate, or delete |
-| Approval gate | Learner previews and approves the study set | Keep it in draft; do not expose it to the map or review queue |
-
-Never silently repair generated facts. Keep generation metadata and validation results with the draft. The learner can edit, remove, or regenerate individual items. A failed job must preserve already-imported material and explain whether retrying may replace or duplicate a draft.
-
-### Step 5 — Publish the lesson
-
-After approval, publish the lesson as **Ready**. Create or unlock its map destination and make its approved study set available to Study, Review, and Flash Cards. The learner may return to Materials to add another file; changed source content creates a new draft version and does not silently replace an approved study set.
-
-Lesson states:
-
-| State | Meaning | Available actions |
-| --- | --- | --- |
-| Empty | Lesson has no source material | Add material or edit lesson details |
-| Importing | File validation or extraction is running | Cancel, view progress |
-| Needs attention | Import, extraction, model, or assurance gate failed | Read issue, retry, replace source, or edit draft |
-| Draft ready | Generated set passed automatic gates but awaits learner review | Preview, edit, remove, approve |
-| Ready | Learner approved the study set | Study, open map node, review, flash cards |
-| Updating | New source material or generation version is being prepared | Continue using the last approved set; inspect the new draft |
-
-### Step 6 — Map and lesson study
-
-The Map presents one node per ready lesson, grouped by course/subject and colored by progress. A learner selects a node to see its goals, estimated time, mastery, and **Start lesson** action. The first release allows choosing any ready lesson; use visual route suggestions for course order rather than hard locks.
-
-Opening a lesson enters Study mode:
-
-1. Show the learning goal and concise source-grounded lesson notes.
-2. Let the learner expand concept explanations and open their source excerpts.
-3. Offer **Review this lesson**, **Study flash cards**, and **Return to map** at clear stopping points.
-4. Save activity progress locally so leaving and returning does not lose the lesson position.
-
-The expedition theme frames progress and feedback. It must not obscure the source material, answer feedback, or navigation.
-
-### Step 7 — Review mode
-
-Review is a short question session across one lesson or the whole library. Default to due review items and concepts previously missed; let the learner choose a lesson and session length. After each answer, show correctness, a concise explanation, and the linked source excerpt. At the end, show score, concepts to revisit, and a one-click route to those flash cards or lesson sections.
-
-Record each attempt with question/card ID, selected answer or recall rating, correctness, lesson ID, and timestamp. Do not count opening a card as mastery.
-
-### Step 8 — Flash Cards mode
-
-Flash Cards supports a lesson-specific session and a due-card queue across lessons:
-
-1. Show one prompt at a time.
-2. Let the learner reveal the answer and source reference.
-3. Ask the learner to rate recall (for example: **Again**, **Hard**, **Good**, **Easy**).
-4. Schedule the next review from that rating and prior attempts.
-5. End with cards due again, cards learned for now, and a route back to the lesson.
-
-Cards stay linked to the source material. Editing a source or card creates a revised item; preserve prior attempts for history and recalculate future scheduling only for the revised card.
-
-### Step 9 — Player stats and progress
-
-Stats translate real learning signals into the expedition theme. Use explicit labels so learners understand what each number measures.
-
-| Player-facing stat | Actual measure |
+| Admission rule | MVP limit |
 | --- | --- |
-| Expedition depth | Number of approved lessons studied, with current lesson shown separately |
-| Knowledge / mastery | Per-lesson performance across recent review attempts, weighted toward repeated recall |
-| Current / best streak | Consecutive study days using a defined local calendar rule |
-| Recall readiness | Due flash cards completed and cards currently due |
-| Route progress | Ready, in-progress, and completed lesson nodes |
-| Study consistency | Active study sessions or days over a selected period |
+| File count | One PDF for the current generation run |
+| File size | Under 5 MiB |
+| Pages | No more than 3 pages |
+| Extracted text | No more than 8,000 normalized characters and at least 300 non-whitespace characters |
+| Language/content | English text that can be extracted and tied to page-level source locations |
+| Unsupported input | Scanned/image-only, encrypted, unreadable, empty, or out-of-limit PDF |
 
-Avoid presenting generated content volume or time-on-screen as knowledge. Show the calculation window and provide a route to the underlying lessons and attempts. Keep streaks encouraging; do not punish missed days.
+Validate before generation and show a specific, actionable reason when a file is rejected. Do not add OCR or silently truncate content. Keep the uploaded PDF bytes in memory for extraction, then release them. Store the normalized extracted pages and source passages needed for questions and feedback; do not retain the original PDF by default.
 
-### Leaderboard
+### 2. Local AI Processing (Sonar Loading)
 
-Leaderboard is a tab inside Stats, alongside **My Stats**. It compares learners who explicitly join the same class or expedition cohort. Participation is opt-in, uses a learner-chosen display name/avatar, and can be ended at any time. Never expose source files, lesson titles, answer history, or detailed study activity to other learners.
+After admission, show a real three-stage loading view. Each stage changes only when that work actually starts or completes; do not show a fabricated percentage. Include elapsed time, a cancel action, and a clear error/retry path.
 
-Rank by **weekly mastery points**, not hours online or raw answer volume:
+| Visible state | Work performed | Completion condition |
+| --- | --- | --- |
+| **Extraction** | Parse the admitted PDF locally and retain page locations with normalized text | Text passes the character/content limits and source locations are available |
+| **Generation** | Send only this document's extracted text and generation instructions to local Ollama using `qwen2.5:1.5b` | Model returns a candidate set covering 3 distinct topics, with one Easy, one Medium, and one Hard question per topic |
+| **Validation** | Validate structure, exact count, topic/difficulty coverage, answer key, explanation, and source evidence | Exactly 9 questions pass checks; each has a defensible answer and an exact supporting PDF quote/page |
 
-- Award points for distinct concepts that reach mastered status after repeated correct recall.
-- Award a one-time lesson milestone when the learner completes an approved lesson's study and review steps.
-- Cap points per concept and lesson each week so repeated attempts cannot be farmed.
-- Start a new weekly board on a consistent cohort timezone; retain personal history in My Stats.
-- Break ties with mastery improvement, then share the rank if still tied.
+The final question set contains exactly 9 source-grounded questions: 3 distinct topics × 3 difficulty levels. A schema-valid response alone is not sufficient: reject unsupported claims, missing/incorrect quotes, ambiguous answer keys, duplicates, or malformed questions. Use bounded repair/retry; if validation still fails, report the failure and return the learner to the library without starting a run.
 
-The board shows rank, display name/avatar, weekly points, and a broad expedition level. Show the scoring rules and board reset time. Ask before joining and keep a **Leave leaderboard** control available. Do not shame low ranks or make participation necessary to unlock lessons or rewards.
+### 3. The Ocean Descent (Game Phase)
 
-Cross-device cohorts require an identity and sync service that the current local-first app does not have. Until it exists, keep the leaderboard entry unavailable or label any on-device profile comparison as local-only; never imply it represents a class or global ranking.
+The validated set is played in fixed order through three depth zones. Each zone begins with **100 player HP**. The player answers all 3 questions in a zone before the zone outcome is resolved, even if HP reaches zero partway through. This preserves fixed question counts and makes the 2/3 threshold determine the encounter outcome.
 
-## 4. Required global states and behaviors
+| Depth zone | Enemy | Difficulty | Questions | Player HP at zone start | Pass condition |
+| --- | --- | --- | ---: | ---: | --- |
+| Surface | Clownfish | Easy | 3 | 100 | At least 2/3 correct |
+| Twilight | Anglerfish | Medium | 3 | 100 | At least 2/3 correct |
+| Midnight | Giant Squid | Hard | 3 | 100 | At least 2/3 correct |
 
-- **No API/Ollama:** Dashboard, saved lessons, and previously approved study sets remain usable. Disable only actions that require the unavailable service and provide a recovery message.
-- **No lessons:** Dashboard and Map guide the learner to create a lesson.
-- **No approved content:** Show draft/processing state and withhold the lesson from study modes and the ready map.
-- **Offline:** Local library, approved study sets, and saved progress remain available. Queue no hidden external requests.
-- **Reduced motion / keyboard:** All study actions work without animation. Every control has focus visibility, a label, and a keyboard path.
-- **Data lifecycle:** Explain local storage, export, deletion, and the fact that reinstall/device loss may remove data unless the learner exports it.
-- **Leaderboard privacy:** Hide the leaderboard until a cohort service is available; joining and leaving are explicit, and shared fields are limited to the display name/avatar and aggregate weekly score.
+Resolve each answer immediately, then let the player continue to the next question:
 
-## 5. Team boundaries and data ownership
+| Answer | Encounter effect | Feedback shown |
+| --- | --- | --- |
+| Correct | Deal 50 damage to the enemy and award 10 XP | Mark correct and show a concise explanation with its source |
+| Incorrect | Deal 50 damage to the player | Immediately reveal the correct answer, explanation, and exact supporting PDF quote with page number |
 
-| Team | Owns |
+Present every question in the fixed round. At the end of the three answers, pass the player to the next zone if they met its threshold; otherwise end the run and open Results. On a passed zone, reset encounter HP and combo for the next zone while preserving run XP and attempts. Keep the question, answer, feedback, and source passage connected so the player can inspect why an answer was correct.
+
+### 4. The Boss Review (Point Nemo)
+
+After the player passes Surface, Twilight, and Midnight, start the Megalodon encounter at Point Nemo. This is labeled **Mixed-topic review: previously encountered questions**. It contains the exact same 9 questions from the descent, shuffled into a saved order; it does not generate new questions.
+
+| Boss | Question pool | Pass condition |
+| --- | --- | --- |
+| Megalodon | All 9 descent questions, mixed across the 3 topics and shuffled | At least 8/9 correct; 7/9 or fewer fails |
+
+Present all nine questions before resolving the result, even if player HP reaches zero. Apply the same correct/incorrect feedback and combat scoring. Boss answers can award practice XP, but they do not create additional unique questions or topic mastery. Keep the shuffled order with the run so refresh/resume continues the same encounter.
+
+### 5. Results & Saved Progress
+
+On a boss pass, award a **Descent Complete** badge tied to that run. Results show the Surface, Twilight, Midnight, and boss scores; the nine unique questions versus eighteen total answer slots; missed topics; and the source-backed mistakes for review.
+
+Failing any zone or the boss ends the run. Results show the failed threshold, mistakes, correct answers, explanations, and exact PDF quotes. **Try again** starts a new run from the same validated question set with XP reset to zero; keep the failed run in attempt history.
+
+Save the run and progression locally in SQLite, including the validated question set, run status, stage, question order, current slot, HP, XP, answers, feedback, and results. On reopening the app, offer **Resume run** for an active run and restore its saved state. Completed and failed attempts remain in the local library. This is same-device persistence; it does not imply cloud backup or cross-device recovery.
+
+## MVP screen inventory
+
+| Screen/state | Required content and actions |
 | --- | --- |
-| Product / UX | Navigation, learner states, empty/error/recovery copy, approval interaction, mastery definitions |
-| Frontend | Navigation shell and Dashboard quick access, library and lesson views, map, Study/Review/Flash Cards/Stats, progress and accessibility states |
-| Backend | Local profile ownership, SQLite migrations/repositories, file lifecycle, processing job state, validated APIs |
-| Document processing | PDF/DOCX/PPTX validation and extraction, source locations, extraction errors |
-| Local AI | Ollama configuration, prompts, bounded generation/retry, schema validation, provenance and assurance results |
-| Cohort / sync | Opt-in membership, privacy controls, weekly score aggregation, rank snapshots, and board reset timing |
+| Local library | Upload PDF; show admission limits; list saved materials/question sets, active run, and attempt history; resume or retry |
+| Sonar loading | Actual Extraction → Generation → Validation states, elapsed time, cancel, and specific failure/retry feedback |
+| Zone encounter | Zone/enemy, difficulty, question count, HP, XP, accessible answer choices, and answer resolution |
+| Answer feedback | Correctness; for a miss, correct answer, explanation, exact quote, and PDF page; Continue action |
+| Boss review | Megalodon, mixed-topic label, saved shuffled nine-question order, score toward 8/9 |
+| Results | Pass/fail, badge if earned, stage/boss scores, mistakes and sources, retry, library, and resume when applicable |
 
-The browser should not call Ollama directly. The API coordinates local extraction, AI generation, validation, and SQLite writes. Keep raw file bytes, extracted text, generated drafts, approved study sets, attempts, and progress as distinct lifecycle records.
+## Local-first behavior and handoff boundaries
 
-## 6. Suggested domain records
+- The browser calls the local application API; it does not call Ollama directly. The local API coordinates PDF extraction, Ollama generation, validation, scoring, and SQLite transactions.
+- Runtime AI inference and application data stay on the device. Internet access is needed only to install prerequisites and download the model before offline use.
+- If Ollama is stopped, show a useful local-service error and preserve the admitted library/run state. If the app closes mid-run, restore the saved run instead of creating a new one.
+- Make keyboard focus, answer labels, contrast, reduced-motion support, and visible state changes part of each encounter/loading/result screen.
+- Provide local deletion for a document and its associated question set/progress. Delete related records transactionally.
+- Do not add user accounts, cloud sync, an expedition map, standalone review or flashcards, leaderboards, broad dashboard quick-access routing, arbitrary file formats, OCR, or long-document support to this MVP.
 
-The existing project already defines subjects, topics, study materials, questions, attempts, and progress. The full flow also needs:
+## Team ownership
 
-- **LocalProfile:** profile ID, display name, optional avatar, created/last-used timestamps.
-- **Lesson:** topic/course link, title, learning goals, status, current approved version.
-- **Material:** original filename, local storage reference, MIME/type, checksum, import status, extracted text, source-location metadata.
-- **ProcessingJob:** lesson/material/version, current stage, model ID, timestamps, cancel/failure reason, assurance results.
-- **StudySetVersion:** generated notes, concepts, questions, cards, provenance, validation status, approval timestamp.
-- **FlashCardSchedule:** card ID, recall rating, due timestamp, interval/ease data.
-- **Attempt / Session:** activity type, lesson, item, response/rating, correctness, timestamp, session duration if needed.
-- **CohortMembership / WeeklyScore:** cohort ID, profile ID, opt-in state, weekly mastery points, score period, and rank snapshot. Store only fields needed for the board; keep attempt-level data local/private.
-- **Progress:** lesson status and mastery summary derived from attempts, with a path to the underlying evidence.
+| Team | MVP responsibility |
+| --- | --- |
+| Product / UX | Five-step flow, admission/loading/error copy, answer feedback, run recovery, and results |
+| Frontend | Local library, PDF selection, Sonar states, three zones, boss encounter, results, resume |
+| Backend | Loopback API, upload admission, run state, scoring, SQLite persistence and transactions |
+| Document processing | Bounded PDF extraction, normalized text, page-level source passages, rejection reasons |
+| Local AI | Ollama model configuration, question generation, bounded repair, structural and source validation |
+| QA | Admission edge cases, question/source correctness, scoring thresholds, close/resume, offline runtime evidence |
 
-Treat mastery summaries and player stats as derived values. Attempts and approved content are the durable source records.
-
-In the current schema, `topics` is the closest match to a lesson. Extend that concept or migrate it deliberately; do not create separate topic and lesson records with overlapping ownership. Add profile ownership to lesson, material, attempt, and progress records before supporting multiple local profiles.
-
-## 7. Delivery sequence
-
-1. **App shell and local profile:** navigation, create/select profile, Dashboard quick access and empty state, local data ownership.
-2. **Lessons library:** subjects, lesson create/edit, material list, local file selection, format/size validation.
-3. **Processing pipeline:** extraction stages, cancellation/retry, visible progress, source locations.
-4. **AI assurance:** local Ollama draft generation, schema and provenance checks, review/edit/approve gate.
-5. **Lesson and Map:** publish approved lesson nodes, choose lesson, source-grounded Study view.
-6. **Practice:** Review questions, answer feedback, Flash Cards, due scheduling, attempt history.
-7. **Stats:** mastery and expedition metrics derived from stored attempts; accessible visual presentation.
-8. **Leaderboard:** after identity and sync are available, add cohort opt-in, privacy controls, weekly score aggregation, and rank snapshots.
-9. **Hardening:** local export/delete, data migration, offline/recovery behavior, narrow-screen and reduced-motion review.
-
-Each step should leave the app usable. Missing Ollama or a failed import must not prevent the learner from opening previously approved lessons.
-
-## 8. Current implementation versus target
-
-The repository currently has a React/Vite web shell, illustrative expedition map, turn-based encounter, battle VFX, Express health and AI-status endpoints, SQLite initialization, shared Zod schemas, and Ollama/document-extraction service boundaries. It does not yet have the product Dashboard or its Start Challenge routing.
-
-The following target-flow features are **not implemented yet**: sign-up/log-in profiles, Dashboard quick access and Start Challenge routing, file upload and extraction, lesson library CRUD, AI study-set generation endpoint, approval/versioning UI, map nodes linked to stored lessons, Study mode, Review mode, Flash Cards scheduling, persisted player stats, cohort identity/sync, and leaderboard scoring. Existing database tables are a starting point; they do not yet cover profile ownership, processing jobs, study-set versions, card schedules, or cohort scores.
-
-Use this document as the product journey and handoff boundary. Use the API/shared schemas and existing design documents for implementation details; update this flow when product decisions or supported formats change.
+Use `point-nemo-masterplan.md` for implementation gates, detailed data contracts, build sequence, and hackathon acceptance evidence. This document defines the learner-facing MVP flow; a described behavior is a target until implementation and acceptance evidence confirm it.
