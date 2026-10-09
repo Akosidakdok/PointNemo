@@ -1,0 +1,17 @@
+{
+  "scannedAt": "2026-10-10",
+  "projectRoot": "C:/Users/CJ Baldonado/Documents/GitHub/PointNemo",
+  "framework": "React 19 + Vite 7",
+  "fontStack": {
+    "display": "ui-monospace, Cascadia Code, Source Code Pro, Menlo, Consolas, monospace",
+    "body": "system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+    "source": "apps/web/src/styles.css"
+  },
+  "palette": {
+    "source": "apps/web/src/styles.css :root",
+    "tokens": ["--abyss", "--deep-indigo", "--ocean-slate", "--steel-blue", "--visor-cyan", "--signal-red", "--equipment-gold", "--text-main", "--text-muted"]
+  },
+  "motion": "No motion library; scene motion is authored with canvas and CSS.",
+  "spacing": "No shared spacing token scale detected.",
+  "preserve": ["Point Nemo palette", "system font stacks", "prepared runtime sprites", "existing authentication and guest-entry behavior"]
+}

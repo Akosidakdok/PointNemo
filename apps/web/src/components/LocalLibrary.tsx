@@ -14,6 +14,8 @@ export interface LocalLibraryProps {
   onDeleteRun: (runId: string) => void;
   isOnline: boolean;
   onOpenSettings: () => void;
+  currentUser?: { displayName: string; email: string } | null;
+  onLogout?: () => void;
 }
 
 export function LocalLibrary({
@@ -27,6 +29,8 @@ export function LocalLibrary({
   onDeleteRun,
   isOnline,
   onOpenSettings,
+  currentUser,
+  onLogout,
 }: LocalLibraryProps) {
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
@@ -45,6 +49,18 @@ export function LocalLibrary({
         </div>
 
         <div className="library-header-actions">
+          {currentUser && (
+            <div className="user-explorer-pill" title={`Logged in as ${currentUser.email}`}>
+              <span className="explorer-status-dot" aria-hidden="true" />
+              <span>EXPLORER: {currentUser.displayName.toUpperCase()}</span>
+              {onLogout && (
+                <button type="button" className="logout-link-btn" onClick={onLogout} aria-label="Log out explorer">
+                  EXIT
+                </button>
+              )}
+            </div>
+          )}
+
           <div className={`status-badge ${isOnline ? "is-online" : "is-offline"}`} title={isOnline ? "Local Systems Online" : "Operating Offline"}>
             <span className="status-dot" />
             <span className="status-label">{isOnline ? "LOCAL SYSTEMS READY" : "OFFLINE RUNTIME"}</span>
