@@ -1,0 +1,21 @@
+{
+  "name": "point-nemo",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run build --workspace=@point-nemo/shared && concurrently -k -n api,web \"npm run dev --workspace=@point-nemo/api\" \"npm run dev --workspace=@point-nemo/web\"",
+    "build": "npm run build --workspace=@point-nemo/shared && npm run build --workspace=@point-nemo/api && npm run build --workspace=@point-nemo/web",
+    "typecheck": "npm run build --workspace=@point-nemo/shared && npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "dotenv": "^16.6.1",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}
