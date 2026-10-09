@@ -117,37 +117,22 @@
             </ol>
             <div class="route-controls"><span id="route-status" aria-live="polite">Swim to the highlighted Surface currents encounter.</span><span class="key-hints" aria-label="Movement controls"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> MOVE</span></div>
           </section>
-          <div class="encounter-overlay" id="encounter-content" hidden>
-            <section class="encounter-dialog" role="dialog" aria-modal="true" aria-labelledby="encounter-title">
-              <header class="encounter-header">
-                <div><p class="eyebrow">SONAR CONTACT · LESSON PART <span id="encounter-part-number">01</span></p><h2 id="encounter-title">Surface currents</h2></div>
-                <div class="encounter-context"><span id="encounter-depth">Epipelagic · 200 m</span><span>ENCOUNTER <b id="encounter-question-number">01</b> / 03</span></div>
-              </header>
-              <div class="battle-layout">
-                <div class="combat-scene">
-                  <canvas class="pixel-scene" id="combat-scene" aria-hidden="true"></canvas>
-                  <span class="arena-caption">SONAR PULSE READY</span>
-                  <span class="arena-enemy" id="encounter-enemy-label">BARRELEYE</span>
-                </div>
-                <div class="health-row">
-                  <div class="health-card"><div><span>YOUR HULL</span><b id="player-hp">100 / 100</b></div><div class="health-track"><i class="player-fill" id="player-hp-bar"></i></div><small>EXPLORER</small></div>
-                  <div class="health-card enemy-hp"><div><span>ENEMY</span><b id="enemy-hp">100 / 100</b></div><div class="health-track"><i class="enemy-fill" id="enemy-hp-bar"></i></div><small id="encounter-enemy-small">ENCOUNTER</small></div>
-                  <p class="combat-hint">Correct answer<br /><b>−50 enemy HP · +10 XP</b></p>
-                </div>
-              </div>
-              <section class="panel question-panel">
-                <div class="question-meta"><span>SAMPLE QUESTION · PART <b id="question-part-number">01</b></span><span id="encounter-topic">TOPIC · OCEAN CURRENTS</span></div>
-                <h3 id="route-question-title">What primarily drives the large-scale surface currents in Earth's oceans?</h3>
-                <div class="answer-list" role="group" aria-label="Choose an answer">
-                  <button type="button" data-answer="wrong"><kbd>A</kbd> Tides alone</button>
-                  <button type="button" data-answer="correct"><kbd>B</kbd> Global wind patterns</button>
-                  <button type="button" data-answer="wrong"><kbd>C</kbd> Deep-sea volcanoes</button>
-                  <button type="button" data-answer="wrong"><kbd>D</kbd> Seafloor pressure</button>
-                </div>
-                <div class="feedback" id="answer-feedback" aria-live="polite" hidden></div>
-                <div class="question-footer"><span>Incorrect answer <b>−50 hull HP</b> · source evidence appears after answering</span><button class="primary-button" type="button" id="clear-part" disabled>Clear part &amp; continue <span>→</span></button></div>
-              </section>
-            </section>
+          <div id="encounter-content" hidden>
+          <div class="health-row"><div class="health-card"><div><span>PLAYER HULL</span><b id="player-hp">100 / 100 HP</b></div><div class="health-track"><i class="player-fill" id="player-hp-bar"></i></div></div><div class="health-card enemy-hp"><div><span>ENEMY</span><b id="enemy-hp">100 / 100 HP</b></div><div class="health-track"><i class="enemy-fill" id="enemy-hp-bar"></i></div></div></div>
+          <section class="panel combat-panel">
+            <div class="combat-scene"><canvas class="pixel-scene" id="combat-scene" aria-hidden="true"></canvas></div>
+          <section class="question-panel">
+            <div class="question-meta"><span>PREVIEW QUESTION · 01 / 03</span><span>TOPIC · OCEAN CURRENTS</span></div>
+            <h2 id="route-question-title">What primarily drives the large-scale surface currents in Earth's oceans?</h2>
+            <div class="answer-list" role="group" aria-label="Choose an answer">
+              <button type="button" data-answer="wrong"><kbd>A</kbd> Tides alone</button>
+              <button type="button" data-answer="correct"><kbd>B</kbd> Global wind patterns</button>
+              <button type="button" data-answer="wrong"><kbd>C</kbd> Deep-sea volcanoes</button>
+              <button type="button" data-answer="wrong"><kbd>D</kbd> Seafloor pressure</button>
+            </div>
+            <div class="feedback" id="answer-feedback" aria-live="polite" hidden></div>
+            <div class="question-footer"><span>Correct answer: 50 enemy damage <i>·</i> +10 XP</span><button class="secondary-button" type="button" id="clear-part" disabled>Clear this part <span>→</span></button></div>
+          </section></section>
           </div>
         </section>
 

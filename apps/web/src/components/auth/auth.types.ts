@@ -8,11 +8,6 @@ export interface AuthenticatedUser {
   remembered: boolean;
 }
 
-export interface LocalExplorer {
-  displayName: string;
-  remembered: boolean;
-}
-
 export interface AuthValidationErrors {
   displayName?: string;
   email?: string;
