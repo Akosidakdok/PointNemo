@@ -23,6 +23,26 @@ interface Bubble {
   alpha: number;
 }
 
+interface Swimmer {
+  id: string;
+  species: string;
+  x: number;
+  y: number;
+  baseYRatio: number;
+  minYRatio: number;
+  maxYRatio: number;
+  speed: number;
+  facing: "left" | "right";
+  bobPhase: number;
+  bobAmp: number;
+  bobSpeed: number;
+  scale: number;
+  opacityLight: number;
+  opacityDark: number;
+  edgeMargin: number;
+  baseFacesLeft: boolean;
+}
+
 export function OceanAmbientBackground({
   bundle,
   reducedMotion = false,
@@ -38,23 +58,22 @@ export function OceanAmbientBackground({
 
     let animId = 0;
     let prev = performance.now();
+    let isTabVisible = !document.hidden;
 
-    // Explorer Diver animations
+    // --- 1. SPRITE ANIMATIONS ---
+    // Explorer Diver (directional swimming animations)
     const diverRight = new SpriteAnimation(bundle, "explorer.swim.right");
     const diverLeft = new SpriteAnimation(bundle, "explorer.swim.left");
 
-    // Fish animations
+    // All Native Deep-Sea Fish Species
     const barreleyeAnim = new SpriteAnimation(bundle, "barreleye.swim");
-    
-    // Optional second creature: Dumbo octopus or Anglerfish if available
-    let dumboAnim: SpriteAnimation | null = null;
-    try {
-      dumboAnim = new SpriteAnimation(bundle, "dumbo.swim");
-    } catch {
-      // Dumbo optional
-    }
+    const blobfishLeft = new SpriteAnimation(bundle, "blobfish.swim.left");
+    const blobfishRight = new SpriteAnimation(bundle, "blobfish.swim.right");
+    const gulperAnim = new SpriteAnimation(bundle, "gulper.swim");
+    const goblinAnim = new SpriteAnimation(bundle, "goblin.swim");
+    const fringeheadAnim = new SpriteAnimation(bundle, "fringehead.swim");
 
-    // Set canvas dimensions to match viewport
+    // Canvas dimensions sync
     const handleResize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -62,41 +81,142 @@ export function OceanAmbientBackground({
     handleResize();
     window.addEventListener("resize", handleResize);
 
-    // Initial Diver state
-    const diver = {
-      x: window.innerWidth * 0.15,
-      y: window.innerHeight * 0.45,
-      targetY: window.innerHeight * 0.45,
-      speed: 48, // pixels per second
-      facing: "right" as "left" | "right",
-      baseY: window.innerHeight * 0.45,
-      bobPhase: 0,
-      scale: speciesScale(bundle, "explorer", 64),
+    const handleVisibilityChange = () => {
+      isTabVisible = !document.hidden;
+      if (isTabVisible) {
+        prev = performance.now();
+      }
     };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    // Initial Barreleye Fish state
-    const barreleye = {
-      x: window.innerWidth * 0.85,
-      y: window.innerHeight * 0.65,
-      speed: 38,
-      facing: "left" as "left" | "right",
-      baseY: window.innerHeight * 0.65,
-      bobPhase: Math.PI / 2,
-      scale: speciesScale(bundle, "barreleye", 70),
-    };
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
-    // Initial Dumbo Octopus state
-    const dumbo = {
-      x: window.innerWidth * 0.5,
-      y: window.innerHeight * 0.25,
-      speed: 25,
-      facing: "right" as "left" | "right",
-      baseY: window.innerHeight * 0.25,
-      bobPhase: Math.PI,
-      scale: dumboAnim ? speciesScale(bundle, "dumbo", 52) : 1,
-    };
+    // --- 2. SWIMMING CREATURES ECOSYSTEM ---
+    const swimmers: Swimmer[] = [
+      // Explorer Diver (Epipelagic / Upper Layer)
+      {
+        id: "explorer",
+        species: "explorer",
+        x: width * 0.15,
+        y: height * 0.22,
+        baseYRatio: 0.22,
+        minYRatio: 0.12,
+        maxYRatio: 0.34,
+        speed: 46,
+        facing: "right",
+        bobPhase: 0,
+        bobAmp: 14,
+        bobSpeed: 1.4,
+        scale: speciesScale(bundle, "explorer", 64),
+        opacityLight: 0.82,
+        opacityDark: 0.88,
+        edgeMargin: 80,
+        baseFacesLeft: false, // discrete left/right animations
+      },
+      // Barreleye Fish (Mesopelagic / Twilight Layer)
+      {
+        id: "barreleye",
+        species: "barreleye",
+        x: width * 0.85,
+        y: height * 0.32,
+        baseYRatio: 0.32,
+        minYRatio: 0.20,
+        maxYRatio: 0.44,
+        speed: 36,
+        facing: "left",
+        bobPhase: Math.PI * 0.4,
+        bobAmp: 10,
+        bobSpeed: 1.8,
+        scale: speciesScale(bundle, "barreleye", 68),
+        opacityLight: 0.68,
+        opacityDark: 0.78,
+        edgeMargin: 90,
+        baseFacesLeft: true,
+      },
+      // Gulper Eel (Bathypelagic / Mid-Deep Layer)
+      {
+        id: "gulper",
+        species: "gulper",
+        x: width * 0.42,
+        y: height * 0.52,
+        baseYRatio: 0.52,
+        minYRatio: 0.38,
+        maxYRatio: 0.64,
+        speed: 32,
+        facing: "right",
+        bobPhase: Math.PI * 0.8,
+        bobAmp: 18,
+        bobSpeed: 1.2,
+        scale: speciesScale(bundle, "gulper", 72),
+        opacityLight: 0.60,
+        opacityDark: 0.72,
+        edgeMargin: 110,
+        baseFacesLeft: true,
+      },
+      // Goblin Shark (Abyssal Predator Layer)
+      {
+        id: "goblin",
+        species: "goblin",
+        x: width * 0.72,
+        y: height * 0.64,
+        baseYRatio: 0.64,
+        minYRatio: 0.48,
+        maxYRatio: 0.76,
+        speed: 42,
+        facing: "left",
+        bobPhase: Math.PI * 1.2,
+        bobAmp: 9,
+        bobSpeed: 1.5,
+        scale: speciesScale(bundle, "goblin", 74),
+        opacityLight: 0.62,
+        opacityDark: 0.74,
+        edgeMargin: 100,
+        baseFacesLeft: true,
+      },
+      // Blobfish (Benthic / Lower Layer)
+      {
+        id: "blobfish",
+        species: "blobfish",
+        x: width * 0.22,
+        y: height * 0.75,
+        baseYRatio: 0.75,
+        minYRatio: 0.62,
+        maxYRatio: 0.86,
+        speed: 20,
+        facing: "right",
+        bobPhase: Math.PI * 1.6,
+        bobAmp: 20,
+        bobSpeed: 0.9,
+        scale: speciesScale(bundle, "blobfish", 58),
+        opacityLight: 0.64,
+        opacityDark: 0.76,
+        edgeMargin: 85,
+        baseFacesLeft: false, // discrete left/right animations
+      },
+      // Sarcastic Fringehead (Seabed / Hadal Layer)
+      {
+        id: "fringehead",
+        species: "fringehead",
+        x: width * 0.60,
+        y: height * 0.87,
+        baseYRatio: 0.87,
+        minYRatio: 0.74,
+        maxYRatio: 0.94,
+        speed: 28,
+        facing: "left",
+        bobPhase: Math.PI * 0.2,
+        bobAmp: 12,
+        bobSpeed: 2.0,
+        scale: speciesScale(bundle, "fringehead", 62),
+        opacityLight: 0.58,
+        opacityDark: 0.70,
+        edgeMargin: 90,
+        baseFacesLeft: true,
+      },
+    ];
 
-    // Bubble particle system (24 ambient floating bubbles)
+    // --- 3. AMBIENT BUBBLES ---
     const BUBBLE_COUNT = 24;
     const bubbles: Bubble[] = Array.from({ length: BUBBLE_COUNT }, () => ({
       x: Math.random() * window.innerWidth,
@@ -113,12 +233,17 @@ export function OceanAmbientBackground({
       const dt = Math.max(0, Math.min((time - prev) / 1000, 0.1));
       prev = time;
 
-      const width = canvas.width;
-      const height = canvas.height;
+      if (!isTabVisible) {
+        animId = requestAnimationFrame(render);
+        return;
+      }
 
-      ctx.clearRect(0, 0, width, height);
+      const curWidth = canvas.width;
+      const curHeight = canvas.height;
 
-      // --- 1. RISING BUBBLE PARTICLES ---
+      ctx.clearRect(0, 0, curWidth, curHeight);
+
+      // --- A. RISING BUBBLE PARTICLES ---
       ctx.save();
       const isLight = theme === "light";
       for (const b of bubbles) {
@@ -127,10 +252,9 @@ export function OceanAmbientBackground({
           b.phase += b.wobbleSpeed * dt;
           b.x += Math.sin(b.phase) * b.wobbleAmp;
 
-          // Wrap to bottom when floating off top
           if (b.y < -20) {
-            b.y = height + 10 + Math.random() * 20;
-            b.x = Math.random() * width;
+            b.y = curHeight + 10 + Math.random() * 20;
+            b.x = Math.random() * curWidth;
           }
         }
 
@@ -148,106 +272,92 @@ export function OceanAmbientBackground({
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Little specular shine dot on top-left of bubble
+        // Specular shine dot on top-left of bubble
         ctx.beginPath();
-        ctx.arc(b.x - b.radius * 0.35, b.y - b.radius * 0.35, Math.max(0.6, b.radius * 0.25), 0, Math.PI * 2);
+        ctx.arc(
+          b.x - b.radius * 0.35,
+          b.y - b.radius * 0.35,
+          Math.max(0.6, b.radius * 0.25),
+          0,
+          Math.PI * 2
+        );
         ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
         ctx.fill();
       }
       ctx.restore();
 
-      // --- 2. UPDATE ACTOR MOVEMENTS ---
+      // --- B. UPDATE ANIMATIONS & POSITIONS ---
       if (!reducedMotion) {
         diverRight.update(dt);
         diverLeft.update(dt);
         barreleyeAnim.update(dt);
-        if (dumboAnim) dumboAnim.update(dt);
+        blobfishLeft.update(dt);
+        blobfishRight.update(dt);
+        gulperAnim.update(dt);
+        goblinAnim.update(dt);
+        fringeheadAnim.update(dt);
 
-        // Diver swimming motion
-        const diverDir = diver.facing === "right" ? 1 : -1;
-        diver.x += diver.speed * diverDir * dt;
-        diver.bobPhase += dt * 1.4;
-        diver.y = diver.baseY + Math.sin(diver.bobPhase) * 16;
+        for (const s of swimmers) {
+          const dir = s.facing === "right" ? 1 : -1;
+          s.x += s.speed * dir * dt;
+          s.bobPhase += dt * s.bobSpeed;
+          s.y = curHeight * s.baseYRatio + Math.sin(s.bobPhase) * s.bobAmp;
 
-        // Diver screen turnaround
-        if (diver.facing === "right" && diver.x > width + 80) {
-          diver.facing = "left";
-          diver.baseY = Math.min(height * 0.75, Math.max(height * 0.2, height * (0.2 + Math.random() * 0.55)));
-        } else if (diver.facing === "left" && diver.x < -80) {
-          diver.facing = "right";
-          diver.baseY = Math.min(height * 0.75, Math.max(height * 0.2, height * (0.2 + Math.random() * 0.55)));
-        }
-
-        // Barreleye Fish swimming motion (moves in opposite general flow)
-        const fishDir = barreleye.facing === "right" ? 1 : -1;
-        barreleye.x += barreleye.speed * fishDir * dt;
-        barreleye.bobPhase += dt * 1.8;
-        barreleye.y = barreleye.baseY + Math.sin(barreleye.bobPhase) * 12;
-
-        if (barreleye.facing === "left" && barreleye.x < -90) {
-          barreleye.facing = "right";
-          barreleye.baseY = Math.min(height * 0.8, Math.max(height * 0.3, height * (0.3 + Math.random() * 0.45)));
-        } else if (barreleye.facing === "right" && barreleye.x > width + 90) {
-          barreleye.facing = "left";
-          barreleye.baseY = Math.min(height * 0.8, Math.max(height * 0.3, height * (0.3 + Math.random() * 0.45)));
-        }
-
-        // Dumbo Octopus drifting
-        if (dumboAnim) {
-          const dumboDir = dumbo.facing === "right" ? 1 : -1;
-          dumbo.x += dumbo.speed * dumboDir * dt;
-          dumbo.bobPhase += dt * 1.1;
-          dumbo.y = dumbo.baseY + Math.sin(dumbo.bobPhase) * 22;
-
-          if (dumbo.facing === "right" && dumbo.x > width + 70) {
-            dumbo.facing = "left";
-            dumbo.baseY = height * (0.15 + Math.random() * 0.35);
-          } else if (dumbo.facing === "left" && dumbo.x < -70) {
-            dumbo.facing = "right";
-            dumbo.baseY = height * (0.15 + Math.random() * 0.35);
+          // Turnaround when swimming past screen edge
+          if (s.facing === "right" && s.x > curWidth + s.edgeMargin) {
+            s.facing = "left";
+            s.baseYRatio =
+              s.minYRatio + Math.random() * (s.maxYRatio - s.minYRatio);
+          } else if (s.facing === "left" && s.x < -s.edgeMargin) {
+            s.facing = "right";
+            s.baseYRatio =
+              s.minYRatio + Math.random() * (s.maxYRatio - s.minYRatio);
           }
         }
       }
 
-      // --- 3. DRAW SWIMMING CREATURES ---
+      // --- C. DRAW ALL SWIMMERS ---
       ctx.imageSmoothingEnabled = false;
 
-      // Draw Dumbo Octopus (drifting deep in background)
-      if (dumboAnim) {
+      for (const s of swimmers) {
+        let frameName = "";
+        let shouldFlip = false;
+
+        if (s.species === "explorer") {
+          frameName =
+            s.facing === "right" ? diverRight.frameName : diverLeft.frameName;
+        } else if (s.species === "blobfish") {
+          frameName =
+            s.facing === "right"
+              ? blobfishRight.frameName
+              : blobfishLeft.frameName;
+        } else if (s.species === "barreleye") {
+          frameName = barreleyeAnim.frameName;
+          shouldFlip = s.facing === "right"; // base faces left
+        } else if (s.species === "gulper") {
+          frameName = gulperAnim.frameName;
+          shouldFlip = s.facing === "right"; // base faces left
+        } else if (s.species === "goblin") {
+          frameName = goblinAnim.frameName;
+          shouldFlip = s.facing === "right"; // base faces left
+        } else if (s.species === "fringehead") {
+          frameName = fringeheadAnim.frameName;
+          shouldFlip = s.facing === "right"; // base faces left
+        }
+
+        if (!frameName) continue;
+
         ctx.save();
-        ctx.globalAlpha = isLight ? 0.45 : 0.55;
-        ctx.translate(Math.round(dumbo.x), Math.round(dumbo.y));
-        if (dumbo.facing === "left") {
+        ctx.globalAlpha = isLight ? s.opacityLight : s.opacityDark;
+        ctx.translate(Math.round(s.x), Math.round(s.y));
+
+        if (shouldFlip) {
           ctx.scale(-1, 1);
         }
-        drawFrame(ctx, bundle, dumboAnim.frameName, 0, 0, dumbo.scale);
+
+        drawFrame(ctx, bundle, frameName, 0, 0, s.scale);
         ctx.restore();
       }
-
-      // Draw Barreleye Fish (swimming smoothly)
-      ctx.save();
-      ctx.globalAlpha = isLight ? 0.65 : 0.75;
-      ctx.translate(Math.round(barreleye.x), Math.round(barreleye.y));
-      // Barreleye sprite in atlas defaults to facing left; flip if facing right
-      if (barreleye.facing === "right") {
-        ctx.scale(-1, 1);
-      }
-      drawFrame(ctx, bundle, barreleyeAnim.frameName, 0, 0, barreleye.scale);
-      ctx.restore();
-
-      // Draw Explorer Diver (front swimming layer)
-      ctx.save();
-      ctx.globalAlpha = isLight ? 0.82 : 0.88;
-      const diverAnim = diver.facing === "right" ? diverRight : diverLeft;
-      drawFrame(
-        ctx,
-        bundle,
-        diverAnim.frameName,
-        Math.round(diver.x),
-        Math.round(diver.y),
-        diver.scale
-      );
-      ctx.restore();
 
       animId = requestAnimationFrame(render);
     };
@@ -257,6 +367,7 @@ export function OceanAmbientBackground({
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [bundle, reducedMotion, theme]);
 
