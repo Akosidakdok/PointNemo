@@ -1,5 +1,4 @@
 import { config as loadEnv } from "dotenv";
-import { homedir } from "node:os";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,6 +10,11 @@ export interface ApiConfig {
   databasePath: string;
   ollamaBaseUrl: string;
   ollamaModel: string;
+  ollamaNumCtx: number;
+  ollamaMaxInputTokens: number;
+  ollamaMaxOutputTokens: number;
+  inferenceTimeoutMs: number;
+  jobTimeoutMs: number;
 }
 
 function readPort(value: string | undefined): number {
@@ -22,16 +26,19 @@ function readPort(value: string | undefined): number {
 }
 
 export function readConfig(environment: NodeJS.ProcessEnv = process.env): ApiConfig {
-  const appDataDirectory = process.platform === "win32"
-    ? environment.LOCALAPPDATA ?? resolve(homedir(), "AppData", "Local")
-    : environment.XDG_DATA_HOME ?? resolve(homedir(), ".local", "share");
-  const databasePath = environment.DATABASE_PATH
-    ? resolve(dirname(fileURLToPath(import.meta.url)), "../", environment.DATABASE_PATH)
-    : resolve(appDataDirectory, "PointNemo", "point-nemo.sqlite");
   return {
     port: readPort(environment.API_PORT),
-    databasePath,
-    ollamaBaseUrl: (environment.OLLAMA_BASE_URL ?? "http://localhost:11434").replace(/\/$/, ""),
+    databasePath: resolve(
+      dirname(fileURLToPath(import.meta.url)),
+      "../",
+      environment.DATABASE_PATH ?? "data/point-nemo.sqlite",
+    ),
+    ollamaBaseUrl: (environment.OLLAMA_BASE_URL ?? "http://127.0.0.1:11434").replace(/\/$/, ""),
     ollamaModel: environment.OLLAMA_MODEL ?? "qwen2.5:1.5b",
+    ollamaNumCtx: Number(environment.OLLAMA_NUM_CTX ?? 8192),
+    ollamaMaxInputTokens: Number(environment.OLLAMA_MAX_INPUT_TOKENS ?? 4096),
+    ollamaMaxOutputTokens: Number(environment.OLLAMA_MAX_OUTPUT_TOKENS ?? 3072),
+    inferenceTimeoutMs: Number(environment.INFERENCE_TIMEOUT_MS ?? 40000),
+    jobTimeoutMs: Number(environment.JOB_TIMEOUT_MS ?? 90000),
   };
 }

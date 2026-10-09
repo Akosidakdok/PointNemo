@@ -5,7 +5,7 @@ import { createApp } from "./app.js";
 const config = readConfig();
 const database = initializeDatabase(config.databasePath);
 const app = createApp(config, database);
-const server = app.listen(config.port, "127.0.0.1", () => {
+const server = app.listen(config.port, () => {
   console.log(`Point Nemo API listening at http://localhost:${config.port}`);
   console.log(`SQLite database: ${config.databasePath}`);
 });

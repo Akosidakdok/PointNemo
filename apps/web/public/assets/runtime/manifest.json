@@ -1,0 +1,2823 @@
+{
+  "version": 1,
+  "atlases": {
+    "explorer": {
+      "image": "explorer.png",
+      "width": 1696,
+      "height": 1112,
+      "cellWidth": 424,
+      "cellHeight": 278
+    },
+    "blobfish": {
+      "image": "blobfish.png",
+      "width": 1808,
+      "height": 848,
+      "cellWidth": 452,
+      "cellHeight": 424
+    },
+    "barreleye": {
+      "image": "barreleye.png",
+      "width": 604,
+      "height": 596,
+      "cellWidth": 151,
+      "cellHeight": 149
+    },
+    "gulper": {
+      "image": "gulper.png",
+      "width": 880,
+      "height": 672,
+      "cellWidth": 220,
+      "cellHeight": 168
+    },
+    "goblin": {
+      "image": "goblin.png",
+      "width": 772,
+      "height": 616,
+      "cellWidth": 193,
+      "cellHeight": 154
+    },
+    "fringehead": {
+      "image": "fringehead.png",
+      "width": 744,
+      "height": 664,
+      "cellWidth": 186,
+      "cellHeight": 166
+    },
+    "buoy": {
+      "image": "buoy.png",
+      "width": 463,
+      "height": 510,
+      "cellWidth": 463,
+      "cellHeight": 510
+    },
+    "water": {
+      "image": "water.png",
+      "width": 1254,
+      "height": 1254,
+      "sha256": "0e04789ed8bfdf13794b5fd81c7237a32962a1a6bf6dd9315b775019dece63f1",
+      "transparentPixels": 0
+    },
+    "effects": {
+      "image": "effects.png",
+      "width": 1024,
+      "height": 384,
+      "cellWidth": 128,
+      "cellHeight": 128
+    }
+  },
+  "frames": {
+    "explorer.down.0": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 77,
+        "y": 42,
+        "width": 156,
+        "height": 234
+      }
+    },
+    "explorer.down.1": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 424,
+        "y": 0,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 349,
+        "y": 43,
+        "width": 257,
+        "height": 237
+      }
+    },
+    "explorer.down.2": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 848,
+        "y": 0,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 697,
+        "y": 42,
+        "width": 196,
+        "height": 243
+      }
+    },
+    "explorer.down.3": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 1272,
+        "y": 0,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 989,
+        "y": 42,
+        "width": 256,
+        "height": 245
+      }
+    },
+    "explorer.left.0": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 0,
+        "y": 278,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 80,
+        "y": 332,
+        "width": 132,
+        "height": 244
+      }
+    },
+    "explorer.left.1": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 424,
+        "y": 278,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 335,
+        "y": 337,
+        "width": 281,
+        "height": 239
+      }
+    },
+    "explorer.left.2": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 848,
+        "y": 278,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 684,
+        "y": 336,
+        "width": 252,
+        "height": 240
+      }
+    },
+    "explorer.left.3": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 1272,
+        "y": 278,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 981,
+        "y": 336,
+        "width": 268,
+        "height": 241
+      }
+    },
+    "explorer.right.0": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 0,
+        "y": 556,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 78,
+        "y": 631,
+        "width": 134,
+        "height": 239
+      }
+    },
+    "explorer.right.1": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 424,
+        "y": 556,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 325,
+        "y": 632,
+        "width": 285,
+        "height": 242
+      }
+    },
+    "explorer.right.2": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 848,
+        "y": 556,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 657,
+        "y": 631,
+        "width": 268,
+        "height": 244
+      }
+    },
+    "explorer.right.3": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 1272,
+        "y": 556,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 968,
+        "y": 631,
+        "width": 282,
+        "height": 239
+      }
+    },
+    "explorer.up.0": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 0,
+        "y": 834,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 72,
+        "y": 924,
+        "width": 160,
+        "height": 254
+      }
+    },
+    "explorer.up.1": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 424,
+        "y": 834,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 346,
+        "y": 925,
+        "width": 261,
+        "height": 258
+      }
+    },
+    "explorer.up.2": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 848,
+        "y": 834,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 694,
+        "y": 924,
+        "width": 200,
+        "height": 257
+      }
+    },
+    "explorer.up.3": {
+      "atlas": "explorer",
+      "rect": {
+        "x": 1272,
+        "y": 834,
+        "width": 424,
+        "height": 278
+      },
+      "anchor": {
+        "x": 214,
+        "y": 97
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "explorer",
+        "x": 988,
+        "y": 924,
+        "width": 257,
+        "height": 262
+      }
+    },
+    "blobfish.0.0": {
+      "atlas": "blobfish",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 452,
+        "height": 424
+      },
+      "anchor": {
+        "x": 226,
+        "y": 212
+      },
+      "kind": "sprite",
+      "suggestedSize": 96,
+      "source": {
+        "atlas": "blobfish",
+        "x": 22,
+        "y": 39,
+        "width": 412,
+        "height": 416
+      }
+    },
+    "blobfish.0.1": {
+      "atlas": "blobfish",
+      "rect": {
+        "x": 452,
+        "y": 0,
+        "width": 452,
+        "height": 424
+      },
+      "anchor": {
+        "x": 226,
+        "y": 212
+      },
+      "kind": "sprite",
+      "suggestedSize": 96,
+      "source": {
+        "atlas": "blobfish",
+        "x": 503,
+        "y": 40,
+        "width": 321,
+        "height": 415
+      }
+    },
+    "blobfish.0.2": {
+      "atlas": "blobfish",
+      "rect": {
+        "x": 904,
+        "y": 0,
+        "width": 452,
+        "height": 424
+      },
+      "anchor": {
+        "x": 226,
+        "y": 212
+      },
+      "kind": "sprite",
+      "suggestedSize": 96,
+      "source": {
+        "atlas": "blobfish",
+        "x": 887,
+        "y": 40,
+        "width": 443,
+        "height": 415
+      }
+    },
+    "blobfish.0.3": {
+      "atlas": "blobfish",
+      "rect": {
+        "x": 1356,
+        "y": 0,
+        "width": 452,
+        "height": 424
+      },
+      "anchor": {
+        "x": 226,
+        "y": 212
+      },
+      "kind": "sprite",
+      "suggestedSize": 96,
+      "source": {
+        "atlas": "blobfish",
+        "x": 1330,
+        "y": 40,
+        "width": 377,
+        "height": 415
+      }
+    },
+    "blobfish.1.0": {
+      "atlas": "blobfish",
+      "rect": {
+        "x": 0,
+        "y": 424,
+        "width": 452,
+        "height": 424
+      },
+      "anchor": {
+        "x": 226,
+        "y": 212
+      },
+      "kind": "sprite",
+      "suggestedSize": 96,
+      "source": {
+        "atlas": "blobfish",
+        "x": 14,
+        "y": 541,
+        "width": 410,
+        "height": 253
+      }
+    },
+    "blobfish.1.1": {
+      "atlas": "blobfish",
+      "rect": {
+        "x": 452,
+        "y": 424,
+        "width": 452,
+        "height": 424
+      },
+      "anchor": {
+        "x": 226,
+        "y": 212
+      },
+      "kind": "sprite",
+      "suggestedSize": 96,
+      "source": {
+        "atlas": "blobfish",
+        "x": 451,
+        "y": 535,
+        "width": 421,
+        "height": 259
+      }
+    },
+    "blobfish.1.2": {
+      "atlas": "blobfish",
+      "rect": {
+        "x": 904,
+        "y": 424,
+        "width": 452,
+        "height": 424
+      },
+      "anchor": {
+        "x": 226,
+        "y": 212
+      },
+      "kind": "sprite",
+      "suggestedSize": 96,
+      "source": {
+        "atlas": "blobfish",
+        "x": 909,
+        "y": 535,
+        "width": 413,
+        "height": 259
+      }
+    },
+    "blobfish.1.3": {
+      "atlas": "blobfish",
+      "rect": {
+        "x": 1356,
+        "y": 424,
+        "width": 452,
+        "height": 424
+      },
+      "anchor": {
+        "x": 226,
+        "y": 212
+      },
+      "kind": "sprite",
+      "suggestedSize": 96,
+      "source": {
+        "atlas": "blobfish",
+        "x": 1351,
+        "y": 535,
+        "width": 410,
+        "height": 241
+      }
+    },
+    "barreleye.0.0": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 25,
+        "y": 33,
+        "width": 131,
+        "height": 105
+      }
+    },
+    "barreleye.0.1": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 151,
+        "y": 0,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 194,
+        "y": 35,
+        "width": 140,
+        "height": 103
+      }
+    },
+    "barreleye.0.2": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 302,
+        "y": 0,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 363,
+        "y": 23,
+        "width": 84,
+        "height": 130
+      }
+    },
+    "barreleye.0.3": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 453,
+        "y": 0,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 499,
+        "y": 18,
+        "width": 88,
+        "height": 139
+      }
+    },
+    "barreleye.1.0": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 0,
+        "y": 149,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 21,
+        "y": 171,
+        "width": 135,
+        "height": 96
+      }
+    },
+    "barreleye.1.1": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 151,
+        "y": 149,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 170,
+        "y": 170,
+        "width": 136,
+        "height": 97
+      }
+    },
+    "barreleye.1.2": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 302,
+        "y": 149,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 319,
+        "y": 170,
+        "width": 134,
+        "height": 97
+      }
+    },
+    "barreleye.1.3": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 453,
+        "y": 149,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 467,
+        "y": 176,
+        "width": 139,
+        "height": 88
+      }
+    },
+    "barreleye.2.0": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 0,
+        "y": 298,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 20,
+        "y": 292,
+        "width": 138,
+        "height": 116
+      }
+    },
+    "barreleye.2.1": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 151,
+        "y": 298,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 174,
+        "y": 292,
+        "width": 134,
+        "height": 115
+      }
+    },
+    "barreleye.2.2": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 302,
+        "y": 298,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 330,
+        "y": 292,
+        "width": 129,
+        "height": 116
+      }
+    },
+    "barreleye.2.3": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 453,
+        "y": 298,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 478,
+        "y": 292,
+        "width": 117,
+        "height": 110
+      }
+    },
+    "barreleye.3.0": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 0,
+        "y": 447,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "environment",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 21,
+        "y": 444,
+        "width": 135,
+        "height": 132
+      }
+    },
+    "barreleye.3.1": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 151,
+        "y": 447,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "environment",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 169,
+        "y": 444,
+        "width": 135,
+        "height": 132
+      }
+    },
+    "barreleye.3.2": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 302,
+        "y": 447,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "environment",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 320,
+        "y": 444,
+        "width": 131,
+        "height": 132
+      }
+    },
+    "barreleye.3.3": {
+      "atlas": "barreleye",
+      "rect": {
+        "x": 453,
+        "y": 447,
+        "width": 151,
+        "height": 149
+      },
+      "anchor": {
+        "x": 74,
+        "y": 75
+      },
+      "kind": "environment",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 469,
+        "y": 438,
+        "width": 134,
+        "height": 135
+      }
+    },
+    "gulper.0.0": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "sprite",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 651,
+        "y": 37,
+        "width": 156,
+        "height": 111
+      }
+    },
+    "gulper.0.1": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 220,
+        "y": 0,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "sprite",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 813,
+        "y": 37,
+        "width": 122,
+        "height": 121
+      }
+    },
+    "gulper.0.2": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 440,
+        "y": 0,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "sprite",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 962,
+        "y": 21,
+        "width": 145,
+        "height": 126
+      }
+    },
+    "gulper.0.3": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 660,
+        "y": 0,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "sprite",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 1145,
+        "y": 13,
+        "width": 61,
+        "height": 159
+      }
+    },
+    "gulper.1.0": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 0,
+        "y": 168,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "sprite",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 650,
+        "y": 176,
+        "width": 159,
+        "height": 93
+      }
+    },
+    "gulper.1.1": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 220,
+        "y": 168,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "sprite",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 791,
+        "y": 185,
+        "width": 174,
+        "height": 77
+      }
+    },
+    "gulper.1.2": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 440,
+        "y": 168,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "sprite",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 951,
+        "y": 176,
+        "width": 157,
+        "height": 94
+      }
+    },
+    "gulper.1.3": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 660,
+        "y": 168,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "sprite",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 1087,
+        "y": 176,
+        "width": 150,
+        "height": 85
+      }
+    },
+    "gulper.2.0": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 0,
+        "y": 336,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "sprite",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 646,
+        "y": 328,
+        "width": 156,
+        "height": 75
+      }
+    },
+    "gulper.2.1": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 220,
+        "y": 336,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "sprite",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 789,
+        "y": 318,
+        "width": 165,
+        "height": 86
+      }
+    },
+    "gulper.2.2": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 440,
+        "y": 336,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "sprite",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 943,
+        "y": 294,
+        "width": 168,
+        "height": 118
+      }
+    },
+    "gulper.2.3": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 660,
+        "y": 336,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "sprite",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 1095,
+        "y": 282,
+        "width": 150,
+        "height": 145
+      }
+    },
+    "gulper.3.0": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 0,
+        "y": 504,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "environment",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 660,
+        "y": 484,
+        "width": 122,
+        "height": 69
+      }
+    },
+    "gulper.3.1": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 220,
+        "y": 504,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "environment",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 807,
+        "y": 458,
+        "width": 134,
+        "height": 100
+      }
+    },
+    "gulper.3.2": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 440,
+        "y": 504,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "environment",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 998,
+        "y": 473,
+        "width": 48,
+        "height": 80
+      }
+    },
+    "gulper.3.3": {
+      "atlas": "gulper",
+      "rect": {
+        "x": 660,
+        "y": 504,
+        "width": 220,
+        "height": 168
+      },
+      "anchor": {
+        "x": 91,
+        "y": 82
+      },
+      "kind": "environment",
+      "suggestedSize": 128,
+      "source": {
+        "atlas": "creatures",
+        "x": 1119,
+        "y": 453,
+        "width": 83,
+        "height": 110
+      }
+    },
+    "goblin.0.0": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 10,
+        "y": 652,
+        "width": 167,
+        "height": 86
+      }
+    },
+    "goblin.0.1": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 193,
+        "y": 0,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 185,
+        "y": 653,
+        "width": 143,
+        "height": 82
+      }
+    },
+    "goblin.0.2": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 386,
+        "y": 0,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 335,
+        "y": 643,
+        "width": 159,
+        "height": 95
+      }
+    },
+    "goblin.0.3": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 579,
+        "y": 0,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 512,
+        "y": 619,
+        "width": 88,
+        "height": 140
+      }
+    },
+    "goblin.1.0": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 0,
+        "y": 154,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 37,
+        "y": 762,
+        "width": 87,
+        "height": 138
+      }
+    },
+    "goblin.1.1": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 193,
+        "y": 154,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 178,
+        "y": 762,
+        "width": 85,
+        "height": 138
+      }
+    },
+    "goblin.1.2": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 386,
+        "y": 154,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 330,
+        "y": 763,
+        "width": 91,
+        "height": 137
+      }
+    },
+    "goblin.1.3": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 579,
+        "y": 154,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 476,
+        "y": 759,
+        "width": 101,
+        "height": 141
+      }
+    },
+    "goblin.2.0": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 0,
+        "y": 308,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 11,
+        "y": 923,
+        "width": 141,
+        "height": 78
+      }
+    },
+    "goblin.2.1": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 193,
+        "y": 308,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 158,
+        "y": 928,
+        "width": 139,
+        "height": 73
+      }
+    },
+    "goblin.2.2": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 386,
+        "y": 308,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 306,
+        "y": 923,
+        "width": 161,
+        "height": 82
+      }
+    },
+    "goblin.2.3": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 579,
+        "y": 308,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 475,
+        "y": 917,
+        "width": 131,
+        "height": 89
+      }
+    },
+    "goblin.3.0": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 0,
+        "y": 462,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "environment",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 21,
+        "y": 1048,
+        "width": 133,
+        "height": 146
+      }
+    },
+    "goblin.3.1": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 193,
+        "y": 462,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "environment",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 168,
+        "y": 1050,
+        "width": 134,
+        "height": 144
+      }
+    },
+    "goblin.3.2": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 386,
+        "y": 462,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "environment",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 320,
+        "y": 1050,
+        "width": 131,
+        "height": 144
+      }
+    },
+    "goblin.3.3": {
+      "atlas": "goblin",
+      "rect": {
+        "x": 579,
+        "y": 462,
+        "width": 193,
+        "height": 154
+      },
+      "anchor": {
+        "x": 105,
+        "y": 77
+      },
+      "kind": "environment",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 478,
+        "y": 1055,
+        "width": 126,
+        "height": 134
+      }
+    },
+    "fringehead.0.0": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 646,
+        "y": 651,
+        "width": 129,
+        "height": 122
+      }
+    },
+    "fringehead.0.1": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 186,
+        "y": 0,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 792,
+        "y": 674,
+        "width": 158,
+        "height": 99
+      }
+    },
+    "fringehead.0.2": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 372,
+        "y": 0,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 950,
+        "y": 674,
+        "width": 135,
+        "height": 87
+      }
+    },
+    "fringehead.0.3": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 558,
+        "y": 0,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 1101,
+        "y": 674,
+        "width": 136,
+        "height": 87
+      }
+    },
+    "fringehead.1.0": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 0,
+        "y": 166,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 645,
+        "y": 798,
+        "width": 136,
+        "height": 85
+      }
+    },
+    "fringehead.1.1": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 186,
+        "y": 166,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 800,
+        "y": 798,
+        "width": 141,
+        "height": 86
+      }
+    },
+    "fringehead.1.2": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 372,
+        "y": 166,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 960,
+        "y": 798,
+        "width": 133,
+        "height": 85
+      }
+    },
+    "fringehead.1.3": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 558,
+        "y": 166,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 1105,
+        "y": 798,
+        "width": 135,
+        "height": 112
+      }
+    },
+    "fringehead.2.0": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 0,
+        "y": 332,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 659,
+        "y": 917,
+        "width": 111,
+        "height": 106
+      }
+    },
+    "fringehead.2.1": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 186,
+        "y": 332,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 791,
+        "y": 917,
+        "width": 117,
+        "height": 110
+      }
+    },
+    "fringehead.2.2": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 372,
+        "y": 332,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 927,
+        "y": 917,
+        "width": 135,
+        "height": 113
+      }
+    },
+    "fringehead.2.3": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 558,
+        "y": 332,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "sprite",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 1062,
+        "y": 910,
+        "width": 178,
+        "height": 133
+      }
+    },
+    "fringehead.3.0": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 0,
+        "y": 498,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "environment",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 640,
+        "y": 1052,
+        "width": 146,
+        "height": 139
+      }
+    },
+    "fringehead.3.1": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 186,
+        "y": 498,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "environment",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 786,
+        "y": 1052,
+        "width": 150,
+        "height": 141
+      }
+    },
+    "fringehead.3.2": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 372,
+        "y": 498,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "environment",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 952,
+        "y": 1060,
+        "width": 137,
+        "height": 139
+      }
+    },
+    "fringehead.3.3": {
+      "atlas": "fringehead",
+      "rect": {
+        "x": 558,
+        "y": 498,
+        "width": 186,
+        "height": 166
+      },
+      "anchor": {
+        "x": 97,
+        "y": 75
+      },
+      "kind": "environment",
+      "suggestedSize": 80,
+      "source": {
+        "atlas": "creatures",
+        "x": 1104,
+        "y": 1060,
+        "width": 128,
+        "height": 139
+      }
+    },
+    "buoy": {
+      "atlas": "buoy",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 463,
+        "height": 510
+      },
+      "anchor": {
+        "x": 231,
+        "y": 293
+      },
+      "kind": "sprite",
+      "suggestedSize": 100,
+      "source": {
+        "atlas": "buoy",
+        "x": 400,
+        "y": 401,
+        "width": 455,
+        "height": 502
+      }
+    },
+    "effects.sonar-hit.0": {
+      "atlas": "effects",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 0,
+        "y": 0,
+        "width": 444,
+        "height": 444
+      }
+    },
+    "effects.sonar-hit.1": {
+      "atlas": "effects",
+      "rect": {
+        "x": 128,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 444,
+        "y": 0,
+        "width": 443,
+        "height": 444
+      }
+    },
+    "effects.sonar-hit.2": {
+      "atlas": "effects",
+      "rect": {
+        "x": 256,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 887,
+        "y": 0,
+        "width": 443,
+        "height": 444
+      }
+    },
+    "effects.sonar-hit.3": {
+      "atlas": "effects",
+      "rect": {
+        "x": 384,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 1330,
+        "y": 0,
+        "width": 444,
+        "height": 444
+      }
+    },
+    "effects.sonar-hit.4": {
+      "atlas": "effects",
+      "rect": {
+        "x": 512,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 0,
+        "y": 444,
+        "width": 444,
+        "height": 443
+      }
+    },
+    "effects.sonar-hit.5": {
+      "atlas": "effects",
+      "rect": {
+        "x": 640,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 444,
+        "y": 444,
+        "width": 443,
+        "height": 443
+      }
+    },
+    "effects.sonar-hit.6": {
+      "atlas": "effects",
+      "rect": {
+        "x": 768,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 887,
+        "y": 444,
+        "width": 443,
+        "height": 443
+      }
+    },
+    "effects.sonar-hit.7": {
+      "atlas": "effects",
+      "rect": {
+        "x": 896,
+        "y": 0,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-hit.png",
+        "x": 1330,
+        "y": 444,
+        "width": 444,
+        "height": 443
+      }
+    },
+    "effects.hull-hit.0": {
+      "atlas": "effects",
+      "rect": {
+        "x": 0,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 0,
+        "y": 0,
+        "width": 444,
+        "height": 444
+      }
+    },
+    "effects.hull-hit.1": {
+      "atlas": "effects",
+      "rect": {
+        "x": 128,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 444,
+        "y": 0,
+        "width": 443,
+        "height": 444
+      }
+    },
+    "effects.hull-hit.2": {
+      "atlas": "effects",
+      "rect": {
+        "x": 256,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 887,
+        "y": 0,
+        "width": 443,
+        "height": 444
+      }
+    },
+    "effects.hull-hit.3": {
+      "atlas": "effects",
+      "rect": {
+        "x": 384,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 1330,
+        "y": 0,
+        "width": 444,
+        "height": 444
+      }
+    },
+    "effects.hull-hit.4": {
+      "atlas": "effects",
+      "rect": {
+        "x": 512,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 0,
+        "y": 444,
+        "width": 444,
+        "height": 443
+      }
+    },
+    "effects.hull-hit.5": {
+      "atlas": "effects",
+      "rect": {
+        "x": 640,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 444,
+        "y": 444,
+        "width": 443,
+        "height": 443
+      }
+    },
+    "effects.hull-hit.6": {
+      "atlas": "effects",
+      "rect": {
+        "x": 768,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 887,
+        "y": 444,
+        "width": 443,
+        "height": 443
+      }
+    },
+    "effects.hull-hit.7": {
+      "atlas": "effects",
+      "rect": {
+        "x": 896,
+        "y": 128,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "hull-hit.png",
+        "x": 1330,
+        "y": 444,
+        "width": 444,
+        "height": 443
+      }
+    },
+    "effects.sonar-cast.0": {
+      "atlas": "effects",
+      "rect": {
+        "x": 0,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 0,
+        "y": 0,
+        "width": 444,
+        "height": 444
+      }
+    },
+    "effects.sonar-cast.1": {
+      "atlas": "effects",
+      "rect": {
+        "x": 128,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 444,
+        "y": 0,
+        "width": 443,
+        "height": 444
+      }
+    },
+    "effects.sonar-cast.2": {
+      "atlas": "effects",
+      "rect": {
+        "x": 256,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 887,
+        "y": 0,
+        "width": 443,
+        "height": 444
+      }
+    },
+    "effects.sonar-cast.3": {
+      "atlas": "effects",
+      "rect": {
+        "x": 384,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 1330,
+        "y": 0,
+        "width": 444,
+        "height": 444
+      }
+    },
+    "effects.sonar-cast.4": {
+      "atlas": "effects",
+      "rect": {
+        "x": 512,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 0,
+        "y": 444,
+        "width": 444,
+        "height": 443
+      }
+    },
+    "effects.sonar-cast.5": {
+      "atlas": "effects",
+      "rect": {
+        "x": 640,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 444,
+        "y": 444,
+        "width": 443,
+        "height": 443
+      }
+    },
+    "effects.sonar-cast.6": {
+      "atlas": "effects",
+      "rect": {
+        "x": 768,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 887,
+        "y": 444,
+        "width": 443,
+        "height": 443
+      }
+    },
+    "effects.sonar-cast.7": {
+      "atlas": "effects",
+      "rect": {
+        "x": 896,
+        "y": 256,
+        "width": 128,
+        "height": 128
+      },
+      "anchor": {
+        "x": 64,
+        "y": 64
+      },
+      "kind": "effect",
+      "source": {
+        "image": "sonar-cast.png",
+        "x": 1330,
+        "y": 444,
+        "width": 444,
+        "height": 443
+      }
+    }
+  },
+  "aliases": {
+    "barreleye.sand-glow-1": "barreleye.3.0",
+    "barreleye.sand-glow-2": "barreleye.3.1",
+    "barreleye.sand-glow-3": "barreleye.3.2",
+    "barreleye.sonar": "barreleye.3.3",
+    "gulper.ripple-1": "gulper.3.0",
+    "gulper.ripple-2": "gulper.3.1",
+    "gulper.depth-1": "gulper.3.2",
+    "gulper.depth-2": "gulper.3.3",
+    "goblin.substrate-1": "goblin.3.0",
+    "goblin.substrate-2": "goblin.3.1",
+    "goblin.substrate-3": "goblin.3.2",
+    "goblin.lunge-trail": "goblin.3.3",
+    "fringehead.flare-variant-1": "fringehead.3.0",
+    "fringehead.flare-variant-2": "fringehead.3.1",
+    "fringehead.rock-burrow": "fringehead.3.2",
+    "fringehead.sand-burrow": "fringehead.3.3"
+  },
+  "animations": {
+    "explorer.idle.down": {
+      "frames": [
+        "explorer.down.0"
+      ],
+      "fps": 1,
+      "loop": true
+    },
+    "explorer.swim.down": {
+      "frames": [
+        "explorer.down.1",
+        "explorer.down.2",
+        "explorer.down.3",
+        "explorer.down.2"
+      ],
+      "fps": 7,
+      "loop": true
+    },
+    "explorer.idle.left": {
+      "frames": [
+        "explorer.left.0"
+      ],
+      "fps": 1,
+      "loop": true
+    },
+    "explorer.swim.left": {
+      "frames": [
+        "explorer.left.1",
+        "explorer.left.2",
+        "explorer.left.3",
+        "explorer.left.2"
+      ],
+      "fps": 7,
+      "loop": true
+    },
+    "explorer.idle.right": {
+      "frames": [
+        "explorer.right.0"
+      ],
+      "fps": 1,
+      "loop": true
+    },
+    "explorer.swim.right": {
+      "frames": [
+        "explorer.right.1",
+        "explorer.right.2",
+        "explorer.right.3",
+        "explorer.right.2"
+      ],
+      "fps": 7,
+      "loop": true
+    },
+    "explorer.idle.up": {
+      "frames": [
+        "explorer.up.0"
+      ],
+      "fps": 1,
+      "loop": true
+    },
+    "explorer.swim.up": {
+      "frames": [
+        "explorer.up.1",
+        "explorer.up.2",
+        "explorer.up.3",
+        "explorer.up.2"
+      ],
+      "fps": 7,
+      "loop": true
+    },
+    "blobfish.idle.down": {
+      "frames": [
+        "blobfish.0.0"
+      ],
+      "fps": 1,
+      "loop": true
+    },
+    "blobfish.swim.down": {
+      "frames": [
+        "blobfish.0.0",
+        "blobfish.0.1",
+        "blobfish.0.2",
+        "blobfish.0.3"
+      ],
+      "fps": 5,
+      "loop": true
+    },
+    "blobfish.swim.left": {
+      "frames": [
+        "blobfish.1.0",
+        "blobfish.1.1"
+      ],
+      "fps": 5,
+      "loop": true
+    },
+    "blobfish.swim.right": {
+      "frames": [
+        "blobfish.1.2",
+        "blobfish.1.3"
+      ],
+      "fps": 5,
+      "loop": true
+    },
+    "barreleye.idle.profile": {
+      "frames": [
+        "barreleye.0.0"
+      ],
+      "fps": 1,
+      "loop": true
+    },
+    "barreleye.swim": {
+      "frames": [
+        "barreleye.1.0",
+        "barreleye.1.1",
+        "barreleye.1.2",
+        "barreleye.1.3"
+      ],
+      "fps": 6,
+      "loop": true
+    },
+    "barreleye.focus": {
+      "frames": [
+        "barreleye.2.0",
+        "barreleye.2.1",
+        "barreleye.2.2",
+        "barreleye.2.3"
+      ],
+      "fps": 5,
+      "loop": false
+    },
+    "gulper.idle.profile": {
+      "frames": [
+        "gulper.0.0"
+      ],
+      "fps": 1,
+      "loop": true
+    },
+    "gulper.swim": {
+      "frames": [
+        "gulper.1.0",
+        "gulper.1.1",
+        "gulper.1.2",
+        "gulper.1.3"
+      ],
+      "fps": 6,
+      "loop": true
+    },
+    "gulper.expand": {
+      "frames": [
+        "gulper.2.0",
+        "gulper.2.1",
+        "gulper.2.2",
+        "gulper.2.3"
+      ],
+      "fps": 5,
+      "loop": false
+    },
+    "goblin.idle.profile": {
+      "frames": [
+        "goblin.0.0"
+      ],
+      "fps": 1,
+      "loop": true
+    },
+    "goblin.swim": {
+      "frames": [
+        "goblin.1.0",
+        "goblin.1.1",
+        "goblin.1.2",
+        "goblin.1.3"
+      ],
+      "fps": 6,
+      "loop": true
+    },
+    "goblin.lunge": {
+      "frames": [
+        "goblin.2.0",
+        "goblin.2.1",
+        "goblin.2.2",
+        "goblin.2.3"
+      ],
+      "fps": 5,
+      "loop": false
+    },
+    "fringehead.idle.profile": {
+      "frames": [
+        "fringehead.0.2"
+      ],
+      "fps": 1,
+      "loop": true
+    },
+    "fringehead.swim": {
+      "frames": [
+        "fringehead.1.0",
+        "fringehead.1.1",
+        "fringehead.1.2",
+        "fringehead.1.3"
+      ],
+      "fps": 6,
+      "loop": true
+    },
+    "fringehead.flare": {
+      "frames": [
+        "fringehead.2.0",
+        "fringehead.2.1",
+        "fringehead.2.2",
+        "fringehead.2.3"
+      ],
+      "fps": 5,
+      "loop": false
+    },
+    "buoy.idle": {
+      "frames": [
+        "buoy"
+      ],
+      "fps": 1,
+      "loop": true
+    },
+    "effects.sonar-hit": {
+      "frames": [
+        "effects.sonar-hit.0",
+        "effects.sonar-hit.1",
+        "effects.sonar-hit.2",
+        "effects.sonar-hit.3",
+        "effects.sonar-hit.4",
+        "effects.sonar-hit.5",
+        "effects.sonar-hit.6",
+        "effects.sonar-hit.7"
+      ],
+      "fps": 16,
+      "loop": false
+    },
+    "effects.hull-hit": {
+      "frames": [
+        "effects.hull-hit.0",
+        "effects.hull-hit.1",
+        "effects.hull-hit.2",
+        "effects.hull-hit.3",
+        "effects.hull-hit.4",
+        "effects.hull-hit.5",
+        "effects.hull-hit.6",
+        "effects.hull-hit.7"
+      ],
+      "fps": 16,
+      "loop": false
+    },
+    "effects.sonar-cast": {
+      "frames": [
+        "effects.sonar-cast.0",
+        "effects.sonar-cast.1",
+        "effects.sonar-cast.2",
+        "effects.sonar-cast.3",
+        "effects.sonar-cast.4",
+        "effects.sonar-cast.5",
+        "effects.sonar-cast.6",
+        "effects.sonar-cast.7"
+      ],
+      "fps": 20,
+      "loop": false
+    }
+  },
+  "world": {
+    "waterAtlas": "water",
+    "repeatMode": "mirror",
+    "tileWorldSize": 320,
+    "buoyFrame": "buoy"
+  },
+  "notes": [
+    "Frame rectangles reference the transparent PNG atlases directly; no equal-cell slicing required.",
+    "Suggested size is the largest dimension of a species reference frame in CSS/world pixels.",
+    "Use a shared scale per species and the per-frame anchor; never independently fit each frame.",
+    "Generated poses are prototype animations. Final combat timing and colliders are gameplay decisions.",
+    "Environmental substrate squares are not verified seamless terrain tiles."
+  ]
+}

@@ -10,7 +10,7 @@
   <body>
     <div class="app-frame">
       <header class="topbar">
-        <a class="brand" href="#library" aria-label="Point Nemo UI playground home">
+        <a class="brand" href="#library" data-go="library" aria-label="Point Nemo UI playground home">
           <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
           <span>POINT <b>NEMO</b></span>
         </a>
@@ -32,7 +32,7 @@
         <section class="screen active" id="library" aria-labelledby="library-title">
           <div class="eyebrow">LOCAL LIBRARY</div>
           <div class="page-heading">
-            <div><h1 id="library-title">Your library</h1><p>Upload a study PDF to build a descent.</p></div>
+            <div><h1 id="library-title">Your library</h1><p>Preview a study expedition with sample lessons. PDF processing is not connected.</p></div>
           </div>
 
           <section class="art-banner" aria-label="Pixel art preview of the underwater descent">
@@ -42,15 +42,15 @@
 
           <div class="library-grid">
             <section class="panel upload-panel" aria-labelledby="upload-title">
-              <div class="panel-heading"><div><h2 id="upload-title">Add a study PDF</h2><p>English, text based · maximum 3 pages</p></div></div>
+              <div class="panel-heading"><div><h2 id="upload-title">Add a study PDF</h2><p>English, text based · file selection preview</p></div></div>
               <label class="dropzone" for="pdf-file">
                 <span class="upload-icon" aria-hidden="true">↑</span>
                 <strong>Choose a PDF file</strong>
-                <span>Up to 8,000 extracted characters</span>
+                <span>No file-size or page limit · no extraction in this preview</span>
                 <span class="choose-button">Choose file</span>
               </label>
               <input id="pdf-file" type="file" accept="application/pdf,.pdf" />
-              <p class="file-status" id="file-status" aria-live="polite">Your PDF is processed on this device.</p>
+              <p class="file-status" id="file-status" aria-live="polite">Preview only: your file is not uploaded or processed.</p>
             </section>
 
             <aside class="panel saved-panel" aria-labelledby="saved-title">
@@ -69,7 +69,7 @@
 
         <section class="screen" id="sonar" aria-labelledby="sonar-title" hidden>
           <div class="eyebrow">LOCAL PROCESSING</div>
-          <div class="page-heading"><div><h1 id="sonar-title">Preparing your descent</h1><p>Questions are generated and checked against your PDF on this device.</p></div><p class="model-info">Local model: <b>qwen2.5:1.5b</b></p></div>
+          <div class="page-heading"><div><h1 id="sonar-title">Preparing your descent</h1><p>Simulated processing stages for visual review. No model is running in this preview.</p></div><p class="model-info">Example model: <b>qwen2.5:1.5b</b></p></div>
           <section class="panel sonar-panel">
             <div class="sonar-rings" aria-hidden="true"><i></i><i></i><i></i><b>◉</b></div>
             <p class="eyebrow center-eyebrow">SONAR STATUS <span id="sonar-count">01 / 03</span></p>
@@ -142,13 +142,13 @@
         </section>
 
         <section class="screen" id="results" aria-labelledby="results-title" hidden>
-          <div class="eyebrow">RUN SUMMARY</div>
+          <div class="eyebrow">SAMPLE RUN SUMMARY · NOT YOUR RESULTS</div>
           <section class="panel results-panel"><div class="badge-mark" aria-hidden="true">✦</div><p class="eyebrow center-eyebrow">DESCENT COMPLETE</p><h1 id="results-title">Well done.</h1><div class="score-grid"><div><b>3 / 3</b><span>LESSON PARTS</span></div><div><b>8 / 9</b><span>FINAL REVIEW</span></div><div><b>170</b><span>XP</span></div></div><div class="results-actions"><button class="primary-button" type="button" data-go="library">Return to library <span>→</span></button><button class="secondary-button" type="button" data-go="seas">Choose sea to try again</button></div></section>
         </section>
 
         <section class="screen" id="profile" aria-labelledby="profile-title" hidden>
           <div class="eyebrow">PLAYER</div>
-          <div class="page-heading"><div><h1 id="profile-title">Profile</h1><p>Your progress across local descents.</p></div></div>
+          <div class="page-heading"><div><h1 id="profile-title">Profile</h1><p>Sample profile for visual review. No account or saved progress is connected.</p></div></div>
           <section class="profile-hero panel">
             <div class="profile-avatar"><canvas class="pixel-scene" id="profile-scene" aria-hidden="true"></canvas></div>
             <div class="profile-identity"><p class="eyebrow">LOCAL DIVER</p><h2>Deep Diver</h2><p>Level 04 <span>·</span> 640 / 1,000 XP</p><div class="xp-track" aria-label="640 of 1000 XP toward the next level"><i></i></div></div>

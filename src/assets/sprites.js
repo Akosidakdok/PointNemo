@@ -1,8 +1,22 @@
 /** Load a prepared atlas bundle; resolves PNG paths relative to its manifest. */
-export async function loadAssetBundle(manifestUrl, { atlases } = {}) {
-  const url = new URL(manifestUrl, globalThis.location?.href);
-  const response = await fetch(url);
+export async function loadAssetBundle(manifestUrl = "/assets/runtime/manifest.json", { atlases } = {}) {
+  let url = new URL(manifestUrl, globalThis.location?.href);
+  let response = await fetch(url);
+  const contentType = response.headers.get("content-type") || "";
+  if ((!response.ok || contentType.includes("text/html")) && manifestUrl !== "/manifest.json") {
+    const fallbackUrl = new URL("/manifest.json", globalThis.location?.href);
+    const fallbackResp = await fetch(fallbackUrl);
+    const fallbackType = fallbackResp.headers.get("content-type") || "";
+    if (fallbackResp.ok && !fallbackType.includes("text/html")) {
+      url = fallbackUrl;
+      response = fallbackResp;
+    }
+  }
   if (!response.ok) throw new Error(`Asset manifest failed: HTTP ${response.status}`);
+  const finalType = response.headers.get("content-type") || "";
+  if (finalType.includes("text/html")) {
+    throw new Error(`Asset manifest failed: received HTML instead of JSON from ${url.pathname}`);
+  }
   const manifest = await response.json();
   const images = {};
   await Promise.all(Object.entries(manifest.atlases).filter(([name]) => !atlases || atlases.includes(name)).map(async ([name, atlas]) => {

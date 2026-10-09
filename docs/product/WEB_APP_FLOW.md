@@ -2,11 +2,15 @@
 
 **Audience:** Product, UX, frontend, backend, QA, and local AI teams
 **Scope:** Strict single-device hackathon MVP, aligned to `point-nemo-masterplan.md`
-**Product promise:** Turn one short English PDF into a source-grounded, replayable ocean descent using local processing and local storage.
+**Product promise:** Turn one English text-based PDF into a source-grounded, replayable ocean descent using local processing and local storage.
+
+## Implementation status
+
+This document describes the five-module target journey. The standalone UI playground is a sample-data preview, not a replacement for the main React app. Main already includes local explorer login/signup and guest entry plus an integrated API with SQLite migrations; this PR preserves them. Remote authentication, connected profiles, and online leaderboards are not implemented here. Main currently groups its three encounters by difficulty; the topic-based WASD route below is an integration target, not a claim that this preview changes the authoritative backend. Preview instances are in memory only and reset on reload.
 
 ## MVP boundaries
 
-- One learner on one laptop. No sign-up, log-in, profile switching, or account recovery.
+- One learner on one laptop. Preserve the main app's local explorer login/signup and guest entry. Remote accounts, profile switching, and account recovery are outside this change.
 - One PDF per document and generation run; learners may keep multiple independent document records in the local library. Never combine documents into one generated set. No cloud upload, cloud inference, cloud sync, or multi-device service.
 - Runtime inference uses local Ollama with `qwen2.5:1.5b`. After setup and model download, the study flow works without internet access.
 - Persist validated source material, generated questions, attempts, and run progression in local SQLite. The source PDF itself is handled in memory during extraction and is not retained by default.
@@ -15,7 +19,7 @@
 
 ## Product module map
 
-The wider web app places a title screen and then a login/signup page before this experience. This flow and the UI playground start after those entry screens, at Module 1: Local Library. The title and login/signup screens are not represented in the playground. Login, signup, account state, and authentication remain outside the functional hackathon MVP; they are not part of the local study flow.
+The wider web app places a title screen and then a login/signup page before this experience. This flow and the UI playground start after those entry screens, at Module 1: Local Library. The playground does not implement or connect to the main app's local identity flow; it introduces no remote authentication.
 
 | Module | Screens and responsibilities | Leads to |
 | --- | --- | --- |
@@ -66,16 +70,16 @@ flowchart LR
 
 ### 1. Library & Document Upload
 
-The app opens directly to a local library screen. There are no account screens or general-purpose dashboard. The primary action is **Upload PDF**; the library lists independent local document records, compatible saved question sets, active runs, and past attempts. Only one generation job may run at a time. After generation, **Choose your sea** lists lessons whose question sets passed validation. The player selects a lesson card and either resumes that lesson's active run or starts a new descent instance for it; each card stays associated with its own document and map progress. This selection step stays in the same app tab so WASD control and local navigation remain predictable.
+The playground opens directly to a local library preview. In the main app, local login/signup or guest entry precedes the library. The primary action is **Upload PDF**; the library lists independent local document records, compatible saved question sets, active runs, and past attempts. Only one generation job may run at a time. After generation, the target **Choose your sea** state lists lessons whose question sets passed validation. The player selects a lesson card and either resumes that lesson's active run or starts a new descent instance for it; each card stays associated with its own document and map progress. This selection step stays in the same app tab so WASD control and local navigation remain predictable.
 
-Accept one English, text-based PDF per run with these strict limits:
+Current main accepts one English, text-based PDF per run with these admission rules:
 
 | Admission rule | MVP limit |
 | --- | --- |
 | File count | One PDF per document and generation run; different PDFs remain isolated |
-| File size | Under 5 MiB |
-| Pages | No more than 3 pages |
-| Extracted text | No more than 8,000 normalized characters and at least 300 non-whitespace characters |
+| File size | No upper admission limit |
+| Pages | No upper admission limit |
+| Extracted text | At least 300 extracted characters; no upper admission limit |
 | Language/content | English text that can be extracted and tied to page-level source locations |
 | Unsupported input | Scanned/image-only, encrypted, unreadable, empty, or out-of-limit PDF |
 
@@ -130,7 +134,7 @@ After the player clears all three topic parts, start the final boss encounter at
 
 #### Route art and sprite use
 
-Use `assets/maps/point-nemo-abyss-ocean.png` as the main world area. Use `assets/characters/ocean-explorer-sprite-sheet.png` as the player character base; its intended grid is four directions by idle plus three swim frames. Use the prepared runtime creature atlases in `assets/prepared/runtime/`, with frame names and shared anchors from `manifest.json` and the helpers in `src/assets/sprites.js`, as overworld enemy markers. The player moves freely within map bounds, while encounter triggers enforce the fixed lesson order. `water.png` with its mirrored repeat mode remains available for other scene backgrounds. Keep pixel edges crisp and preserve each prepared atlas species' scale and anchor across animations.
+Use `assets/maps/point-nemo-abyss-ocean.png` as the main world area. The player artwork originates in `assets/characters/ocean-explorer-sprite-sheet.png`; render its prepared transparent Explorer atlas using the manifest's directional idle/swim sequences and shared anchors. Use the prepared runtime creature atlases in `assets/prepared/runtime/`, with frame names and shared anchors from `manifest.json` and the helpers in `src/assets/sprites.js`, as overworld enemy markers. The player moves freely within map bounds, while encounter triggers enforce the fixed lesson order. `water.png` with its mirrored repeat mode remains available for other scene backgrounds. Keep pixel edges crisp and preserve each prepared atlas species' scale and anchor across animations.
 
 The current prepared runtime art does not include Clownfish, Giant Squid, or Megalodon. Do not imply those creatures have dedicated sprites. Use a clearly identified existing prototype sprite for a placeholder encounter, or add approved art before claiming that the named enemy is represented. Use `effects.png` for sonar cast/hit and hull-hit feedback. Source concept sheets with white backgrounds are not runtime assets.
 
@@ -163,7 +167,7 @@ Save each run and route progression locally in SQLite, including the document/qu
 - If Ollama is stopped, show a useful local-service error and preserve the admitted library/run state. If the app closes mid-run, restore the selected lesson's saved run and map position instead of creating a new one.
 - Make keyboard focus, answer labels, contrast, reduced-motion support, and visible state changes part of each encounter/loading/result screen.
 - Provide local deletion for a document and its associated question set, runs, attempts, progress, and badges. Cancel related work and delete linked records transactionally.
-- Do not add user accounts, cloud sync, standalone review or flashcards, leaderboards, broad dashboard quick-access routing, arbitrary file formats, OCR, or long-document support to this MVP.
+- Do not add remote user accounts, cloud sync, standalone review or flashcards, connected leaderboards, broad dashboard quick-access routing, arbitrary file formats, or OCR in this change. Main's existing local identity flow and current PDF admission behavior remain intact.
 
 ## Team ownership
 

@@ -1,7 +1,6 @@
 import { drawFrame, drawWater, loadAssetBundle, speciesScale, SpriteAnimation } from "../../../src/assets/sprites.js";
 
 import oceanMapUrl from "../../../assets/maps/point-nemo-abyss-ocean.png";
-import explorerSheetUrl from "../../../assets/characters/ocean-explorer-sprite-sheet.png";
 
 const screenNames = ["library", "sonar", "seas", "descent", "boss", "results", "profile", "leaderboard"];
 const navButtons = [...document.querySelectorAll(".nav-step[data-screen]")];
@@ -11,7 +10,7 @@ let routePartAnswered = false;
 let activeEncounter = false;
 let bossReached = false;
 let worldMapImage;
-let explorerFrames;
+const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const heldMovementKeys = new Set();
 const worldPlayer = { x: 0.5, y: 0.57, facing: "up", moving: false };
 const marineBiologyTopics = ["", "Surface currents", "Pressure & adaptation", "Deep-sea habitats", "Lesson boss"];
@@ -98,6 +97,7 @@ function saveCurrentInstance() {
     playerHP: Number.parseInt(document.querySelector("#player-hp").textContent, 10),
     enemyHP: Number.parseInt(document.querySelector("#enemy-hp").textContent, 10),
     feedbackHtml: document.querySelector("#answer-feedback").hidden ? "" : document.querySelector("#answer-feedback").innerHTML,
+    feedbackIncorrect: document.querySelector("#answer-feedback").classList.contains("incorrect"),
   });
 }
 
@@ -149,6 +149,8 @@ function startLessonInstance(lessonId, action) {
   const feedback = document.querySelector("#answer-feedback");
   feedback.innerHTML = instance.feedbackHtml ?? "";
   feedback.hidden = !instance.feedbackHtml;
+  feedback.classList.toggle("incorrect", Boolean(instance.feedbackIncorrect));
+  sceneEffects = [];
   document.querySelectorAll("[data-answer]").forEach((answer) => { answer.disabled = instance.routePartAnswered; });
   heldMovementKeys.clear();
   document.querySelector("#descent-lesson-title").textContent = lesson.title;
@@ -295,16 +297,11 @@ fileInput.addEventListener("change", () => {
   if (!file) return;
   const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
   if (!isPdf) {
-    status.textContent = "Choose a PDF file. This prototype checks file type and size only.";
+    status.textContent = "Choose a PDF file. This preview checks its extension/type only.";
     status.classList.add("error-text");
     return;
   }
-  if (file.size >= 5 * 1024 * 1024) {
-    status.textContent = "This file is 5 MiB or larger. Choose a smaller PDF.";
-    status.classList.add("error-text");
-    return;
-  }
-  status.textContent = `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MiB · ready for a future local extraction flow.`;
+  status.textContent = `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MiB · selected for preview only; no extraction is performed.`;
   status.classList.remove("error-text");
 });
 
@@ -339,12 +336,12 @@ document.querySelectorAll("[data-answer]").forEach((button) => {
     feedback.classList.toggle("incorrect", !correct);
     const currentQuestion = currentRouteQuestions[routeNode];
     feedback.innerHTML = correct
-      ? "Correct · <b>+10 XP</b> and 50 enemy damage. The answer is supported by your saved source document."
+      ? "Correct · <b>+10 sample XP</b> and 50 enemy damage. This is a demo question, not extracted PDF content."
       : `Incorrect · The correct answer is <b>${currentQuestion.answer}</b>. <div class="source-evidence"><small>WHY THIS IS CORRECT · SAMPLE EXPLANATION</small><p>${currentQuestion.explanation}</p><small>SUPPORTING PDF QUOTE · PLACEHOLDER</small><blockquote>“The exact supporting passage from the uploaded PDF appears here.”</blockquote></div>`;
     const hpId = correct ? "enemy" : "player";
     document.getElementById(`${hpId}-hp`).textContent = "50 / 100 HP";
     document.getElementById(`${hpId}-hp-bar`).style.width = "50%";
-    if (assetBundle) sceneEffects = [new SpriteAnimation(assetBundle, correct ? "effects.sonar-hit" : "effects.hull-hit")];
+    if (assetBundle && !reducedMotion.matches) sceneEffects = [new SpriteAnimation(assetBundle, correct ? "effects.sonar-hit" : "effects.hull-hit")];
     document.querySelectorAll("[data-answer]").forEach((answer) => { answer.disabled = true; });
     routePartAnswered = true;
     document.querySelector("#clear-part").disabled = false;
@@ -380,10 +377,11 @@ function setupScene(canvas, definition) {
   const creature = definition.species
     ? new SpriteAnimation(assetBundle, definition.species === "barreleye" ? "barreleye.swim" : "goblin.idle.profile")
     : null;
+  const routePlayer = definition.route ? new SpriteAnimation(assetBundle, "explorer.idle.up") : null;
   const routeCreatures = definition.route
     ? ["barreleye.swim", "gulper.swim", "fringehead.swim", "goblin.idle.profile"].map((animation) => new SpriteAnimation(assetBundle, animation))
     : null;
-  return { canvas, context, definition, player, creature, routeCreatures };
+  return { canvas, context, definition, player, creature, routePlayer, routeCreatures };
 }
 
 function loadImage(url) {
@@ -393,25 +391,6 @@ function loadImage(url) {
     image.onerror = () => reject(new Error(`Could not load image asset: ${url}`));
     image.src = url;
   });
-}
-
-function prepareExplorerFrames(image) {
-  const cellWidth = image.naturalWidth / 4;
-  const cellHeight = image.naturalHeight / 4;
-  const directions = ["down", "left", "right", "up"];
-  return Object.fromEntries(directions.map((direction, row) => [direction, Array.from({ length: 4 }, (_, column) => {
-    const frame = document.createElement("canvas");
-    frame.width = Math.floor(cellWidth);
-    frame.height = Math.floor(cellHeight);
-    const context = frame.getContext("2d", { willReadFrequently: true });
-    context.drawImage(image, column * cellWidth, row * cellHeight, cellWidth, cellHeight, 0, 0, frame.width, frame.height);
-    const pixels = context.getImageData(0, 0, frame.width, frame.height);
-    for (let index = 0; index < pixels.data.length; index += 4) {
-      if (pixels.data[index] > 242 && pixels.data[index + 1] > 242 && pixels.data[index + 2] > 242) pixels.data[index + 3] = 0;
-    }
-    context.putImageData(pixels, 0, 0);
-    return frame;
-  })]));
 }
 
 function paintRouteMap(scene, dt, width, height) {
@@ -435,7 +414,7 @@ function paintRouteMap(scene, dt, width, height) {
     const marker = points[markerIndex];
     const animation = scene.routeCreatures[markerIndex - 1];
     const scale = Math.max(0.42, Math.min(1, width / 650));
-    animation.update(dt);
+    animation.update(reducedMotion.matches ? 0 : dt);
     context.save();
     context.globalAlpha = markerIndex < routeNode ? 0.38 : markerIndex === routeNode ? 1 : 0.55;
     context.beginPath();
@@ -454,12 +433,12 @@ function paintRouteMap(scene, dt, width, height) {
     context.restore();
   }
 
-  const frameSequence = explorerFrames[worldPlayer.facing];
-  const frameIndex = worldPlayer.moving ? 1 + Math.floor(performance.now() / 125) % 3 : 0;
-  const explorerSize = width * 0.15;
+  scene.routePlayer.play(`explorer.${worldPlayer.moving && !reducedMotion.matches ? "swim" : "idle"}.${worldPlayer.facing}`);
+  scene.routePlayer.update(reducedMotion.matches ? 0 : dt);
+  const explorerScale = cachedScales.explorer * width * 0.15 / 104;
   context.save();
   context.globalAlpha = 1;
-  context.drawImage(frameSequence[frameIndex], worldPlayer.x * width - explorerSize / 2, worldPlayer.y * height - explorerSize / 2, explorerSize, explorerSize);
+  scene.routePlayer.draw(context, Math.round(worldPlayer.x * width), Math.round(worldPlayer.y * height), explorerScale);
   context.restore();
 }
 
@@ -484,7 +463,7 @@ function paintScene(scene, dt) {
   context.fillRect(0, 0, width, height);
   const scale = Math.min(1, height / 175);
   if (player) {
-    player.update(dt);
+    player.update(reducedMotion.matches ? 0 : dt);
     const playerScale = definition.playerSize ? definition.playerSize / 104 : scale;
     const playerX = width * (definition.playerX ?? 0.39);
     const playerY = height * (definition.playerY ?? 0.62);
@@ -492,7 +471,7 @@ function paintScene(scene, dt) {
       playerX, playerY, cachedScales.explorer * playerScale);
   }
   if (creature) {
-    creature.update(dt);
+    creature.update(reducedMotion.matches ? 0 : dt);
     const size = definition.species === "barreleye" ? cachedScales.barreleye : cachedScales.goblinLarge;
     drawFrame(context, assetBundle, creature.frameName, width * (player ? 0.74 : 0.56), height * 0.56, size * scale);
   }
@@ -515,12 +494,10 @@ function animate(time) {
 Promise.all([
   loadAssetBundle("/manifest.json", { atlases: ["explorer", "barreleye", "gulper", "goblin", "fringehead", "buoy", "water", "effects"] }),
   loadImage(oceanMapUrl),
-  loadImage(explorerSheetUrl),
 ])
-  .then(([bundle, mapImage, explorerSheet]) => {
+  .then(([bundle, mapImage]) => {
     assetBundle = bundle;
     worldMapImage = mapImage;
-    explorerFrames = prepareExplorerFrames(explorerSheet);
     cachedScales.explorer = speciesScale(bundle, "explorer", 104);
     cachedScales.barreleye = speciesScale(bundle, "barreleye", 88);
     cachedScales.gulper = speciesScale(bundle, "gulper", 88);

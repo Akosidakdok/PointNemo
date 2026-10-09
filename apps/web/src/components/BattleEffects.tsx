@@ -69,7 +69,7 @@ export const BattleEffects = forwardRef<BattleEffectsHandle, Props>(function Bat
 
   useEffect(() => {
     let live = true;
-    void loadAssetBundle("/manifest.json", { atlases: ["effects"] }).then((bundle) => {
+    void loadAssetBundle("/assets/runtime/manifest.json", { atlases: ["effects"] }).then((bundle) => {
       if (!live) return;
       bundleRef.current = bundle;
       activeRef.current.push(...queuedRef.current.map((queued) => ({

@@ -2,9 +2,15 @@
 
 ## Where this UI sits
 
-The broader app sequence is **Title → Login / Sign up → Local Library → Sonar → Choose a Sea → Ocean Descent → Lesson Boss → Results**. The playground begins at **Local Library**, after the title and login screens. Those two entry screens are context only: they are not implemented here, and accounts/authentication remain outside the functional hackathon MVP. Choose a Sea is a selection state within the Local Library module, not a new product module.
+The broader app sequence is **Title → Login / Sign up → Local Library → Sonar → Choose a Sea → Ocean Descent → Lesson Boss → Results**. The playground begins at **Local Library**, after the title and login screens. Those entry screens are not implemented here. The main React app already has local explorer login/signup and guest entry; this preview neither replaces that flow nor connects to its identity. Remote accounts remain outside this change. Choose a Sea is a selection state within the Local Library module, not a new product module.
 
 The playground is a frontend-only preview at `apps/web/ui-playground`. It helps review the five MVP modules in [WEB_APP_FLOW.md](WEB_APP_FLOW.md); it does not connect to the local API, Ollama, or SQLite.
+
+## Integration status
+
+This PR retains main's API, SQLite migrations, shared contracts, and React login flow unchanged. Earlier competing backend implementations and their API documentation have been excluded. Approved playground screens must be integrated into React in a separate change; running the main app does not display this preview after signup.
+
+PDF selection checks the extension/type only and does not read or upload file contents. Current main has no upper file-size, page-count, or extracted-character limit and requires at least 300 extracted characters. This preview cannot validate extracted text or language. Sonar stages, questions, Profile, Leaderboard, and Results use sample content; instance progress lasts only until reload.
 
 ## Module order
 
@@ -32,10 +38,9 @@ The playground currently draws:
 - Explorer animation from `explorer.png` in the Library and Descent scenes.
 - Barreleye animation from `barreleye.png` in the Library scene.
 - The square world area from `assets/maps/point-nemo-abyss-ocean.png`, with Point Nemo at its central buoy.
-- The player from `assets/characters/ocean-explorer-sprite-sheet.png`; the preview reads its four direction rows and cycles the three swim frames while WASD is held. Its white sheet background is made transparent in the preview renderer.
+- The player uses the prepared transparent `explorer.png` atlas derived from `assets/characters/ocean-explorer-sprite-sheet.png`. Directional idle/swim sequences, frame rectangles, and anchors come from the manifest; source sheets are not sliced or color-keyed in the browser.
 - Barreleye, Gulper, Fringehead, and Goblin Shark sprites from their prepared runtime atlases as overworld enemy markers. These are illustrative route markers, not claims about which creatures appear in the source lesson.
 - `water.png` with mirrored repeat for other scene backgrounds, and sonar/hull effects from `effects.png`.
-- Water from `water.png` and sonar/hull effects from `effects.png`.
 - `waves.svg` as a masked background layer, tinted by the active light or dark theme.
 
 The prepared runtime set has no Clownfish, Giant Squid, or Megalodon. The playground uses available prepared sprites as clearly labeled prototypes until dedicated art is added. Do not use original white-background concept sheets directly as runtime sprite images; use the prepared atlases and manifest.
@@ -49,6 +54,8 @@ Each real uploaded lesson/question set must have its own descent instance and is
 ## Visual direction
 
 The current playground uses translucent glass panels over a blue water backdrop. Light mode uses white and pale blue. Dark mode uses deep navy with blue/cyan highlights and a smooth theme transition. Existing pixel art should remain crisp and visible. Do not add authentication or backend calls to the standalone preview pages.
+
+System reduced-motion preferences freeze decorative sprite animation and suppress hit effects while keeping WASD movement available.
 
 ## Run locally
 
