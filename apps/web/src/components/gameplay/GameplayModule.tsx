@@ -17,6 +17,8 @@ interface GameplayModuleProps {
   bundle: AssetBundle | null;
   customLessons?: LessonRecord[];
   initialSubscreen?: GameplaySubscreen;
+  initialLessonId?: string;
+  initialAction?: "resume" | "new";
   navKey?: number;
   onNavigateScreen: (screen: any) => void;
   onUploadNewPdf: () => void;
@@ -28,6 +30,8 @@ export function GameplayModule({
   bundle,
   customLessons = [],
   initialSubscreen = "seas",
+  initialLessonId,
+  initialAction = "resume",
   navKey,
   onNavigateScreen,
   onUploadNewPdf,
@@ -123,6 +127,13 @@ export function GameplayModule({
     },
     [activeInstanceByLesson, instances, updateInstanceId, onNavigateScreen]
   );
+
+  // Synchronize when parent requests specific lesson selection or retake
+  useEffect(() => {
+    if (initialLessonId && initialSubscreen === "descent") {
+      handleSelectLesson(initialLessonId, initialAction || "resume");
+    }
+  }, [initialLessonId, initialAction, navKey, initialSubscreen]);
 
   const handleUpdatePlayer = useCallback(
     (x: number, y: number, facing: "up" | "down" | "left" | "right") => {

@@ -12,6 +12,7 @@ interface LibraryHubViewProps {
   activeInstanceId?: string | null;
   onOpenUpload: () => void;
   onGoToSeas: () => void;
+  onSelectLesson?: (lessonId: string, action: "resume" | "new") => void;
   bundle: AssetBundle | null;
   reducedMotion?: boolean;
 }
@@ -21,6 +22,7 @@ export function LibraryHubView({
   activeInstanceId = "PN-001",
   onOpenUpload,
   onGoToSeas,
+  onSelectLesson,
   bundle,
   reducedMotion = false,
 }: LibraryHubViewProps) {
@@ -130,42 +132,108 @@ export function LibraryHubView({
           </div>
 
           {questionSets.length > 0 ? (
-            questionSets.slice(0, 2).map((qs) => (
-              <article key={qs.id} className="saved-card">
-                <div className="pdf-mark">PDF</div>
-                <div className="saved-copy">
-                  <strong>
-                    {"documentName" in qs
-                      ? qs.documentName
-                      : "title" in (qs as Record<string, unknown>)
-                      ? String((qs as Record<string, unknown>).title)
-                      : "Study Lesson"}
-                  </strong>
-                  <span>9 questions · Ready to practice</span>
-                </div>
-                <span className="ready-dot" aria-label="Ready" />
-              </article>
-            ))
+            questionSets.slice(0, 3).map((qs) => {
+              const lessonTitle =
+                "documentName" in qs
+                  ? qs.documentName
+                  : "title" in (qs as Record<string, unknown>)
+                  ? String((qs as Record<string, unknown>).title)
+                  : "Study Lesson";
+              const lessonId = qs.id;
+              return (
+                <article key={qs.id} className="saved-card">
+                  <div className="pdf-mark">PDF</div>
+                  <div className="saved-copy">
+                    <button
+                      type="button"
+                      className="saved-title-btn"
+                      onClick={() =>
+                        onSelectLesson ? onSelectLesson(lessonId, "resume") : onGoToSeas()
+                      }
+                      title={`Open ${lessonTitle}`}
+                    >
+                      {lessonTitle}
+                    </button>
+                    <span>9 questions · Ready to practice</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="text-button retake-btn"
+                    onClick={() =>
+                      onSelectLesson ? onSelectLesson(lessonId, "new") : onGoToSeas()
+                    }
+                    title="Retake this lesson from the beginning"
+                  >
+                    Retake ↺
+                  </button>
+                </article>
+              );
+            })
           ) : (
             <article className="saved-card">
               <div className="pdf-mark">PDF</div>
               <div className="saved-copy">
-                <strong>Introduction to Marine Biology</strong>
-                <span>3 topics · 9 questions · Ready</span>
+                <button
+                  type="button"
+                  className="saved-title-btn"
+                  onClick={() =>
+                    onSelectLesson ? onSelectLesson("marine-biology", "resume") : onGoToSeas()
+                  }
+                  title="Open Introduction to Marine Biology"
+                >
+                  Introduction to Marine Biology
+                </button>
+                <span>3 topics · 9 questions · Accomplished</span>
               </div>
-              <span className="ready-dot" aria-label="Ready" />
+              <button
+                type="button"
+                className="text-button retake-btn"
+                onClick={() =>
+                  onSelectLesson ? onSelectLesson("marine-biology", "new") : onGoToSeas()
+                }
+                title="Retake this lesson from the beginning"
+              >
+                Retake ↺
+              </button>
             </article>
           )}
 
           <article className="saved-card active-run">
             <div className="resume-mark">↗</div>
             <div className="saved-copy">
-              <strong>In-Progress Lesson · {activeInstanceId || "PN-001"}</strong>
+              <button
+                type="button"
+                className="saved-title-btn"
+                onClick={() =>
+                  onSelectLesson ? onSelectLesson("marine-biology", "resume") : onGoToSeas()
+                }
+                title="Resume in-progress lesson"
+              >
+                In-Progress Lesson · {activeInstanceId || "PN-001"}
+              </button>
               <span>Introduction to Marine Biology</span>
             </div>
-            <button className="text-button" type="button" onClick={onGoToSeas}>
-              Resume Lesson
-            </button>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <button
+                className="text-button"
+                type="button"
+                onClick={() =>
+                  onSelectLesson ? onSelectLesson("marine-biology", "resume") : onGoToSeas()
+                }
+              >
+                Resume
+              </button>
+              <button
+                className="text-button retake-btn"
+                type="button"
+                onClick={() =>
+                  onSelectLesson ? onSelectLesson("marine-biology", "new") : onGoToSeas()
+                }
+                title="Retake from the beginning"
+              >
+                Retake ↺
+              </button>
+            </div>
           </article>
 
           <button

@@ -72,6 +72,19 @@ export function App() {
     [activeInstanceId]
   );
 
+  // Selected Lesson State from Library Hub
+  const [selectedLessonId, setSelectedLessonId] = useState<string>("marine-biology");
+  const [selectedLessonAction, setSelectedLessonAction] = useState<"resume" | "new">("resume");
+
+  const handleSelectLessonFromLibrary = useCallback(
+    (lessonId: string, action: "resume" | "new") => {
+      setSelectedLessonId(lessonId);
+      setSelectedLessonAction(action);
+      handleNavigate("descent");
+    },
+    [handleNavigate]
+  );
+
   // Theme State (Default to Light Mode)
   const [theme, setTheme] = useState<"dark" | "light">(() => {
     const saved = localStorage.getItem("point-nemo-theme");
@@ -343,6 +356,7 @@ export function App() {
               activeInstanceId={activeInstanceId}
               onOpenUpload={() => handleNavigate("upload")}
               onGoToSeas={() => handleNavigate("seas")}
+              onSelectLesson={handleSelectLessonFromLibrary}
               bundle={bundle}
               reducedMotion={reducedMotion}
             />
@@ -376,6 +390,8 @@ export function App() {
               bundle={bundle}
               customLessons={customLessonRecords}
               navKey={navKey}
+              initialLessonId={selectedLessonId}
+              initialAction={selectedLessonAction}
               initialSubscreen={
                 currentScreen === "seas"
                   ? "seas"
