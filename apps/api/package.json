@@ -11,8 +11,12 @@
   },
   "dependencies": {
     "@point-nemo/shared": "0.1.0",
+    "@types/multer": "^2.3.0",
+    "@types/pdf-parse": "^1.1.5",
     "better-sqlite3": "^12.2.0",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "multer": "^2.4.0",
+    "pdf-parse": "^2.4.5"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",

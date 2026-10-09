@@ -56,6 +56,34 @@ export function initializeDatabase(path: string): SqliteDatabase {
       completed_lessons INTEGER NOT NULL DEFAULT 0 CHECK (completed_lessons >= 0),
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS question_sets (
+      id TEXT PRIMARY KEY,
+      document_name TEXT NOT NULL,
+      topics_json TEXT NOT NULL,
+      questions_json TEXT NOT NULL,
+      extracted_pages_json TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS runs (
+      id TEXT PRIMARY KEY,
+      question_set_id TEXT NOT NULL REFERENCES question_sets(id) ON DELETE CASCADE,
+      document_name TEXT NOT NULL,
+      stage TEXT NOT NULL CHECK (stage IN ('surface', 'twilight', 'midnight', 'boss', 'results')),
+      status TEXT NOT NULL CHECK (status IN ('active', 'completed', 'failed')),
+      current_question_index INTEGER NOT NULL DEFAULT 0,
+      player_hp INTEGER NOT NULL DEFAULT 100,
+      enemy_hp INTEGER NOT NULL DEFAULT 100,
+      xp INTEGER NOT NULL DEFAULT 0,
+      shuffled_boss_order_json TEXT NOT NULL,
+      attempts_json TEXT NOT NULL DEFAULT '[]',
+      zone_scores_json TEXT NOT NULL DEFAULT '{"surface":0,"twilight":0,"midnight":0}',
+      failure_reason TEXT,
+      completed_at TEXT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   return database;

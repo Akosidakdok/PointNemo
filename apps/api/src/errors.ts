@@ -15,3 +15,17 @@ export class ServiceUnavailableError extends ApiError {
     this.name = "ServiceUnavailableError";
   }
 }
+
+export class ValidationError extends ApiError {
+  constructor(message: string, code: string = "VALIDATION_ERROR") {
+    super(400, code, message);
+    this.name = "ValidationError";
+  }
+}
+
+export class NotFoundError extends ApiError {
+  constructor(message: string = "Resource not found.", code: string = "NOT_FOUND") {
+    super(404, code, message);
+    this.name = "NotFoundError";
+  }
+}

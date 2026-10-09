@@ -1,43 +1,61 @@
 import { useState, useEffect, useCallback } from "react";
-import { getAppStatus, type AppStatus } from "./api";
+import {
+  type DescentRun,
+  type QuestionSet,
+} from "@point-nemo/shared";
+import {
+  getAppStatus,
+  extractDocument,
+  generateQuestionSet,
+  fetchRuns,
+  submitRunAnswer,
+  tryAgainRun,
+  deleteRun,
+  type AppStatus,
+} from "./api";
 import { loadAssetBundle, type AssetBundle } from "./game/sprites";
 import { OceanCanvas } from "./game/OceanCanvas";
-import { CompactHUD } from "./components/CompactHUD";
-import { BottomControls } from "./components/BottomControls";
-import { TitleScreen } from "./components/TitleScreen";
-import { ExpeditionMap, mapNodes, type MapNode } from "./components/ExpeditionMap";
-import { BattleEncounter } from "./components/BattleEncounter";
-import { FieldGuideModal } from "./components/FieldGuideModal";
+import { LocalLibrary } from "./components/LocalLibrary";
+import { UploadDialog } from "./components/UploadDialog";
+import { SonarProcessing, type SonarStageStatus } from "./components/SonarProcessing";
+import { DescentEncounter } from "./components/DescentEncounter";
+import { ResultsScreen } from "./components/ResultsScreen";
 import { SettingsModal } from "./components/SettingsModal";
 import { SonarPreloader } from "./components/ui/SonarPreloader";
-import { GameModal } from "./components/ui/GameModal";
 
 const initialStatus: AppStatus = {
   api: { available: false, message: "Checking local API…" },
   ai: { available: false, message: "Checking Ollama…" },
 };
 
-type ScreenView = "title" | "exploration";
-type OverlayModal = "map" | "battle" | "guide" | "settings" | null;
+type AppView = "library" | "processing" | "encounter" | "results";
 
 export function App() {
-  // Preloading & bundle state
+  // Preloading & assets
   const [bundle, setBundle] = useState<AssetBundle | null>(null);
   const [preloadProgress, setPreloadProgress] = useState(0);
   const [preloadTotal, setPreloadTotal] = useState(8);
   const [preloadError, setPreloadError] = useState<string | null>(null);
 
-  // App & Gameplay state
-  const [screen, setScreen] = useState<ScreenView>("title");
-  const [overlay, setOverlay] = useState<OverlayModal>(null);
+  // App Navigation
+  const [view, setView] = useState<AppView>("library");
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // App & Run Data
   const [status, setStatus] = useState<AppStatus>(initialStatus);
-  const [selectedNode, setSelectedNode] = useState<MapNode>(mapNodes[0]);
-  const [depthMeters, setDepthMeters] = useState(4180);
-  const [hullPercent] = useState(100);
-  const [oxygenPercent] = useState(94);
-  const [buoyDistance] = useState(240);
-  const [sonarTriggerCount, setSonarTriggerCount] = useState(0);
-  const [activeEncounter, setActiveEncounter] = useState<string | null>(null);
+  const [runs, setRuns] = useState<DescentRun[]>([]);
+  const [questionSets, setQuestionSets] = useState<QuestionSet[]>([]);
+  const [currentRun, setCurrentRun] = useState<DescentRun | null>(null);
+  const [currentQuestionSet, setCurrentQuestionSet] = useState<QuestionSet | null>(null);
+
+  // Sonar Processing Stage State
+  const [processingFile, setProcessingFile] = useState<File | null>(null);
+  const [extractionStatus, setExtractionStatus] = useState<SonarStageStatus>("waiting");
+  const [generationStatus, setGenerationStatus] = useState<SonarStageStatus>("waiting");
+  const [validationStatus, setValidationStatus] = useState<SonarStageStatus>("waiting");
+  const [processingError, setProcessingError] = useState<string | null>(null);
+  const [isOllamaOffline, setIsOllamaOffline] = useState(false);
 
   // Preferences
   const [reducedMotion, setReducedMotion] = useState(() => {
@@ -47,14 +65,14 @@ export function App() {
     return false;
   });
 
-  // Load prepared runtime assets
+  // Load assets
   const loadAssets = useCallback(async () => {
     setPreloadError(null);
     setPreloadProgress(0);
     try {
-      const loaded = await loadAssetBundle("/assets/runtime/manifest.json", (current, total) => {
-        setPreloadProgress(current);
-        setPreloadTotal(total);
+      const loaded = await loadAssetBundle("/assets/runtime/manifest.json", (cur, tot) => {
+        setPreloadProgress(cur);
+        setPreloadTotal(tot);
       });
       setBundle(loaded);
     } catch (err: any) {
@@ -67,58 +85,173 @@ export function App() {
     void loadAssets();
   }, [loadAssets]);
 
-  // Check API health status
-  useEffect(() => {
-    let active = true;
-    void getAppStatus().then((nextStatus) => {
-      if (active) setStatus(nextStatus);
-    });
-    return () => {
-      active = false;
-    };
+  // Load API status and saved runs on mount
+  const refreshLibraryData = useCallback(async () => {
+    try {
+      const [appStat, libraryData] = await Promise.all([
+        getAppStatus(),
+        fetchRuns().catch(() => ({ runs: [], questionSets: [] })),
+      ]);
+      setStatus(appStat);
+      setRuns(libraryData.runs);
+      setQuestionSets(libraryData.questionSets);
+    } catch (err) {
+      console.warn("Failed to refresh library data:", err);
+    }
   }, []);
 
-  // Global keyboard shortcuts
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
+    void refreshLibraryData();
+  }, [refreshLibraryData]);
 
-      if (e.code === "Space" && overlay === null && screen === "exploration") {
-        e.preventDefault();
-        setSonarTriggerCount((c) => c + 1);
-      } else if (e.key === "Escape") {
-        if (overlay !== null) {
-          e.preventDefault();
-          setOverlay(null);
+  // Determine active run (unfinished run)
+  const activeRun = runs.find((r) => r.status === "active") || null;
+
+  // Handler: Start Sonar Processing for Uploaded File
+  const handleStartProcessing = useCallback(
+    async (file: File) => {
+      setProcessingFile(file);
+      setIsUploadOpen(false);
+      setView("processing");
+      setExtractionStatus("active");
+      setGenerationStatus("waiting");
+      setValidationStatus("waiting");
+      setProcessingError(null);
+      setIsOllamaOffline(false);
+
+      try {
+        // Stage 1: Extraction
+        const extractedDoc = await extractDocument(file);
+        setExtractionStatus("complete");
+        setGenerationStatus("active");
+
+        // Stage 2 & 3: Generation & Strict Validation
+        const result = await generateQuestionSet(extractedDoc);
+        setGenerationStatus("complete");
+        setValidationStatus("complete");
+
+        // Set active run and question set
+        setCurrentRun(result.run);
+        setCurrentQuestionSet(result.questionSet);
+
+        // Update library list
+        await refreshLibraryData();
+
+        // Short pause to show validation complete, then start Surface Zone
+        setTimeout(() => {
+          setView("encounter");
+        }, 800);
+      } catch (err: any) {
+        const msg = err?.message || "Document processing failed.";
+        console.error("Processing error:", err);
+        setProcessingError(msg);
+
+        if (extractionStatus === "active") {
+          setExtractionStatus("failed");
+        } else {
+          setGenerationStatus("failed");
+          setValidationStatus("failed");
         }
-      } else if (e.key === "m" || e.key === "M") {
-        if (overlay === "map") setOverlay(null);
-        else if (overlay === null) setOverlay("map");
-      } else if (e.key === "g" || e.key === "G") {
-        if (overlay === "guide") setOverlay(null);
-        else if (overlay === null) setOverlay("guide");
+
+        if (msg.includes("Ollama") || msg.includes("local AI") || err?.code === "OLLAMA_UNAVAILABLE") {
+          setIsOllamaOffline(true);
+        }
       }
-    };
+    },
+    [extractionStatus, refreshLibraryData]
+  );
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [overlay, screen]);
+  // Handler: Resume Run
+  const handleResumeRun = useCallback(
+    (runId: string) => {
+      const run = runs.find((r) => r.id === runId);
+      if (!run) return;
+      const qSet = questionSets.find((qs) => qs.id === run.questionSetId);
+      if (!qSet) return;
 
-  // Handlers
-  const handleSonarPulse = useCallback(() => {
-    setSonarTriggerCount((c) => c + 1);
-  }, []);
+      setCurrentRun(run);
+      setCurrentQuestionSet(qSet);
 
-  const handleQuickDive = useCallback(() => {
-    setDepthMeters((d) => Math.min(10935, d + 250));
-    setSonarTriggerCount((c) => c + 1);
-  }, []);
+      if (run.stage === "results") {
+        setView("results");
+      } else {
+        setView("encounter");
+      }
+    },
+    [runs, questionSets]
+  );
 
-  const handleEncounterTrigger = useCallback((creatureName: string) => {
-    setActiveEncounter(creatureName);
-  }, []);
+  // Handler: Submit Answer in Encounter
+  const handleAnswerSubmit = useCallback(
+    async (selectedAnswer: number) => {
+      if (!currentRun) return;
+
+      try {
+        const response = await submitRunAnswer(currentRun.id, selectedAnswer);
+        setCurrentRun(response.run);
+        await refreshLibraryData();
+
+        // Check if run transitioned to results
+        if (response.run.stage === "results") {
+          setTimeout(() => {
+            setView("results");
+          }, 1200);
+        }
+      } catch (err) {
+        console.error("Failed to submit answer:", err);
+      }
+    },
+    [currentRun, refreshLibraryData]
+  );
+
+  // Handler: Try Again (uses SAME question set)
+  const handleTryAgain = useCallback(
+    async (runId: string) => {
+      try {
+        const result = await tryAgainRun(runId);
+        setCurrentRun(result.run);
+        setCurrentQuestionSet(result.questionSet);
+        await refreshLibraryData();
+        setView("encounter");
+      } catch (err) {
+        console.error("Failed to restart run:", err);
+      }
+    },
+    [refreshLibraryData]
+  );
+
+  // Handler: Delete Run
+  const handleDeleteRun = useCallback(
+    async (runId: string) => {
+      try {
+        await deleteRun(runId);
+        await refreshLibraryData();
+        if (currentRun?.id === runId) {
+          setCurrentRun(null);
+          setCurrentQuestionSet(null);
+          setView("library");
+        }
+      } catch (err) {
+        console.error("Failed to delete run:", err);
+      }
+    },
+    [currentRun, refreshLibraryData]
+  );
+
+  // Handler: View Results of finished run
+  const handleViewResults = useCallback(
+    (runId: string) => {
+      const run = runs.find((r) => r.id === runId);
+      if (!run) return;
+      const qSet = questionSets.find((qs) => qs.id === run.questionSetId);
+      if (!qSet) return;
+
+      setCurrentRun(run);
+      setCurrentQuestionSet(qSet);
+      setView("results");
+    },
+    [runs, questionSets]
+  );
 
   // Preloading View
   if (!bundle) {
@@ -135,100 +268,103 @@ export function App() {
   }
 
   return (
-    <main className="pointnemo-app" role="application" aria-label="Point Nemo Expedition Game">
-      {/* 2D Interactive Ocean Viewport */}
-      <div className="viewport-container" aria-hidden={screen === "title"}>
+    <main className="pointnemo-app" role="application" aria-label="Point Nemo Educational Descent">
+      {/* 2D Interactive Ocean Viewport in Background */}
+      <div className="viewport-container" aria-hidden="true">
         <OceanCanvas
           bundle={bundle}
-          depthMeters={depthMeters}
-          onDepthChange={setDepthMeters}
-          sonarTriggerCount={sonarTriggerCount}
-          onEncounterTrigger={handleEncounterTrigger}
-          paused={overlay !== null}
+          depthMeters={
+            currentRun
+              ? currentRun.stage === "surface"
+                ? 100
+                : currentRun.stage === "twilight"
+                ? 800
+                : currentRun.stage === "midnight"
+                ? 3200
+                : 10935
+              : 0
+          }
+          sonarTriggerCount={0}
+          paused={view !== "encounter"}
           reducedMotion={reducedMotion}
         />
       </div>
 
-      {/* Screen 1: Title Screen */}
-      {screen === "title" && (
-        <TitleScreen
-          onStartExpedition={() => setScreen("exploration")}
-          onOpenMap={() => setOverlay("map")}
-          onOpenGuide={() => setOverlay("guide")}
-          onOpenSettings={() => setOverlay("settings")}
-          isOnline={status.api.available || navigator.onLine}
+      {/* Screen 1: Local Library (Home) */}
+      {view === "library" && (
+        <LocalLibrary
+          runs={runs}
+          questionSets={questionSets}
+          activeRun={activeRun}
+          onUploadClick={() => setIsUploadOpen(true)}
+          onResumeRun={handleResumeRun}
+          onTryAgain={handleTryAgain}
+          onViewResults={handleViewResults}
+          onDeleteRun={handleDeleteRun}
+          isOnline={status.api.available}
+          onOpenSettings={() => setIsSettingsOpen(true)}
         />
       )}
 
-      {/* Screen 2: Exploration HUD & Controls */}
-      {screen === "exploration" && (
-        <>
-          <CompactHUD
-            depthMeters={depthMeters}
-            hullPercent={hullPercent}
-            oxygenPercent={oxygenPercent}
-            buoyDistance={buoyDistance}
-            onTriggerSonar={handleSonarPulse}
-            onOpenMap={() => setOverlay("map")}
-            onOpenGuide={() => setOverlay("guide")}
-            onOpenSettings={() => setOverlay("settings")}
-            onOpenBattle={() => setOverlay("battle")}
-            isOnline={status.api.available || navigator.onLine}
-            activeEncounter={activeEncounter}
-          />
-
-          <BottomControls
-            onSonar={handleSonarPulse}
-            onQuickDive={handleQuickDive}
-            currentObjective={selectedNode.label}
-          />
-        </>
+      {/* Screen 2: Sonar Processing */}
+      {view === "processing" && (
+        <SonarProcessing
+          filename={processingFile?.name || "document.pdf"}
+          extractionStatus={extractionStatus}
+          generationStatus={generationStatus}
+          validationStatus={validationStatus}
+          error={processingError}
+          isOllamaOffline={isOllamaOffline}
+          onCancel={() => setView("library")}
+          onRetry={() => {
+            if (processingFile) handleStartProcessing(processingFile);
+          }}
+          onChooseAnotherPdf={() => {
+            setView("library");
+            setIsUploadOpen(true);
+          }}
+        />
       )}
 
-      {/* Modal 1: Tactical Route Map */}
-      <GameModal
-        isOpen={overlay === "map"}
-        onClose={() => setOverlay(null)}
-        title="HADAL DESCENT // TACTICAL ROUTE CHART"
-        subtitle="NAVIGATION WAYPOINTS"
-        maxWidth="720px"
-      >
-        <ExpeditionMap
-          selectedId={selectedNode.id}
-          onSelect={setSelectedNode}
-          onLaunchEncounter={() => setOverlay("battle")}
-          onClose={() => setOverlay(null)}
-        />
-      </GameModal>
-
-      {/* Modal 2: Creature Encounter Turn-Battle */}
-      <GameModal
-        isOpen={overlay === "battle"}
-        onClose={() => setOverlay(null)}
-        title="ENGAGEMENT PROTOCOL // TURN BATTLE"
-        subtitle="HADAL LIFEFORM"
-        maxWidth="560px"
-      >
-        <BattleEncounter
+      {/* Screen 3: Descent Encounter (Surface, Twilight, Midnight, Boss) */}
+      {view === "encounter" && currentRun && currentQuestionSet && (
+        <DescentEncounter
+          run={currentRun}
+          questionSet={currentQuestionSet}
           bundle={bundle}
-          onClose={() => setOverlay(null)}
+          onAnswerSubmit={handleAnswerSubmit}
+          reducedMotion={reducedMotion}
         />
-      </GameModal>
+      )}
 
-      {/* Modal 3: Abyssal Field Guide */}
-      <FieldGuideModal
-        isOpen={overlay === "guide"}
-        onClose={() => setOverlay(null)}
-        bundle={bundle}
+      {/* Screen 4: Results */}
+      {view === "results" && currentRun && currentQuestionSet && (
+        <ResultsScreen
+          run={currentRun}
+          questionSet={currentQuestionSet}
+          onTryAgain={() => handleTryAgain(currentRun.id)}
+          onReturnToLibrary={() => setView("library")}
+          onStartNewPdf={() => {
+            setView("library");
+            setIsUploadOpen(true);
+          }}
+        />
+      )}
+
+      {/* Upload Dialog */}
+      <UploadDialog
+        isOpen={isUploadOpen}
+        onClose={() => setIsUploadOpen(false)}
+        onConfirmFile={handleStartProcessing}
       />
 
-      {/* Modal 4: Submersible Settings */}
+      {/* Settings Modal */}
       <SettingsModal
-        isOpen={overlay === "settings"}
-        onClose={() => setOverlay(null)}
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
         status={status}
         reducedMotion={reducedMotion}
-        onToggleReducedMotion={() => setReducedMotion((v) => !v)}
+        onToggleReducedMotion={() => setReducedMotion((m) => !m)}
       />
     </main>
   );

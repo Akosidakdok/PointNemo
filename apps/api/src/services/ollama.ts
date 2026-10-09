@@ -96,4 +96,44 @@ export class OllamaService {
 
     return GeneratedQuestionResponseSchema.parse(generated).questions;
   }
+
+  async chat(systemPrompt: string, userMessage: string): Promise<string> {
+    let response: Response;
+    try {
+      response = await fetch(`${this.config.ollamaBaseUrl}/api/chat`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        signal: AbortSignal.timeout(90_000),
+        body: JSON.stringify({
+          model: this.config.ollamaModel,
+          stream: false,
+          format: "json",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userMessage },
+          ],
+        }),
+      });
+    } catch {
+      throw new ServiceUnavailableError(
+        "OLLAMA_UNAVAILABLE",
+        `Ollama is not reachable at ${this.config.ollamaBaseUrl}. Start Ollama and confirm model ${this.config.ollamaModel} is installed.`
+      );
+    }
+
+    const body = (await response.json()) as OllamaChatResponse;
+    if (!response.ok) {
+      throw new ServiceUnavailableError(
+        "OLLAMA_REQUEST_FAILED",
+        body.error ?? `Ollama returned HTTP ${response.status}. Check that model ${this.config.ollamaModel} is installed.`
+      );
+    }
+
+    const rawContent = body.message?.content;
+    if (!rawContent) {
+      throw new ServiceUnavailableError("OLLAMA_EMPTY_RESPONSE", "Ollama returned no message content.");
+    }
+
+    return rawContent;
+  }
 }
