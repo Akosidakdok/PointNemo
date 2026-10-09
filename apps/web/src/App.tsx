@@ -23,7 +23,6 @@ import { LibraryHubView } from "./components/library/LibraryHubView";
 import { DocumentIntakeModule } from "./components/intake/DocumentIntakeModule";
 import { GameplayModule } from "./components/gameplay/GameplayModule";
 import { ProfileView } from "./components/profile/ProfileView";
-import { LeaderboardView } from "./components/leaderboard/LeaderboardView";
 
 const initialStatus: AppStatus = {
   api: { available: false, message: "Checking local API…" },
@@ -381,10 +380,6 @@ export function App() {
             />
           )}
 
-          {/* Standalone Extra: Leaderboard */}
-          {currentScreen === "leaderboard" && (
-            <LeaderboardView currentUser={currentUser} />
-          )}
         </main>
 
         <footer className="playground-footer">

@@ -507,6 +507,171 @@
   color: var(--danger);
 }
 
+/* PDF safety gate */
+.pdf-safety-gate {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(36,82,117,.28), rgba(8,30,52,.3));
+}
+
+:root[data-theme="light"] .pdf-safety-gate {
+  background: linear-gradient(145deg, rgba(255,255,255,.58), rgba(198,226,244,.24));
+}
+
+.pdf-safety-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.pdf-safety-heading h3 {
+  margin: 8px 0 0;
+  font-size: 15px;
+}
+
+.pdf-safety-heading p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.pdf-safety-seal {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--muted);
+  background: var(--surface);
+  font: 11px var(--mono);
+}
+
+.pdf-safety-seal.is-ready {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pdf-safety-seal.has-error {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.pdf-safety-checks {
+  display: grid;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.pdf-safety-check {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0;
+  color: var(--text);
+  font-size: 11px;
+}
+
+.pdf-safety-check + .pdf-safety-check {
+  border-top: 1px solid var(--line);
+}
+
+.check-state {
+  color: var(--muted);
+  text-align: right;
+  font: 9px var(--mono);
+}
+
+.check-state.state-passed {
+  color: var(--accent);
+}
+
+.check-state.state-failed {
+  color: var(--danger);
+}
+
+.pdf-safety-dropzone {
+  min-height: 112px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 5px 14px;
+  padding: 14px;
+  border: 1px dashed rgba(123,200,243,.42);
+  border-radius: 9px;
+  background: rgba(9,31,50,.22);
+  transition: border-color .2s ease, background .2s ease;
+}
+
+:root[data-theme="light"] .pdf-safety-dropzone {
+  border-color: rgba(69,130,174,.42);
+  background: rgba(255,255,255,.3);
+}
+
+.pdf-safety-dropzone:hover,
+.pdf-safety-dropzone.has-file {
+  border-color: var(--accent);
+  background: rgba(35,83,119,.22);
+}
+
+.pdf-safety-dropzone.is-checking {
+  opacity: .75;
+}
+
+.pdf-safety-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.pdf-safety-file-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdf-safety-dropzone small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.pdf-safety-dropzone button:disabled {
+  opacity: .65;
+  cursor: wait;
+}
+
+.pdf-safety-error,
+.pdf-safety-note {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.pdf-safety-error {
+  color: var(--danger);
+}
+
+.pdf-safety-note {
+  color: var(--muted);
+}
+
 /* Saved Records */
 .saved-card {
   display: flex;

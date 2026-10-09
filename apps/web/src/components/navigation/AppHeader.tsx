@@ -8,8 +8,7 @@ export type AppNavScreen =
   | "descent"
   | "boss"
   | "results"
-  | "profile"
-  | "leaderboard";
+  | "profile";
 
 interface AppHeaderProps {
   currentScreen: AppNavScreen;
@@ -159,17 +158,6 @@ export function AppHeader({
           aria-current={currentScreen === "results" ? "page" : undefined}
         >
           <b>06</b> Results
-        </button>
-
-        <span className="nav-divider" aria-hidden="true" />
-
-        <button
-          type="button"
-          className={`nav-step ${currentScreen === "leaderboard" ? "active" : ""}`}
-          onClick={() => onNavigate("leaderboard")}
-          aria-current={currentScreen === "leaderboard" ? "page" : undefined}
-        >
-          Leaderboard
         </button>
       </nav>
     </header>

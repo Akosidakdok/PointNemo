@@ -1,5 +1,6 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { type QuestionSet } from "@point-nemo/shared";
+import { PdfSafetyGate } from "./PdfSafetyGate";
 
 interface DocumentIntakeModuleProps {
   onStartRealProcessing?: (file: File) => Promise<QuestionSet | void>;
@@ -38,41 +39,8 @@ export function DocumentIntakeModule({
   isOllamaOffline,
 }: DocumentIntakeModuleProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileError, setFileError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [simulatedStage, setSimulatedStage] = useState(0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setFileError(null);
-
-    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-    if (!isPdf) {
-      setFileError("Please choose a valid PDF file. Point Nemo requires an English text-based PDF.");
-      setSelectedFile(null);
-      return;
-    }
-
-    setSelectedFile(file);
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
-    setFileError(null);
-
-    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-    if (!isPdf) {
-      setFileError("Please choose a valid PDF file.");
-      setSelectedFile(null);
-      return;
-    }
-
-    setSelectedFile(file);
-  };
 
   const handleBeginCalibration = useCallback(async () => {
     if (!selectedFile) return;
@@ -127,46 +95,13 @@ export function DocumentIntakeModule({
             <div className="panel-heading">
               <div>
                 <h2>Document selection</h2>
-                <p>No upper page or file-size limit · Min 300 characters extracted locally</p>
+                <p>One PDF · max 5 MiB · up to 3 pages · 300–8,000 readable characters</p>
               </div>
             </div>
 
-            <label
-              className="dropzone"
-              htmlFor="pdf-file-upload"
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleDrop}
-            >
-              <span className="upload-icon" aria-hidden="true">
-                ↑
-              </span>
-              <strong>{selectedFile ? selectedFile.name : "Choose a PDF file or drag it here"}</strong>
-              <span>
-                {selectedFile
-                  ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MiB · Ready for sonar extraction`
-                  : "English, text-based documents only. Encrypted or image-only PDFs are rejected."}
-              </span>
-              <span className="choose-button">
-                {selectedFile ? "Replace file" : "Browse files"}
-              </span>
-            </label>
+            <PdfSafetyGate onFileChange={setSelectedFile} />
 
-            <input
-              id="pdf-file-upload"
-              ref={fileInputRef}
-              type="file"
-              accept="application/pdf,.pdf"
-              style={{ display: "none" }}
-              onChange={handleFileChange}
-            />
-
-            {fileError && (
-              <p className="file-status error-text" role="alert">
-                ⚠ {fileError}
-              </p>
-            )}
-
-            {selectedFile && !fileError && (
+            {selectedFile && (
               <div style={{ marginTop: "20px", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
                 <button type="button" className="secondary-button" onClick={onCancel}>
                   Cancel
