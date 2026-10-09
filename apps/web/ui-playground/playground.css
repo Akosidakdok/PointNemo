@@ -119,6 +119,18 @@ main { flex: 1; padding: 36px 0 52px; }
 .depth-mark { position: absolute; left: 14px; bottom: 12px; padding: 6px 8px; border: 1px solid rgba(255,255,255,.65); border-radius: 7px; background: rgba(245,251,255,.78); color: #173c58; font: 10px var(--mono); letter-spacing: .07em; backdrop-filter: blur(8px); }
 .depth-mark i { color: var(--accent); font-style: normal; }
 .library-grid { display: grid; grid-template-columns: 1.12fr .88fr; gap: 16px; }
+.sea-list { display: grid; gap: 12px; }
+.sea-card { display: grid; grid-template-columns: 112px minmax(0,1fr) auto; align-items: center; gap: 16px; padding: 13px; }
+.sea-map-thumb { width: 112px; aspect-ratio: 1; border: 1px solid var(--line); border-radius: 9px; background: #06172c url("../../../assets/maps/point-nemo-abyss-ocean.png") center/cover no-repeat; image-rendering: pixelated; }
+.sea-map-thumb-alt { filter: hue-rotate(18deg) brightness(1.14); }
+.sea-card-copy { min-width: 0; }
+.sea-card-copy .eyebrow { font-size: 9px; }
+.sea-card-copy h2 { margin: 6px 0; font-size: 16px; }
+.sea-card-copy > p:not(.eyebrow) { margin: 0 0 8px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.sea-card-copy small { color: var(--accent); font: 10px var(--mono); }
+.sea-card-actions { display: grid; gap: 7px; }
+.sea-card-actions button { white-space: nowrap; }
+.sea-card-actions button:disabled { opacity: .46; cursor: not-allowed; }
 .panel { min-width: 0; border: 1px solid rgba(255,255,255,.76); border-radius: 13px; background: linear-gradient(135deg, rgba(255,255,255,.56), var(--surface) 58%, rgba(208,233,248,.34)); box-shadow: var(--glass-shadow); backdrop-filter: blur(24px) saturate(145%); transition: background .42s ease, border-color .42s ease, color .42s ease, box-shadow .42s ease, backdrop-filter .42s ease; }
 .upload-panel, .saved-panel { padding: 18px; }
 .panel-heading { display: flex; align-items: center; gap: 11px; margin-bottom: 16px; }
@@ -181,6 +193,29 @@ main { flex: 1; padding: 36px 0 52px; }
 .combat-panel { overflow: hidden; }
 .combat-scene { height: 180px; position: relative; overflow: hidden; border-bottom: 1px solid var(--line); background: #c4e3f2; }
 .combat-scene .pixel-scene { position: absolute; inset: 0; }
+.descent-subtitle { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+.descent-route { margin: 18px 0; padding: 16px; overflow: hidden; }
+.route-heading { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+.route-heading h2 { margin: 7px 0 0; font-size: 17px; }
+.route-heading > span, .route-depth-label { color: var(--muted); font: 10px var(--mono); letter-spacing: .06em; }
+.route-scene { position: relative; width: min(100%, 650px); aspect-ratio: 1; overflow: hidden; margin: 14px auto 10px; border: 1px solid var(--line); border-radius: 10px; background: #06172c; }
+.route-scene .pixel-scene { position: absolute; inset: 0; }
+.route-depth-label { position: absolute; right: 10px; bottom: 8px; padding: 5px 7px; border: 1px solid rgba(255,255,255,.4); border-radius: 6px; background: rgba(8,37,59,.58); color: #eff9ff; }
+.route-stops { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; margin: 0; padding: 3px 0; list-style: none; }
+.route-stops li { position: relative; display: grid; align-content: start; gap: 4px; min-width: 0; padding: 9px 8px; border-top: 2px solid var(--line); color: var(--muted); }
+.route-stops li::before { content: ""; position: absolute; top: -5px; left: 8px; width: 8px; height: 8px; border: 1px solid var(--line); border-radius: 50%; background: var(--page); }
+.route-stops li.current { border-color: var(--accent); color: var(--text); }
+.route-stops li.locked { opacity: .48; }
+.route-stops li.current::before, .route-stops li.complete::before { border-color: var(--accent); background: var(--accent); }
+.route-stops li > span { font: 9px var(--mono); color: var(--accent); }
+.route-stops li b { overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.route-stops li small { color: var(--muted); font-size: 9px; }
+.route-controls { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 10px; padding-top: 13px; border-top: 1px solid var(--line); }
+.route-controls > span { color: var(--muted); font-size: 11px; }
+.key-hints { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font: 9px var(--mono); letter-spacing: .06em; }
+.key-hints kbd { min-width: 19px; padding: 4px 5px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface-raised); color: var(--text); text-align: center; font: 10px var(--mono); }
+.nav-step:disabled { opacity: .52; cursor: not-allowed; }
+:root[data-theme="dark"] .route-scene { background: #164364; }
 .question-panel { padding: 18px; }
 .question-meta { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font: 10px var(--mono); }
 .question-panel h2 { max-width: 680px; margin: 18px 0; font-size: 19px; line-height: 1.4; font-weight: 600; }
@@ -277,10 +312,23 @@ main { flex: 1; padding: 36px 0 52px; }
   .page-heading h1, .game-heading h1 { font-size: 31px; }
   .art-banner { height: 145px; }
   .library-grid { grid-template-columns: 1fr; gap: 12px; }
+  .sea-card { grid-template-columns: 68px minmax(0,1fr); gap: 11px; padding: 10px; }
+  .sea-map-thumb { width: 68px; }
+  .sea-card-copy h2 { font-size: 14px; }
+  .sea-card-copy > p:not(.eyebrow) { font-size: 10px; }
+  .sea-card-actions { grid-column: 1 / -1; grid-template-columns: 1fr 1fr; }
   .health-row { gap: 7px; }
   .health-card { padding: 9px; }
   .health-card > div:first-child { font-size: 8px; }
   .combat-scene { height: 145px; }
+  .route-heading { align-items: start; flex-direction: column; }
+  .route-scene { width: 100%; }
+  .route-stops { grid-template-columns: 1fr; gap: 2px; padding-left: 5px; }
+  .route-stops li { grid-template-columns: 26px minmax(0,1fr) auto; align-items: center; gap: 6px; padding: 7px 8px 7px 15px; border-top: 0; border-left: 2px solid var(--line); }
+  .route-stops li::before { top: 50%; left: -5px; transform: translateY(-50%); }
+  .route-stops li b { font-size: 11px; }
+  .route-stops li small { text-align: right; }
+  .route-controls { align-items: start; flex-direction: column; }
   .question-panel { padding: 14px; }
   .question-panel h2 { font-size: 17px; }
   .answer-list { grid-template-columns: 1fr; }

@@ -2,7 +2,7 @@
 
 ## Where this UI sits
 
-The broader app sequence is **Title → Login / Sign up → Local Library → Sonar → Ocean Descent → Point Nemo review → Results**. The playground begins at **Local Library**, after the title and login screens. Those two entry screens are context only: they are not implemented here, and accounts/authentication remain outside the functional hackathon MVP.
+The broader app sequence is **Title → Login / Sign up → Local Library → Sonar → Choose a Sea → Ocean Descent → Lesson Boss → Results**. The playground begins at **Local Library**, after the title and login screens. Those two entry screens are context only: they are not implemented here, and accounts/authentication remain outside the functional hackathon MVP. Choose a Sea is a selection state within the Local Library module, not a new product module.
 
 The playground is a frontend-only preview at `apps/web/ui-playground`. It helps review the five MVP modules in [WEB_APP_FLOW.md](WEB_APP_FLOW.md); it does not connect to the local API, Ollama, or SQLite.
 
@@ -12,8 +12,9 @@ The playground is a frontend-only preview at `apps/web/ui-playground`. It helps 
 | --- | --- | --- |
 | 1. Local Library & Document Intake | Library | Select one English text-based PDF and preview the saved local library |
 | 2. Sonar / Local AI Processing | Sonar | Preview Extraction → Generation → Validation states |
-| 3. Ocean Descent | Descent | Preview question, answer feedback, HP, XP, and source evidence |
-| 4. Point Nemo Boss Review | Point Nemo | Preview the mixed-topic final encounter |
+| 1. Local Library · Choose a Sea | Choose Sea | Select a validated saved lesson; resume its active run or create a new instance |
+| 3. Ocean Descent | Descent | WASD through that lesson's map and reach its three topic encounters in order |
+| 4. Lesson Boss Review | Lesson Boss | Preview the mixed-topic final encounter at the end of the route |
 | 5. Results & Saved Progress | Results | Preview completion, scores, retry, and return to library |
 
 Use the module order and feature boundaries from `WEB_APP_FLOW.md` when changing the MVP screens, navigation, or content.
@@ -30,11 +31,20 @@ The playground currently draws:
 
 - Explorer animation from `explorer.png` in the Library and Descent scenes.
 - Barreleye animation from `barreleye.png` in the Library scene.
-- Goblin shark from `goblin.png` as a labeled placeholder in the Point Nemo scene. There is no Megalodon sprite yet.
-- Water from `water.png` and answer effects from `effects.png`.
+- The square world area from `assets/maps/point-nemo-abyss-ocean.png`, with Point Nemo at its central buoy.
+- The player from `assets/characters/ocean-explorer-sprite-sheet.png`; the preview reads its four direction rows and cycles the three swim frames while WASD is held. Its white sheet background is made transparent in the preview renderer.
+- Barreleye, Gulper, Fringehead, and Goblin Shark sprites from their prepared runtime atlases as overworld enemy markers. These are illustrative route markers, not claims about which creatures appear in the source lesson.
+- `water.png` with mirrored repeat for other scene backgrounds, and sonar/hull effects from `effects.png`.
+- Water from `water.png` and sonar/hull effects from `effects.png`.
 - `waves.svg` as a masked background layer, tinted by the active light or dark theme.
 
-There is no Clownfish sprite in the current roster, so keep that small Surface icon identified as a UI placeholder. Do not use the original white-background concept sheets directly as runtime sprite images; use the prepared atlas and manifest.
+The prepared runtime set has no Clownfish, Giant Squid, or Megalodon. The playground uses available prepared sprites as clearly labeled prototypes until dedicated art is added. Do not use original white-background concept sheets directly as runtime sprite images; use the prepared atlases and manifest.
+
+## Descent route preview
+
+The **Choose a Sea** screen lists three sample lesson records. Choose **Resume** to open the active instance for that lesson, or **Start new descent** to create another instance with its own ID, player position, and route state. The same-tab selection keeps keyboard input in one app context; browser tabs are not used as lesson instances. The Descent screen starts each selected map at Point Nemo for a new run, then the Explorer moves under **W, A, S, D** control. Reaching the highlighted enemy triggers that lesson part. Answer the sample question, then use **Clear this part** to unlock the next marker. Later enemies cannot trigger early. Clearing all three parts unlocks the Goblin Shark prototype boss marker and opens the final boss preview when reached. The preview keeps instances in memory for the current page session only; real resume and attempt history must use the isolated SQLite run records described in [WEB_APP_FLOW.md](WEB_APP_FLOW.md). It does not implement all nine question slots, API calls, Ollama, or SQLite.
+
+Each real uploaded lesson/question set must have its own descent instance and isolated run state. A retry creates another run for that lesson; no progress, route position, answers, or results are shared across different lesson records. See the data and scoring rules in [WEB_APP_FLOW.md](WEB_APP_FLOW.md).
 
 ## Visual direction
 
