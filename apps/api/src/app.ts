@@ -1,11 +1,16 @@
 import express, { type ErrorRequestHandler } from "express";
 import type { ApiConfig } from "./config.js";
 import { ApiError } from "./errors.js";
+import type { SqliteDatabase } from "./db.js";
 import { createAiStatusRouter } from "./routes/ai-status.js";
 import { healthRouter } from "./routes/health.js";
 import { OllamaService } from "./services/ollama.js";
 
-export function createApp(config: ApiConfig, ollama = new OllamaService(config)) {
+export function createApp(
+  config: ApiConfig,
+  _database: SqliteDatabase,
+  ollama = new OllamaService(config),
+) {
   const app = express();
   app.use(express.json({ limit: "1mb" }));
   app.use("/api/health", healthRouter);
