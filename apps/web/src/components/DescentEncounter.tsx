@@ -7,7 +7,7 @@ import {
   type RunDetail,
   type AnswerFeedback,
 } from "@point-nemo/shared";
-import { type AssetBundle, drawFrame, speciesScale } from "../game/sprites";
+import { type AssetBundle, speciesScale, SpriteAnimation } from "../game/sprites";
 import { GameButton } from "./ui/GameButton";
 
 export interface DescentEncounterProps {
@@ -181,9 +181,33 @@ export function DescentEncounter({
 
     let animId: number;
     let t = 0;
+    let lastFrame = performance.now();
+    const explorerSwim = new SpriteAnimation(bundle, "explorer.swim.right");
+    const enemyAnimationByStage: Record<Exclude<DescentZone, "results">, string> = {
+      surface: "blobfish.swim.left",
+      twilight: "barreleye.swim",
+      midnight: "gulper.swim",
+      boss: "goblin.swim",
+    };
+    const enemySpeciesByStage: Record<Exclude<DescentZone, "results">, string> = {
+      surface: "blobfish",
+      twilight: "barreleye",
+      midnight: "gulper",
+      boss: "goblin",
+    };
+    const encounterStage = run.stage === "results" ? null : run.stage;
+    const enemySwim = encounterStage ? new SpriteAnimation(bundle, enemyAnimationByStage[encounterStage]) : null;
+    const fringeheadSwim = run.stage === "boss" ? new SpriteAnimation(bundle, "fringehead.swim") : null;
 
-    const render = () => {
-      t += 0.04;
+    const render = (now: number) => {
+      const dt = Math.min((now - lastFrame) / 1000, 0.1);
+      lastFrame = now;
+      if (!reducedMotion) {
+        t += dt;
+        explorerSwim.update(dt);
+        enemySwim?.update(dt);
+        fringeheadSwim?.update(dt);
+      }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.imageSmoothingEnabled = false;
 
@@ -206,29 +230,20 @@ export function DescentEncounter({
 
       // Draw Player Submersible (Explorer)
       const explorerScale = speciesScale(bundle, "explorer", 64);
-      const playerY = Math.round(canvas.height * 0.55 + Math.sin(t) * 3);
-      drawFrame(ctx, bundle, "explorer.right.0", 70, playerY, explorerScale);
+      const playerY = Math.round(canvas.height * 0.55 + (reducedMotion ? 0 : Math.sin(t * 1.2) * 2));
+      explorerSwim.draw(ctx, 70, playerY, explorerScale);
 
       // Draw Enemy Silhouette / Sprite
       const enemyX = Math.round(canvas.width - 80);
-      const enemyY = Math.round(canvas.height * 0.55 + Math.cos(t) * 3);
+      const enemyY = Math.round(canvas.height * 0.55 + (reducedMotion ? 0 : Math.cos(t * 0.85) * 3));
+      if (enemySwim && encounterStage) {
+        const enemyScale = speciesScale(bundle, enemySpeciesByStage[encounterStage], run.stage === "boss" ? 84 : 68);
+        enemySwim.draw(ctx, enemyX, enemyY, enemyScale);
+      }
 
-      if (run.stage === "surface") {
-        // Clownfish (using blobfish frame with warm gold tone or blobfish profile)
-        const scale = speciesScale(bundle, "blobfish", 60);
-        drawFrame(ctx, bundle, "blobfish.1.0", enemyX, enemyY, scale);
-      } else if (run.stage === "twilight") {
-        // Anglerfish / Barreleye
-        const scale = speciesScale(bundle, "barreleye", 66);
-        drawFrame(ctx, bundle, "barreleye.1.0", enemyX, enemyY, scale);
-      } else if (run.stage === "midnight") {
-        // Giant Squid / Gulper
-        const scale = speciesScale(bundle, "gulper", 85);
-        drawFrame(ctx, bundle, "gulper.1.0", enemyX, enemyY, scale);
-      } else if (run.stage === "boss") {
-        // Megalodon / Goblin
-        const scale = speciesScale(bundle, "goblin", 90);
-        drawFrame(ctx, bundle, "goblin.1.0", enemyX, enemyY, scale);
+      // The prepared fringehead swim loop joins the apex scene as distant life.
+      if (fringeheadSwim) {
+        fringeheadSwim.draw(ctx, Math.round(canvas.width * 0.62), Math.round(canvas.height * 0.28), speciesScale(bundle, "fringehead", 44));
       }
 
       if (!reducedMotion) {
@@ -236,7 +251,7 @@ export function DescentEncounter({
       }
     };
 
-    render();
+    render(performance.now());
     return () => cancelAnimationFrame(animId);
   }, [bundle, run.stage, reducedMotion]);
 

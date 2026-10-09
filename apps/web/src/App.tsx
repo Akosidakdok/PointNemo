@@ -27,6 +27,8 @@ import { DescentEncounter } from "./components/DescentEncounter";
 import { ResultsScreen } from "./components/ResultsScreen";
 import { SettingsModal } from "./components/SettingsModal";
 import { SonarPreloader } from "./components/ui/SonarPreloader";
+import { AuthPage } from "./components/auth/AuthPage";
+import { type AuthenticatedUser } from "./components/auth/auth.types";
 import { AuthoritativeBattle } from "./components/AuthoritativeBattle";
 import { BattleEncounter } from "./components/BattleEncounter";
 import { DocumentIntake } from "./components/DocumentIntake";
@@ -69,6 +71,40 @@ export function App() {
   const [validationStatus, setValidationStatus] = useState<SonarStageStatus>("waiting");
   const [processingError, setProcessingError] = useState<string | null>(null);
   const [isOllamaOffline, setIsOllamaOffline] = useState(false);
+
+  // User Authentication State
+  const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(() => {
+    try {
+      const stored = localStorage.getItem("point_nemo_explorer");
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    return null;
+  });
+
+  const handleAuthSuccess = useCallback((user: AuthenticatedUser) => {
+    setCurrentUser(user);
+    if (user.remembered) {
+      try {
+        localStorage.setItem("point_nemo_explorer", JSON.stringify(user));
+      } catch {}
+    }
+  }, []);
+
+  const handleGuestAccess = useCallback(() => {
+    setCurrentUser({
+      displayName: "Guest Explorer",
+      email: "guest@pointnemo.local",
+      remembered: false,
+    });
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem("point_nemo_explorer");
+    } catch {}
+    setView("library");
+  }, []);
 
   // Preferences
   const [reducedMotion, setReducedMotion] = useState(() => {
@@ -349,6 +385,29 @@ export function App() {
     );
   }
 
+  if (!currentUser) {
+    return (
+      <main className="pointnemo-app auth-gateway-app" role="application" aria-label="Point Nemo Authentication Gateway">
+        <AuthPage
+          onAuthSuccess={handleAuthSuccess}
+          onGuestAccess={handleGuestAccess}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          reducedMotion={reducedMotion}
+          onToggleReducedMotion={() => setReducedMotion((m) => !m)}
+        />
+
+        {/* Settings Modal */}
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          status={status}
+          reducedMotion={reducedMotion}
+          onToggleReducedMotion={() => setReducedMotion((m) => !m)}
+        />
+      </main>
+    );
+  }
+
   return (
     <main className="pointnemo-app" role="application" aria-label="Point Nemo Educational Descent">
       {/* 2D Interactive Ocean Viewport in Background */}
@@ -385,6 +444,8 @@ export function App() {
           onDeleteRun={handleDeleteRun}
           isOnline={status.api.available}
           onOpenSettings={() => setIsSettingsOpen(true)}
+          currentUser={currentUser}
+          onLogout={handleLogout}
         />
       )}
 

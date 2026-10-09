@@ -12,7 +12,11 @@ const CORE_ASSETS = [
   '/assets/runtime/barreleye.png',
   '/assets/runtime/gulper.png',
   '/assets/runtime/goblin.png',
-  '/assets/runtime/fringehead.png'
+  '/assets/runtime/fringehead.png',
+  '/assets/runtime/effects.png',
+  '/assets/characters/explorer-front.png',
+  '/fonts/PressStart2P-Regular.ttf',
+  '/fonts/PixelifySans-Variable.ttf'
 ];
 
 self.addEventListener('install', (event) => {

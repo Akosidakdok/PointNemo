@@ -2,7 +2,7 @@ import { useEffect, useReducer, useRef } from "react";
 import { battleReducer, initialBattleState } from "../game/battleState";
 import { type AssetBundle, drawFrame, speciesScale } from "../game/sprites";
 import { GameButton } from "./ui/GameButton";
-import { type BattleEffectsHandle } from "./BattleEffects";
+import { BattleEffects, type BattleEffectsHandle } from "./BattleEffects";
 
 export interface BattleEncounterProps {
   bundle?: AssetBundle | null;
@@ -12,21 +12,29 @@ export interface BattleEncounterProps {
 export function BattleEncounter({ bundle, onClose }: BattleEncounterProps) {
   const [battle, dispatch] = useReducer(battleReducer, initialBattleState);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const effectsRef = useRef<BattleEffectsHandle | null>(null);
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<HTMLDivElement>(null);
+  const enemyRef = useRef<HTMLDivElement>(null);
+  const effectsRef = useRef<BattleEffectsHandle>(null);
 
   useEffect(() => {
-    if (battle.turn === "enemy") {
-      const timeoutId = window.setTimeout(() => dispatch({ type: "enemy/attack-start" }), 600);
-      return () => window.clearTimeout(timeoutId);
-    }
-    if (battle.turn === "enemy-attack") {
-      const timeoutId = window.setTimeout(() => dispatch({ type: "enemy/attack-hit" }), 500);
-      return () => window.clearTimeout(timeoutId);
-    }
+    let timeoutId: number | undefined;
     if (battle.turn === "player-attack") {
-      const timeoutId = window.setTimeout(() => dispatch({ type: "player/attack-hit" }), 500);
-      return () => window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => {
+        effectsRef.current?.play("effects.sonar-hit", "enemy", "above-actors");
+        dispatch({ type: "player/attack-hit" });
+      }, 300);
+    } else if (battle.turn === "enemy") {
+      timeoutId = window.setTimeout(() => {
+        dispatch({ type: "enemy/attack-start" });
+      }, 450);
+    } else if (battle.turn === "enemy-attack") {
+      timeoutId = window.setTimeout(() => {
+        effectsRef.current?.play("effects.hull-hit", "player", "above-actors");
+        dispatch({ type: "enemy/attack-hit" });
+      }, 300);
     }
+    return () => window.clearTimeout(timeoutId);
   }, [battle.turn]);
 
   // Handle keyboard ENTER to attack
@@ -88,7 +96,7 @@ export function BattleEncounter({ bundle, onClose }: BattleEncounterProps) {
 
       // 2. Draw Enemy (Blobfish profile facing left)
       const blobfishScale = speciesScale(bundle, "blobfish", 82);
-      const isEnemyAttacking = battle.turn === "enemy";
+      const isEnemyAttacking = battle.turn === "enemy" || battle.turn === "enemy-attack";
       const lungeOffset = isEnemyAttacking ? Math.sin(t * 8) * 12 : 0;
       const enemyX = Math.round(width - 90 - lungeOffset);
       const enemyY = Math.round(height * 0.55 + Math.cos(t * 0.8) * 4);
@@ -97,8 +105,8 @@ export function BattleEncounter({ bundle, onClose }: BattleEncounterProps) {
       const blobfishFrame = Math.floor(t * 2) % 2 === 0 ? "blobfish.1.0" : "blobfish.1.1";
       drawFrame(ctx, bundle, blobfishFrame, enemyX, enemyY, blobfishScale);
 
-      // Sonar pulse FX if player just attacked
-      if (battle.turn === "enemy") {
+      // Sonar pulse FX if player is attacking
+      if (battle.turn === "player-attack") {
         ctx.beginPath();
         ctx.arc(100 + (t * 50) % 180, playerY, 20, -Math.PI * 0.3, Math.PI * 0.3);
         ctx.strokeStyle = "rgba(48, 214, 242, 0.6)";
@@ -126,7 +134,11 @@ export function BattleEncounter({ bundle, onClose }: BattleEncounterProps) {
           <span className={`turn-badge turn-${battle.turn}`} aria-live="polite">
             {battle.turn === "player"
               ? "STATUS: YOUR TURN"
+              : battle.turn === "player-attack"
+              ? "STATUS: PULSE IN FLIGHT"
               : battle.turn === "enemy"
+              ? "STATUS: ENEMY TURN"
+              : battle.turn === "enemy-attack"
               ? "STATUS: CREATURE ATTACKING"
               : battle.turn === "won"
               ? "STATUS: PATH CLEARED"
@@ -140,14 +152,17 @@ export function BattleEncounter({ bundle, onClose }: BattleEncounterProps) {
         </div>
       </div>
 
-      {/* 16-bit Battle Arena Canvas */}
-      <div className="battle-arena" aria-hidden="true">
+      {/* 16-bit Battle Arena Canvas with VFX Overlay */}
+      <div ref={sceneRef} className="battle-arena" aria-hidden="true" style={{ position: "relative" }}>
+        <div ref={playerRef} style={{ position: "absolute", left: "80px", top: "55%", width: 1, height: 1 }} />
+        <div ref={enemyRef} style={{ position: "absolute", right: "90px", top: "55%", width: 1, height: 1 }} />
         <canvas
           ref={canvasRef}
           width={480}
           height={160}
           className="battle-canvas pixel-art"
         />
+        <BattleEffects ref={effectsRef} sceneRef={sceneRef} playerRef={playerRef} enemyRef={enemyRef} />
         <div className="arena-overlay">
           <span className="depth-tag">DEPTH: 4,180 M · ABYSSAL ZONE</span>
           <span className="specimen-tag">SPECIMEN: PSYCHROLUTES PSYCHROLUTES</span>

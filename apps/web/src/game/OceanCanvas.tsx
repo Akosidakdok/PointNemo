@@ -30,10 +30,11 @@ interface PlayerState {
 interface CreatureState {
   id: string;
   name: string;
-  x: number;
-  y: number;
-  direction: "left" | "right" | "down";
-  speed: number;
+  xRatio: number;
+  yRatio: number;
+  phase: number;
+  sway: number;
+  swimRate: number;
   animation: SpriteAnimation;
   scale: number;
 }
@@ -80,11 +81,13 @@ export function OceanCanvas({
 
     const explorerScale = speciesScale(bundle, "explorer", 74);
     const buoyScale = speciesScale(bundle, "buoy", 110);
-    const blobfishScale = speciesScale(bundle, "blobfish", 64);
-    const barreleyeScale = speciesScale(bundle, "barreleye", 68);
-
-    const blobfishAnim = new SpriteAnimation(bundle, "blobfish.swim.down");
-    const barreleyeAnim = new SpriteAnimation(bundle, "barreleye.swim");
+    const creatures: Array<Omit<CreatureState, "animation" | "scale"> & { species: string; animationName: string; spriteSize: number }> = [
+      { id: "blobfish-1", name: "Blobfish", species: "blobfish", animationName: "blobfish.swim.down", spriteSize: 58, xRatio: 0.22, yRatio: 0.7, phase: 0.3, sway: 26, swimRate: 0.34 },
+      { id: "barreleye-1", name: "Barreleye", species: "barreleye", animationName: "barreleye.swim", spriteSize: 58, xRatio: 0.72, yRatio: 0.29, phase: 1.7, sway: 34, swimRate: 0.29 },
+      { id: "gulper-1", name: "Gulper Eel", species: "gulper", animationName: "gulper.swim", spriteSize: 70, xRatio: 0.87, yRatio: 0.62, phase: 2.9, sway: 24, swimRate: 0.24 },
+      { id: "goblin-1", name: "Goblin Shark", species: "goblin", animationName: "goblin.swim", spriteSize: 72, xRatio: 0.57, yRatio: 0.77, phase: 4.1, sway: 38, swimRate: 0.22 },
+      { id: "fringehead-1", name: "Fringehead", species: "fringehead", animationName: "fringehead.swim", spriteSize: 62, xRatio: 0.36, yRatio: 0.2, phase: 5.2, sway: 30, swimRate: 0.31 },
+    ];
 
     animationsRef.current = {
       explorerDown: new SpriteAnimation(bundle, "explorer.swim.down"),
@@ -93,28 +96,11 @@ export function OceanCanvas({
       explorerRight: new SpriteAnimation(bundle, "explorer.swim.right"),
       explorerScale,
       buoyScale,
-      creatures: [
-        {
-          id: "blobfish-1",
-          name: "Blobfish",
-          x: 480,
-          y: 420,
-          direction: "down",
-          speed: 35,
-          animation: blobfishAnim,
-          scale: blobfishScale,
-        },
-        {
-          id: "barreleye-1",
-          name: "Barreleye",
-          x: 200,
-          y: 380,
-          direction: "right",
-          speed: 40,
-          animation: barreleyeAnim,
-          scale: barreleyeScale,
-        },
-      ],
+      creatures: creatures.map(({ species, animationName, spriteSize, ...creature }) => ({
+        ...creature,
+        animation: new SpriteAnimation(bundle, animationName),
+        scale: speciesScale(bundle, species, spriteSize),
+      })),
     };
   }, [bundle]);
 
@@ -234,11 +220,13 @@ export function OceanCanvas({
     let animId: number;
     let lastTime = performance.now();
     let beaconPhase = 0;
+    let worldTime = 0;
 
     const render = (now: number) => {
       animId = requestAnimationFrame(render);
       const dt = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
+      if (!paused && !reducedMotion) worldTime += dt;
 
       const dpr = window.devicePixelRatio || 1;
       const cssWidth = canvas.clientWidth || 800;
@@ -261,7 +249,8 @@ export function OceanCanvas({
       // Slight camera drift based on player or time
       const camX = Math.round(playerRef.current.x * 0.2);
       const camY = Math.round(playerRef.current.y * 0.2);
-      drawWater(ctx, bundle.images.water, cssWidth, cssHeight, 320, camX, camY);
+      const currentDrift = reducedMotion ? 0 : worldTime * 2;
+      drawWater(ctx, bundle.images.water, cssWidth, cssHeight, 320, camX + currentDrift, camY - currentDrift * 0.4);
 
       // Deep ocean vignette overlay
       ctx.fillStyle = "rgba(6, 20, 38, 0.4)";
@@ -302,13 +291,13 @@ export function OceanCanvas({
         for (const creature of anims.creatures) {
           if (!paused && !reducedMotion) {
             creature.animation.update(dt);
-            // Gentle wandering
-            creature.y += Math.sin(now * 0.001 + creature.x) * 0.25;
           }
-          creature.animation.draw(ctx, creature.x, creature.y, creature.scale);
+          const x = cssWidth * creature.xRatio + Math.sin(worldTime * creature.swimRate + creature.phase) * creature.sway;
+          const y = cssHeight * creature.yRatio + Math.cos(worldTime * creature.swimRate * 0.7 + creature.phase) * 8;
+          creature.animation.draw(ctx, Math.round(x), Math.round(y), creature.scale);
 
           // Check proximity for encounter notification
-          const distToPlayer = Math.hypot(playerRef.current.x - creature.x, playerRef.current.y - creature.y);
+          const distToPlayer = Math.hypot(playerRef.current.x - x, playerRef.current.y - y);
           if (distToPlayer < 45 && onEncounterTrigger) {
             onEncounterTrigger(creature.name);
           }
