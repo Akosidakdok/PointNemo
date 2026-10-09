@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+.game-panel {
+  color: #eaf4fc;
+  background: #0b1e38;
+  border: 2px solid #426887;
+  box-shadow: 4px 4px 0 #030912;
+}
+
+.game-button {
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #030912;
+  transition: all 0.1s;
+}
+
+.game-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #030912;
+}
+
+.game-button:focus-visible {
+  outline: 3px solid #30d6f2;
+  outline-offset: 3px;
+}
+
+.pixel-art {
+  image-rendering: pixelated;
+}
+
+/* Background Mockup Styles */
+.mockup-ocean-img {
+  background-image: url('../../assets/maps/point-nemo-abyss-ocean.png');
+  background-size: cover;
+  background-position: top center;
+  height: 400vh; /* make it tall to scroll down */
+}
+
+.mockup-bg.surface { transform: translateY(0); }
+.mockup-bg.twilight { transform: translateY(-30%); }
+.mockup-bg.midnight { transform: translateY(-60%); }
+.mockup-bg.boss { transform: translateY(-80%); }
+
+/* Sprites CSS steps mock */
+.explorer-sprite {
+  width: 120px;
+  height: 120px;
+  background-image: url('../../assets/prepared/runtime/explorer.png');
+  background-size: 400% 400%;
+  animation: swim-idle 1s steps(3, end) infinite;
+}
+
+.enemy-sprite {
+  width: 120px;
+  height: 120px;
+  background-image: url('../../assets/prepared/runtime/blobfish.png');
+  background-size: 400% 200%;
+  background-position: 0 100%;
+  animation: enemy-idle 1s steps(2, end) infinite;
+}
+
+@keyframes swim-idle {
+  0% { background-position: 33.33% 0; }
+  100% { background-position: 100% 0; }
+}
+
+@keyframes enemy-idle {
+  0% { background-position: 0 100%; }
+  100% { background-position: 33.33% 100%; }
+}

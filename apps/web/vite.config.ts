@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from "vite";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import tailwindcss from "@tailwindcss/vite";
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -9,6 +10,7 @@ export default defineConfig(({ mode }) => {
   const apiPort = process.env.API_PORT ?? environment.API_PORT ?? "3001";
 
   return {
+    plugins: [tailwindcss()],
     server: {
       host: "127.0.0.1",
       port: 5173,
