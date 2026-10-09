@@ -3,6 +3,7 @@ import {
   type AssetBundle,
   SpriteAnimation,
   drawFrame,
+  drawWater,
   speciesScale,
 } from "../../game/sprites";
 import {
@@ -33,6 +34,8 @@ export function DescentMapView({
   const playerPosRef = useRef({ ...instance.player });
   const mapImageRef = useRef<HTMLImageElement | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [pendingNode, setPendingNode] = useState<number | null>(null);
+  const [ignoredNode, setIgnoredNode] = useState<number | null>(null);
 
   // Synchronize internal ref with external instance player state
   useEffect(() => {
@@ -113,6 +116,16 @@ export function DescentMapView({
 
     let animId = 0;
     let prevTime = performance.now();
+    let elapsed = 0;
+
+    // Ambient floating marine snow particles (same as login scene)
+    const particles = Array.from({ length: 24 }, () => ({
+      x: Math.random() * 650,
+      y: Math.random() * 650,
+      speedY: 0.25 + Math.random() * 0.45,
+      size: Math.random() > 0.7 ? 2 : 1,
+      opacity: 0.15 + Math.random() * 0.35,
+    }));
 
     // Creature animations
     const creatures = [
@@ -126,6 +139,7 @@ export function DescentMapView({
     const render = (time: number) => {
       const dt = Math.min((time - prevTime) / 1000, 0.1);
       prevTime = time;
+      elapsed += dt;
 
       const width = canvas.width;
       const height = canvas.height;
@@ -162,18 +176,50 @@ export function DescentMapView({
 
         // Check distance to target node
         const target = BASE_ROUTE_POINTS[instance.routeNode];
-        if (target && !instance.activeEncounter) {
+        if (target && !instance.activeEncounter && pendingNode === null) {
           const dist = Math.hypot(playerPosRef.current.x - target.x, playerPosRef.current.y - target.y);
           if (dist < 0.07) {
-            heldKeysRef.current.clear();
-            onReachTarget(instance.routeNode);
+            if (ignoredNode !== instance.routeNode) {
+              heldKeysRef.current.clear();
+              setPendingNode(instance.routeNode);
+            }
+          } else if (dist > 0.12) {
+            if (ignoredNode === instance.routeNode) {
+              setIgnoredNode(null);
+            }
           }
         }
       }
 
-      // 2. Draw World Map Background
+      // 2. Draw Animated Water Waves Background (identical to login scene)
       ctx.imageSmoothingEnabled = false;
-      if (mapImageRef.current) {
+      const waterImg = bundle?.images[bundle.manifest.world.waterAtlas] || bundle?.images?.water;
+      if (waterImg) {
+        const current = elapsed * 20;
+        drawWater(ctx, waterImg, width, height, 320, current, -current * 0.35);
+
+        // Deep ocean gradient tint overlay
+        const waterTint = ctx.createLinearGradient(0, 0, 0, height);
+        waterTint.addColorStop(0, "#081b30");
+        waterTint.addColorStop(1, "#030c18");
+        ctx.globalAlpha = 0.35;
+        ctx.fillStyle = waterTint;
+        ctx.fillRect(0, 0, width, height);
+        ctx.globalAlpha = 1;
+
+        // Ambient floating marine snow particles
+        for (const p of particles) {
+          p.y -= p.speedY;
+          if (p.y < 0) {
+            p.y = height + 10;
+            p.x = Math.random() * width;
+          }
+          ctx.globalAlpha = p.opacity;
+          ctx.fillStyle = "#8ec5ec";
+          ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size);
+        }
+        ctx.globalAlpha = 1;
+      } else if (mapImageRef.current) {
         ctx.drawImage(mapImageRef.current, 0, 0, width, height);
       } else {
         const grad = ctx.createLinearGradient(0, 0, 0, height);
@@ -183,30 +229,96 @@ export function DescentMapView({
         ctx.fillRect(0, 0, width, height);
       }
 
-      // 3. Draw Route Path Line
+      // 3. Draw Route Path Line (only draw up to the active target encounter)
       const pts = BASE_ROUTE_POINTS.map((p) => ({
         x: p.x * width,
         y: p.y * height,
       }));
 
-      for (let i = 1; i < pts.length; i++) {
+      ctx.lineDashOffset = -time * 0.015;
+      for (let i = 1; i <= Math.min(instance.routeNode, pts.length - 1); i++) {
         ctx.beginPath();
         ctx.moveTo(pts[i - 1].x, pts[i - 1].y);
         ctx.lineTo(pts[i].x, pts[i].y);
-        ctx.setLineDash([6, 8]);
-        ctx.lineWidth = Math.max(2, width * 0.005);
-        ctx.strokeStyle =
-          i < instance.routeNode
-            ? "rgba(48, 214, 242, 0.85)"
-            : i === instance.routeNode
-            ? "rgba(220, 249, 255, 0.95)"
-            : "rgba(66, 104, 135, 0.35)";
+        
+        ctx.setLineDash([8, 10]);
+        ctx.lineCap = "round";
+        ctx.lineWidth = Math.max(3, width * 0.006);
+        
+        const isPast = i < instance.routeNode;
+        const isCurrent = i === instance.routeNode;
+        
+        ctx.strokeStyle = isPast 
+          ? "rgba(48, 214, 242, 0.4)" 
+          : isCurrent 
+          ? "rgba(220, 249, 255, 0.95)" 
+          : "rgba(66, 104, 135, 0.25)";
+          
+        if (isCurrent) {
+          ctx.shadowColor = "rgba(48, 214, 242, 0.8)";
+          ctx.shadowBlur = 8;
+        } else {
+          ctx.shadowBlur = 0;
+        }
+
         ctx.stroke();
       }
       ctx.setLineDash([]);
+      ctx.shadowBlur = 0;
 
-      // 4. Draw Waypoint Creature Markers
+      // 4a. Animate Origin Buoy wave ripples & draw buoy sprite at the center point (Point Nemo)
+      const originPt = pts[0];
+      const s = width / 650;
+      ctx.save();
+      
+      // Animated concentric water ripples emanating from buoy base
+      for (let r = 0; r < 3; r++) {
+        const progress = ((time * 0.0008 + r / 3) % 1);
+        const rx = (20 + progress * 32) * s;
+        const ry = rx * 0.42;
+        const alpha = (1 - progress) * 0.55;
+        ctx.beginPath();
+        ctx.ellipse(originPt.x, originPt.y + 12 * s, rx, ry, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 80, 95, ${alpha})`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // Draw the autonomous buoy sprite fixed at the center point
+      const buoyScale = speciesScale(bundle, "buoy", 74) * s;
+      drawFrame(ctx, bundle, "buoy", originPt.x, originPt.y, buoyScale);
+
+      // Red beacon light pulse at the buoy tip
+      const beaconPhase = (time * 0.003) % (Math.PI * 2);
+      const pulseR = (10 + Math.sin(beaconPhase) * 4) * s;
+      const pulseAlpha = 0.25 + Math.sin(beaconPhase) * 0.15;
+      ctx.beginPath();
+      ctx.arc(originPt.x, originPt.y - 30 * s, pulseR, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255, 72, 83, ${pulseAlpha})`;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(originPt.x, originPt.y - 30 * s, 3.5 * s, 0, Math.PI * 2);
+      ctx.fillStyle = "#ff4853";
+      ctx.shadowColor = "#ff4853";
+      ctx.shadowBlur = 6;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Clean label below the buoy without dark covering circle
+      ctx.font = "bold 9px monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.fillStyle = "#30d6f2";
+      ctx.fillText("POINT NEMO", originPt.x, originPt.y + 36 * s);
+      ctx.restore();
+
+      // 4b. Draw Waypoint Creature Markers (only current active and accomplished encounters)
       for (let m = 1; m <= 4; m++) {
+        // Fog of war: Hide future encounters until the current level is accomplished
+        if (m > instance.routeNode) continue;
+
         const marker = pts[m];
         const creature = creatures[m - 1];
         if (!reducedMotion) creature.update(dt);
@@ -215,13 +327,13 @@ export function DescentMapView({
         const isPast = m < instance.routeNode;
 
         ctx.save();
-        ctx.globalAlpha = isPast ? 0.35 : isCurrent ? 1.0 : 0.55;
+        ctx.globalAlpha = isPast ? 0.45 : 1.0;
 
         // Glowing circle under marker
         ctx.beginPath();
         ctx.arc(marker.x, marker.y, Math.max(24, width * 0.05), 0, Math.PI * 2);
-        ctx.fillStyle = isCurrent ? "rgba(48, 214, 242, 0.35)" : "rgba(6, 20, 38, 0.55)";
-        ctx.strokeStyle = isCurrent ? "#d7f6ff" : "rgba(66, 104, 135, 0.6)";
+        ctx.fillStyle = isCurrent ? "rgba(48, 214, 242, 0.35)" : "rgba(6, 20, 38, 0.45)";
+        ctx.strokeStyle = isCurrent ? "#d7f6ff" : "rgba(48, 214, 242, 0.4)";
         ctx.lineWidth = isCurrent ? 3 : 1;
         ctx.fill();
         ctx.stroke();
@@ -236,9 +348,10 @@ export function DescentMapView({
         ctx.font = "bold 9px monospace";
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
-        ctx.fillStyle = isCurrent ? "#30d6f2" : "#eaf4fc";
-        const stopLabel = lesson.topics[m] || BASE_ROUTE_POINTS[m].label;
-        ctx.fillText(stopLabel.toUpperCase(), marker.x, marker.y + width * 0.058);
+        ctx.fillStyle = isCurrent ? "#30d6f2" : "#7ea0b8";
+        const rawLabel = lesson.topics[m] || BASE_ROUTE_POINTS[m].label;
+        const stopLabel = isPast ? `✓ ${rawLabel.toUpperCase()}` : rawLabel.toUpperCase();
+        ctx.fillText(stopLabel, marker.x, marker.y + width * 0.058);
         ctx.restore();
       }
 
@@ -266,14 +379,14 @@ export function DescentMapView({
       <div className="route-heading">
         <div>
           <p className="eyebrow">
-            INDEPENDENT RUN · <span>{instance.id}</span>
+            STUDY LESSON · <span>{instance.id}</span>
           </p>
-          <h2 id="route-title">{lesson.title} — Descent Map</h2>
+          <h2 id="route-title">{lesson.title} — Study Map</h2>
         </div>
         <span id="route-position">
           {instance.routeNode === 4
-            ? "FINAL TARGET · LESSON BOSS"
-            : `NEXT OBJECTIVE · PART ${instance.routeNode} OF 3`}
+            ? "FINAL CHALLENGE · REVIEW QUIZ"
+            : `CURRENT GOAL · TOPIC ${instance.routeNode} OF 3`}
         </span>
       </div>
 
@@ -283,10 +396,47 @@ export function DescentMapView({
           width={650}
           height={650}
           className="pixel-scene"
-          aria-label="Ocean descent world map. Use W, A, S, D to swim to the highlighted creature marker."
+          aria-label="Interactive study map. Use W, A, S, D to move to the highlighted quiz marker."
           tabIndex={0}
         />
-        <span className="route-depth-label">WORLD MAP · WASD TO SWIM</span>
+        {pendingNode !== null && (
+          <div className="encounter-confirm-overlay">
+            <div className="encounter-confirm-card">
+              <p className="eyebrow">QUIZ READY</p>
+              <h3>Ready for this question?</h3>
+              <p>
+                {pendingNode <= 3
+                  ? `You've reached the ${lesson.topics[pendingNode] || "quiz"} challenge.`
+                  : "You've reached the Final Review Quiz."}
+              </p>
+              <div className="button-row">
+                <button
+                  type="button"
+                  className="primary-button"
+                  onClick={() => {
+                    onReachTarget(pendingNode);
+                    setPendingNode(null);
+                  }}
+                >
+                  Start Question ▶
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => {
+                    setIgnoredNode(pendingNode);
+                    setPendingNode(null);
+                  }}
+                >
+                  Not Yet
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {pendingNode === null && (
+          <span className="route-depth-label">STUDY MAP · USE WASD TO MOVE</span>
+        )}
       </div>
 
       {/* On-screen Directional Touch Controls for mobile/accessibility */}
@@ -302,46 +452,90 @@ export function DescentMapView({
         <button
           type="button"
           className="secondary-button"
-          style={{ width: "42px", height: "38px", padding: 0 }}
+          style={{
+            width: "44px",
+            height: "44px",
+            minWidth: "44px",
+            minHeight: "44px",
+            padding: 0,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
           onPointerDown={() => handleVirtualDirection("up", true)}
           onPointerUp={() => handleVirtualDirection("up", false)}
           onPointerLeave={() => handleVirtualDirection("up", false)}
           aria-label="Swim Up"
         >
-          ▲
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <polygon points="8,3 13,13 3,13" />
+          </svg>
         </button>
         <button
           type="button"
           className="secondary-button"
-          style={{ width: "42px", height: "38px", padding: 0 }}
+          style={{
+            width: "44px",
+            height: "44px",
+            minWidth: "44px",
+            minHeight: "44px",
+            padding: 0,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
           onPointerDown={() => handleVirtualDirection("left", true)}
           onPointerUp={() => handleVirtualDirection("left", false)}
           onPointerLeave={() => handleVirtualDirection("left", false)}
           aria-label="Swim Left"
         >
-          ◀
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <polygon points="3,8 13,3 13,13" />
+          </svg>
         </button>
         <button
           type="button"
           className="secondary-button"
-          style={{ width: "42px", height: "38px", padding: 0 }}
+          style={{
+            width: "44px",
+            height: "44px",
+            minWidth: "44px",
+            minHeight: "44px",
+            padding: 0,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
           onPointerDown={() => handleVirtualDirection("down", true)}
           onPointerUp={() => handleVirtualDirection("down", false)}
           onPointerLeave={() => handleVirtualDirection("down", false)}
           aria-label="Swim Down"
         >
-          ▼
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <polygon points="8,13 13,3 3,3" />
+          </svg>
         </button>
         <button
           type="button"
           className="secondary-button"
-          style={{ width: "42px", height: "38px", padding: 0 }}
+          style={{
+            width: "44px",
+            height: "44px",
+            minWidth: "44px",
+            minHeight: "44px",
+            padding: 0,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
           onPointerDown={() => handleVirtualDirection("right", true)}
           onPointerUp={() => handleVirtualDirection("right", false)}
           onPointerLeave={() => handleVirtualDirection("right", false)}
           aria-label="Swim Right"
         >
-          ▶
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <polygon points="13,8 3,3 3,13" />
+          </svg>
         </button>
       </div>
 
@@ -349,35 +543,35 @@ export function DescentMapView({
         <li className={instance.routeNode === 0 ? "current" : "complete"}>
           <span>01</span>
           <b>Point Nemo</b>
-          <small>Origin Buoy</small>
+          <small>Start Point</small>
         </li>
         <li className={instance.routeNode === 1 ? "current" : instance.routeNode > 1 ? "complete" : "locked"}>
           <span>02</span>
-          <b>{lesson.topics[1] || "Part 1"}</b>
-          <small>Encounter 1</small>
+          <b>{instance.routeNode >= 1 ? (lesson.topics[1] || "Topic 1") : "???"}</b>
+          <small>{instance.routeNode > 1 ? "Cleared ✓" : instance.routeNode === 1 ? "In Progress" : "Locked"}</small>
         </li>
         <li className={instance.routeNode === 2 ? "current" : instance.routeNode > 2 ? "complete" : "locked"}>
           <span>03</span>
-          <b>{lesson.topics[2] || "Part 2"}</b>
-          <small>Encounter 2</small>
+          <b>{instance.routeNode >= 2 ? (lesson.topics[2] || "Topic 2") : "???"}</b>
+          <small>{instance.routeNode > 2 ? "Cleared ✓" : instance.routeNode === 2 ? "In Progress" : "Locked"}</small>
         </li>
         <li className={instance.routeNode === 3 ? "current" : instance.routeNode > 3 ? "complete" : "locked"}>
           <span>04</span>
-          <b>{lesson.topics[3] || "Part 3"}</b>
-          <small>Encounter 3</small>
+          <b>{instance.routeNode >= 3 ? (lesson.topics[3] || "Topic 3") : "???"}</b>
+          <small>{instance.routeNode > 3 ? "Cleared ✓" : instance.routeNode === 3 ? "In Progress" : "Locked"}</small>
         </li>
         <li className={instance.routeNode === 4 ? "current" : "locked"}>
           <span>05</span>
-          <b>Lesson Boss</b>
-          <small>Final Review</small>
+          <b>{instance.routeNode >= 4 ? "Final Quiz" : "???"}</b>
+          <small>{instance.routeNode >= 4 ? "Review All" : "Locked"}</small>
         </li>
       </ol>
 
       <div className="route-controls">
         <span id="route-status">
           {instance.routeNode === 4
-            ? "All three topics clear. Swim to the Goblin Shark marker for the final boss review."
-            : `Swim to the highlighted ${activeTopic} marker. Subsequent markers unlock upon clearing this encounter.`}
+            ? "All 3 topics completed! Swim to the final marker to take your review quiz."
+            : `Move to the highlighted ${activeTopic} marker to start your quiz. Answer correctly to unlock the next topic.`}
         </span>
         <span className="key-hints">
           <kbd>W</kbd>

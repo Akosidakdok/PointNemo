@@ -42,11 +42,26 @@ export function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeInstanceId, setActiveInstanceId] = useState<string | null>("PN-001");
   const [bossUnlocked, setBossUnlocked] = useState(false);
+  const [maxUnlockedStep, setMaxUnlockedStep] = useState(1);
 
   const handleNavigate = useCallback(
     (screen: AppNavScreen) => {
       setCurrentScreen(screen);
       setNavKey((k) => k + 1);
+
+      const stepMap: Record<AppNavScreen, number> = {
+        library: 1,
+        upload: 2,
+        sonar: 2,
+        seas: 3,
+        descent: 4,
+        boss: 4,
+        results: 5,
+        profile: 1,
+      };
+      const stepNum = stepMap[screen] || 1;
+      setMaxUnlockedStep((prev) => Math.max(prev, stepNum));
+
       if (screen === "boss") {
         setBossUnlocked(true);
       }
@@ -57,11 +72,15 @@ export function App() {
     [activeInstanceId]
   );
 
-  // Theme State
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  // Theme State (Default to Light Mode)
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    const saved = localStorage.getItem("point-nemo-theme");
+    return (saved === "dark" || saved === "light") ? saved : "light";
+  });
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
+    localStorage.setItem("point-nemo-theme", theme);
   }, [theme]);
 
   // App & Run Data from SQLite
@@ -296,6 +315,7 @@ export function App() {
   return (
     <div
       className="playground-shell"
+      data-reduced-motion={reducedMotion ? "true" : undefined}
       role="application"
       aria-label="Point Nemo Educational Descent"
     >
@@ -311,6 +331,7 @@ export function App() {
           onToggleTheme={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
           activeInstanceId={activeInstanceId}
           bossUnlocked={bossUnlocked}
+          maxUnlockedStep={maxUnlockedStep}
         />
 
         {/* Active Screen Content */}
@@ -377,14 +398,15 @@ export function App() {
               currentUser={currentUser}
               bundle={bundle}
               reducedMotion={reducedMotion}
+              onBack={() => handleNavigate("library")}
             />
           )}
 
         </main>
 
         <footer className="playground-footer">
-          <span>POINT NEMO · OCEAN EXPEDITION</span>
-          <span>LOCAL FIRST · OFFLINE PWA</span>
+          <span>POINT NEMO · STUDY ADVENTURE</span>
+          <span>PRIVATE &amp; OFFLINE · RUNS ON YOUR DEVICE</span>
         </footer>
       </div>
 

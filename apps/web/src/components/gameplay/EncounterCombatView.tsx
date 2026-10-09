@@ -114,7 +114,7 @@ export function EncounterCombatView({
       <div className="health-row">
         <div className="health-card">
           <div>
-            <span>SUBMERSIBLE HULL INTEGRITY</span>
+            <span>YOUR HEALTH (HP)</span>
             <b id="player-hp">{instance.playerHP} / 100 HP</b>
           </div>
           <div className="health-track">
@@ -124,7 +124,7 @@ export function EncounterCombatView({
 
         <div className="health-card">
           <div>
-            <span>CREATURE THREAT (ORGANIC)</span>
+            <span>CHALLENGE (HP)</span>
             <b id="enemy-hp">{instance.enemyHP} / 100 HP</b>
           </div>
           <div className="health-track">
@@ -140,7 +140,7 @@ export function EncounterCombatView({
 
         <div className="question-panel">
           <div className="question-meta">
-            <span>{`TACTICAL ENCOUNTER · 0${partNumber} / 03`}</span>
+            <span>{`PRACTICE QUESTION · 0${partNumber} / 03`}</span>
             <span>{`TOPIC: ${topicName.toUpperCase()}`}</span>
           </div>
 
@@ -180,18 +180,18 @@ export function EncounterCombatView({
             >
               {isCorrect ? (
                 <>
-                  ✓ <b>Correct!</b> Dispersal pulse resonates. +10 XP awarded.
+                  ✓ <b>Correct!</b> Great job! +10 XP awarded.
                 </>
               ) : (
                 <>
-                  ✕ <b>Hull breach!</b> Submersible received impact. The correct answer was{" "}
+                  ✕ <b>Not quite right.</b> The correct answer was{" "}
                   <b>{question.answer}</b>.
                   <div className="source-evidence">
-                    <small>SOURCE EXPLANATION</small>
+                    <small>EXPLANATION</small>
                     <p>{question.explanation}</p>
                     {question.supportingQuote && (
                       <>
-                        <small>SUPPORTING DOCUMENT QUOTE</small>
+                        <small>QUOTE FROM YOUR NOTES</small>
                         <blockquote>“{question.supportingQuote}”</blockquote>
                       </>
                     )}
@@ -203,7 +203,7 @@ export function EncounterCombatView({
 
           <div className="question-footer">
             <span>
-              Correct answer: 50 creature threat damage · +10 XP reward
+              Answer correctly to clear this challenge · +10 XP
             </span>
             <button
               type="button"
@@ -211,7 +211,7 @@ export function EncounterCombatView({
               disabled={!answered}
               onClick={onClearPart}
             >
-              {partNumber < 3 ? "Clear this part →" : "Proceed to Boss Review →"}
+              {partNumber < 3 ? "Next Topic →" : "Proceed to Final Quiz →"}
             </button>
           </div>
         </div>

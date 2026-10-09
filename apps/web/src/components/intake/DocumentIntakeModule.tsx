@@ -15,16 +15,16 @@ interface DocumentIntakeModuleProps {
 
 const STAGES = [
   {
-    title: "Extracting text",
-    desc: "Reading page text and source locations on this device locally.",
+    title: "Reading document",
+    desc: "Reading text and key concepts from your PDF.",
   },
   {
-    title: "Generating questions",
-    desc: "Local Ollama drafts 3 source-grounded questions across 3 oceanic topics.",
+    title: "Creating questions",
+    desc: "AI is creating 3 study questions across 3 main topics from your notes.",
   },
   {
-    title: "Validating sources",
-    desc: "Checking exact question count, defensible answer keys, and supporting PDF quotes.",
+    title: "Checking question quality",
+    desc: "Verifying answers and matching explanations directly to your text.",
   },
 ];
 
@@ -80,22 +80,22 @@ export function DocumentIntakeModule({
     <section className="document-intake-module" aria-labelledby="intake-title">
       {!isProcessing ? (
         <div className="intake-selection-view">
-          <div className="eyebrow">MODULE 01 · DOCUMENT INTAKE</div>
+          <div className="eyebrow">STEP 02 · CREATE LESSON FROM PDF</div>
           <div className="page-heading">
             <div>
               <h1 id="intake-title">Add a study PDF</h1>
-              <p>Upload an English text-based PDF to generate your local 9-question ocean descent.</p>
+              <p>Upload an English PDF to automatically generate a 9-question study quiz.</p>
             </div>
             <p className="model-info">
-              Inference model: <b>qwen2.5:1.5b (Local Ollama)</b>
+              Offline AI: <b>Local &amp; Private</b>
             </p>
           </div>
 
           <div className="panel upload-panel" style={{ maxWidth: "680px", margin: "0 auto" }}>
             <div className="panel-heading">
               <div>
-                <h2>Document selection</h2>
-                <p>One PDF · max 5 MiB · up to 3 pages · 300–8,000 readable characters</p>
+                <h2>Select Document</h2>
+                <p>One PDF · max 5 MB · up to 3 pages · 300–8,000 readable characters</p>
               </div>
             </div>
 
@@ -111,7 +111,7 @@ export function DocumentIntakeModule({
                   className="primary-button"
                   onClick={handleBeginCalibration}
                 >
-                  Start Sonar Processing <span>→</span>
+                  Create Study Quiz <span>→</span>
                 </button>
               </div>
             )}
@@ -119,14 +119,14 @@ export function DocumentIntakeModule({
         </div>
       ) : (
         <div className="intake-sonar-view">
-          <div className="eyebrow">MODULE 02 · LOCAL PROCESSING</div>
+          <div className="eyebrow">STEP 02 · CREATING YOUR QUIZ</div>
           <div className="page-heading">
             <div>
-              <h1 id="sonar-title">Preparing your descent</h1>
-              <p>Source grounding and local AI processing running offline on your hardware.</p>
+              <h1 id="sonar-title">Creating your lesson</h1>
+              <p>Scanning your text and creating quiz questions privately on your device.</p>
             </div>
             <p className="model-info">
-              Local Ollama: <b>qwen2.5:1.5b</b>
+              Offline AI: <b>Processing locally</b>
             </p>
           </div>
 
@@ -139,7 +139,7 @@ export function DocumentIntakeModule({
             </div>
 
             <p className="eyebrow center-eyebrow">
-              SONAR CALIBRATION <span>{`0${activeStageIndex + 1} / 03`}</span>
+              PROCESSING STEP <span>{`0${activeStageIndex + 1} / 03`}</span>
             </p>
 
             <h2 id="sonar-state">{STAGES[activeStageIndex].title}</h2>
