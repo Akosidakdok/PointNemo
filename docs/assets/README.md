@@ -2,6 +2,12 @@
 
 Local OpenAI image-generation tooling for PointNemo's maps, characters, villains, and draft animation sprite sheets. Select **GPT Image 2.5 Sunburst** or **GPT Image 2.5 Flare** explicitly. This is an asset-production tool; the game only needs the exported PNGs.
 
+The implemented combat effects, their reproducible atlas build, and battle timing are documented in [VFX_PLAN.md](VFX_PLAN.md). Those three sheets were created with the built-in imagegen tool; the CLI instructions below remain available for future assets.
+
+For an inventory of each generated effect, source prompt, provenance, runtime animation, and preview steps, see the [combat effect asset catalog](../../assets/effects/README.md).
+
+The supplied [game-over video clip](../../assets/utilities/gameover-clip.mp4) is catalogued in the [utility media inventory](../../assets/utilities/README.md). It is a candidate for the failed-run Results screen and is not yet integrated or visually reviewed.
+
 Requires **Node.js 22.9 or newer**. There are no dependencies to install.
 
 ## Setup

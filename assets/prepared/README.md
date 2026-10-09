@@ -1,6 +1,6 @@
 # Prepared PointNemo game assets
 
-**Use the files inside `runtime/` in the web app.** They contain seven transparent, aligned sprite atlases, one opaque water background, and a single JSON manifest. Original white-background artwork remains untouched in `assets/characters`, `assets/enemies`, and `assets/maps`.
+**Use the files inside `runtime/` in the web app.** They contain eight transparent, aligned sprite atlases, one opaque water background, and a single JSON manifest. Original white-background artwork remains untouched in `assets/characters`, `assets/enemies`, and `assets/maps`.
 
 ## What is included
 
@@ -13,8 +13,9 @@
 | `runtime/goblin.png` | 16 frames: idle views, overhead swimming, jaw lunge, substrate, motion trail |
 | `runtime/fringehead.png` | 16 frames: burrow/profile idle, swimming, mouth flare, pattern variants, empty burrows |
 | `runtime/buoy.png` | 1 independent red buoy with localized signal glow |
+| `runtime/effects.png` | 24 frames for sonar cast, sonar hit, and hull hit |
 | `runtime/water.png` | Water-only background, with the original buoy removed |
-| `runtime/manifest.json` | 89 named frame rectangles, shared anchors, 25 animations, 16 environment aliases |
+| `runtime/manifest.json` | 113 named frame rectangles, shared anchors, 28 animations, 16 environment aliases |
 
 White-background extraction and water/buoy separation used the built-in image tool. Cropping and atlas packing then preserved the edited sprites' colors and alpha. Those edits are not guaranteed pixel-identical to the original sheets. The packing script isolates overlapping Gulper Eel silhouettes so their bounding rectangles do not include neighboring animals.
 
@@ -26,7 +27,7 @@ From the repo root:
 npm run preview:assets
 ```
 
-Open **http://127.0.0.1:8080**. The preview includes all directional player loops, enemy swimming and ability sequences, environmental elements, checkerboard/white/ocean backgrounds, shared anchor markers, pause, and ability replay. Ability animations play once and hold their final frame; click Replay abilities to review them again. Reduced-motion users start paused.
+Open **http://127.0.0.1:8080**. The preview includes all directional player loops, enemy swimming and ability sequences, three combat effects, environmental elements, checkerboard/white/ocean backgrounds, shared anchor markers, pause, and replay. Nonlooping animations play once and hold their final frame; click Replay abilities and effects to review them again. Reduced-motion users start paused.
 
 ## Integrate
 
@@ -92,3 +93,7 @@ node tools/pack-prepared-assets.mjs
 The first command needs Pillow. The second needs the `sharp` Node module, or an `ASSET_SHARP_MODULE` environment variable pointing at an existing Sharp installation. Neither is a browser/runtime dependency. The builder's measured crop separators and pivots refer to these exact intermediate sheets; recheck them if a new image edit changes the layout.
 
 See `preparation-prompts.txt` for the background extraction and ocean separation prompts.
+
+## Combat effects
+
+The VFX source PNGs, prompts, and sidecars are in `assets/effects/source/`; the prepared atlas and manifest are in `assets/effects/prepared/`. Include both directories in the commit. Rebuild and merge them with `npm run prepare:vfx` (Python and Pillow required). The web app loads only the `effects` atlas from the runtime manifest. See [the VFX plan](../../docs/assets/VFX_PLAN.md) for animation timing and event placement.

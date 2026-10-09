@@ -1,0 +1,8 @@
+Use case: stylized-concept
+Asset type: PointNemo game VFX sprite sheet, sonar cast flash.
+Input images: supplied explorer and creature atlases are STYLE REFERENCES ONLY. Create a new asset.
+Primary request: Exactly eight ordered frames in a 4-column by 2-row sheet, read left to right then top to bottom. A compact cyan sonar emitter flash from an underwater craft: frame 1 a pinpoint cyan glint, frames 2-3 a short luminous cross and tight wake, frames 4-5 asymmetric angular turquoise wavelets radiating from the center, frames 6-8 small scattered teal pixels fading. One isolated effect centered in every cell.
+Style/medium: crisp 16-bit underwater pixel art matching the references, hard square pixel clusters, bright cyan and muted mint, dark navy outlines, restrained brightness.
+Composition/framing: equal cells with generous empty padding; stable center and consistent apparent size; no visible cell borders.
+Scene/backdrop: genuinely transparent alpha background.
+Constraints: no craft, fish, person, terrain, lettering, UI, grid, border, watermark, continuous background, soft blur, smooth gradient, huge bloom, or clipped particles. Each frame is a distinct animation stage.
