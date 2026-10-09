@@ -55,10 +55,17 @@ export function BattleEncounter() {
 
       <p className="battle-message" aria-live="polite">{battle.message}</p>
       <div className="battle-actions">
-        <button className="attack-button" type="button" disabled={battle.turn !== "player"} onClick={() => dispatch({ type: "player/attack" })}>
-          <span aria-hidden="true">⌁</span> Sonar pulse <kbd>ENTER</kbd>
+        <button
+          className="attack-button"
+          type="button"
+          aria-disabled={!finished && battle.turn !== "player"}
+          onClick={() => {
+            if (finished) dispatch({ type: "battle/reset" });
+            else if (battle.turn === "player") dispatch({ type: "player/attack" });
+          }}
+        >
+          <span aria-hidden="true">⌁</span> {finished ? "Reset encounter" : "Sonar pulse"} <kbd>ENTER</kbd>
         </button>
-        {finished && <button className="reset-button" type="button" onClick={() => dispatch({ type: "battle/reset" })}>Reset encounter</button>}
       </div>
       <p className="battle-footnote">Turns resolve automatically · Each sonar pulse deals 7 damage</p>
     </section>

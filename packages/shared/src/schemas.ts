@@ -39,6 +39,9 @@ export const GeneratedQuestionSchema = z.object({
 });
 
 export const GeneratedQuestionsSchema = z.array(GeneratedQuestionSchema);
+export const GeneratedQuestionResponseSchema = z.object({
+  questions: GeneratedQuestionsSchema,
+});
 
 export type Subject = z.infer<typeof SubjectSchema>;
 export type Topic = z.infer<typeof TopicSchema>;

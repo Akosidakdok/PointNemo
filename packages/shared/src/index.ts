@@ -1,5 +1,6 @@
 export {
   GeneratedQuestionSchema,
+  GeneratedQuestionResponseSchema,
   GeneratedQuestionsSchema,
   ProgressSchema,
   StudyContentSchema,

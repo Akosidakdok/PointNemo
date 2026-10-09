@@ -1,5 +1,5 @@
 import {
-  GeneratedQuestionsSchema,
+  GeneratedQuestionResponseSchema,
   type GeneratedQuestion,
   type StudyContent,
 } from "@point-nemo/shared";
@@ -61,7 +61,7 @@ export class OllamaService {
           messages: [
             {
               role: "system",
-              content: "Create three multiple-choice study questions. Return a JSON array. Each item must have id (UUID), prompt, options (at least two strings), answerIndex (zero-based integer), and explanation.",
+              content: "Create three multiple-choice study questions. Return a JSON object with a questions array. Each question must have id (UUID), prompt, options (at least two strings), answerIndex (zero-based integer), and explanation.",
             },
             { role: "user", content: JSON.stringify(input) },
           ],
@@ -94,6 +94,6 @@ export class OllamaService {
       throw new ServiceUnavailableError("OLLAMA_INVALID_JSON", "Ollama returned malformed JSON; try the request again or select a different model.");
     }
 
-    return GeneratedQuestionsSchema.parse(generated);
+    return GeneratedQuestionResponseSchema.parse(generated).questions;
   }
 }
