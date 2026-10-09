@@ -12,7 +12,10 @@
     "build": "npm run build --workspace=@point-nemo/shared && npm run build --workspace=@point-nemo/api && npm run build --workspace=@point-nemo/web",
     "typecheck": "npm run build --workspace=@point-nemo/shared && npm run typecheck --workspaces --if-present",
     "assets": "node --env-file-if-exists=.env tools/generate-asset.mjs",
-    "test": "node --test",
+    "test": "npm run test:assets && npm run test:api",
+    "test:assets": "node --test tests/*.test.mjs",
+    "test:api": "npm run test --workspace=@point-nemo/api",
+    "test:smoke": "tsx scripts/smoke-test.ts",
     "preview:assets": "node tools/preview-assets.mjs"
   },
   "devDependencies": {

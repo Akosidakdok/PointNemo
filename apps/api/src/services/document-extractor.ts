@@ -1,6 +1,5 @@
 import { createHash } from "node:crypto";
-// @ts-expect-error TS1192: pdf-parse has no default export in its types but works at runtime
-import pdfParse from "pdf-parse";
+import { PDFParse } from "pdf-parse";
 import { BadRequestError } from "../errors.js";
 
 export interface UploadedDocument {
@@ -35,19 +34,23 @@ export class LocalPdfExtractor implements DocumentExtractor {
     // 3. Compute SHA-256
     const hash = createHash("sha256").update(file.buffer).digest("hex");
 
-    let data;
+    let data: Awaited<ReturnType<PDFParse["getText"]>>;
+    let parser: PDFParse | undefined;
     try {
       // 4. Parse PDF
-      data = await pdfParse(Buffer.from(file.buffer));
+      parser = new PDFParse({ data: Buffer.from(file.buffer) });
+      data = await parser.getText();
     } catch (error) {
       throw new BadRequestError(
         "UNREADABLE_PDF",
         "The PDF could not be parsed. It may be encrypted, malformed, or unsupported.",
       );
+    } finally {
+      await parser?.destroy();
     }
 
     // 5. Enforce Limits
-    if (data.numpages > 3) {
+    if (data.total > 3) {
       throw new BadRequestError("TOO_MANY_PAGES", "PDF exceeds the 3-page limit.");
     }
 
@@ -74,9 +77,15 @@ export class LocalPdfExtractor implements DocumentExtractor {
     // per-page bounding boxes by default without a custom page renderer.
     return {
       sha256: hash,
-      pageCount: data.numpages,
+      pageCount: data.total,
       normalizedCharCount: charCount,
-      pagesJson: JSON.stringify([{ pageNumber: 1, chunkId: "chunk-1", text: normalizedText }]),
+      pagesJson: JSON.stringify(
+        data.pages.map((page) => ({
+          pageNumber: page.num,
+          chunkId: `chunk-${page.num}`,
+          text: page.text.trim().replace(/\s+/g, " "),
+        })),
+      ),
     };
   }
 }

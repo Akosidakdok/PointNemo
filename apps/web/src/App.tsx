@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { getAppStatus, type AppStatus } from "./api";
+import { createRun, getAppStatus, getRun, type AppStatus, type RunDetail } from "./api";
+import { AuthoritativeBattle } from "./components/AuthoritativeBattle";
 import { BattleEncounter } from "./components/BattleEncounter";
+import { DocumentIntake } from "./components/DocumentIntake";
 import { ExpeditionMap, mapNodes, type MapNode } from "./components/ExpeditionMap";
 
 const initialStatus: AppStatus = {
@@ -11,14 +13,44 @@ const initialStatus: AppStatus = {
 function App() {
   const [status, setStatus] = useState<AppStatus>(initialStatus);
   const [selectedNode, setSelectedNode] = useState<MapNode>(mapNodes[0]);
+  const [activeRun, setActiveRun] = useState<RunDetail | null>(null);
 
   useEffect(() => {
     let active = true;
     void getAppStatus().then((nextStatus) => {
       if (active) setStatus(nextStatus);
     });
+
+    const savedRunId = localStorage.getItem("point_nemo_active_run_id");
+    if (savedRunId) {
+      void getRun(savedRunId)
+        .then((run) => {
+          if (active) setActiveRun(run);
+        })
+        .catch(() => {
+          localStorage.removeItem("point_nemo_active_run_id");
+        });
+    }
+
     return () => { active = false; };
   }, []);
+
+  async function handleStartRun(questionSetId: string) {
+    try {
+      const run = await createRun(questionSetId);
+      setActiveRun(run);
+      localStorage.setItem("point_nemo_active_run_id", run.id);
+      const encounterNode = mapNodes.find((node) => node.id === "anglerfish");
+      if (encounterNode) setSelectedNode(encounterNode);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Could not start expedition run.");
+    }
+  }
+
+  function handleResetRun() {
+    setActiveRun(null);
+    localStorage.removeItem("point_nemo_active_run_id");
+  }
 
   return (
     <main className="app-shell">
@@ -64,12 +96,26 @@ function App() {
               <h3>{selectedNode.label}</h3>
               <p>{selectedNode.detail}</p>
             </div>
-            {selectedNode.kind === "encounter" && <span className="waypoint-open">ENCOUNTER OPEN <i>↗</i></span>}
+            {(selectedNode.kind === "encounter" || activeRun) && <span className="waypoint-open">ENCOUNTER OPEN <i>↗</i></span>}
           </section>
         </div>
 
         <aside className="side-column" aria-label="Expedition details">
-          {selectedNode.kind === "encounter" ? <BattleEncounter /> : (
+          {activeRun ? (
+            <AuthoritativeBattle
+              run={activeRun}
+              onRunUpdated={(updated) => {
+                setActiveRun(updated);
+                if (updated.state === "completed" || updated.state === "failed") {
+                  localStorage.removeItem("point_nemo_active_run_id");
+                }
+              }}
+              onNewRun={handleResetRun}
+              onRetryQuestionSet={(questionSetId) => void handleStartRun(questionSetId)}
+            />
+          ) : selectedNode.kind === "encounter" ? (
+            <BattleEncounter />
+          ) : (
             <section className="mission-card">
               <div className="mission-header"><p className="eyebrow">CURRENT MISSION</p><span className="mission-number">01 — 04</span></div>
               <h2>Pressure<br /><em>makes life.</em></h2>
@@ -89,6 +135,8 @@ function App() {
             <p>{status.ai.message}</p>
             <div className="ai-model"><span>MODEL</span><code>{status.ai.model ?? "OLLAMA · LOCAL"}</code></div>
           </section>
+
+          <DocumentIntake onStartRun={handleStartRun} activeRunId={activeRun?.id} />
 
           <div className="ambient-note"><span>↳</span> The map is only the beginning. Every lesson opens a deeper route.</div>
         </aside>

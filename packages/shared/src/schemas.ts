@@ -79,6 +79,7 @@ export const AIQuestionSetOutputSchema = z.object({
   })).length(3),
   questions: z.array(AIQuestionOutputSchema).length(9),
 });
+export type AIQuestionSetOutput = z.infer<typeof AIQuestionSetOutputSchema>;
 
 export const QuestionSetSchema = z.object({
   id: z.string().uuid(),
@@ -132,9 +133,76 @@ export const RunSchema = z.object({
   xp: z.number().int().min(0),
   combo: z.number().int().min(0),
   currentSlotIndex: z.number().int().min(0),
+  rulesVersion: z.string().default("1.0"),
   createdAt: z.string().datetime(),
 });
 export type Run = z.infer<typeof RunSchema>;
+
+export const ActiveQuestionSchema = z.object({
+  id: z.string().uuid(),
+  topicId: z.string().uuid(),
+  topicName: z.string(),
+  difficulty: QuestionDifficultySchema,
+  prompt: z.string().min(1).max(300),
+  options: z.array(z.string().min(1).max(160)).length(4),
+});
+export type ActiveQuestion = z.infer<typeof ActiveQuestionSchema>;
+
+export const CurrentSlotSchema = z.object({
+  id: z.string().uuid(),
+  slotIndex: z.number().int().min(0),
+  encounterType: z.enum(["surface", "twilight", "midnight", "boss"]),
+  question: ActiveQuestionSchema,
+});
+export type CurrentSlot = z.infer<typeof CurrentSlotSchema>;
+
+export const RunAttemptDetailSchema = z.object({
+  id: z.string().uuid(),
+  slotId: z.string().uuid(),
+  slotIndex: z.number().int().min(0),
+  encounterType: z.enum(["surface", "twilight", "midnight", "boss"]),
+  selectedOptionIndex: z.number().int().min(0).max(3),
+  isCorrect: z.boolean(),
+  feedback: AnswerFeedbackSchema,
+  questionPrompt: z.string(),
+  topicName: z.string(),
+  createdAt: z.string().datetime(),
+});
+export type RunAttemptDetail = z.infer<typeof RunAttemptDetailSchema>;
+
+export const RunDetailSchema = z.object({
+  id: z.string().uuid(),
+  questionSetId: z.string().uuid(),
+  state: RunStateSchema,
+  playerHp: z.number().int().min(0).max(100),
+  currentEncounterHp: z.number().int().min(0).max(100),
+  xp: z.number().int().min(0),
+  combo: z.number().int().min(0),
+  currentSlotIndex: z.number().int().min(0),
+  rulesVersion: z.string(),
+  createdAt: z.string().datetime(),
+  currentSlot: CurrentSlotSchema.optional(),
+  latestFeedback: AnswerFeedbackSchema.optional(),
+  attempts: z.array(RunAttemptDetailSchema).optional(),
+});
+export type RunDetail = z.infer<typeof RunDetailSchema>;
+
+export const CreateRunRequestSchema = z.object({
+  questionSetId: z.string().uuid(),
+});
+export type CreateRunRequest = z.infer<typeof CreateRunRequestSchema>;
+
+export const SubmitAnswerRequestSchema = z.object({
+  slotId: z.string().uuid(),
+  selectedOptionIndex: z.number().int().min(0).max(3),
+});
+export type SubmitAnswerRequest = z.infer<typeof SubmitAnswerRequestSchema>;
+
+export const AnswerSubmitResponseSchema = z.object({
+  feedback: AnswerFeedbackSchema,
+  run: RunDetailSchema,
+});
+export type AnswerSubmitResponse = z.infer<typeof AnswerSubmitResponseSchema>;
 
 // Standard API Error
 export const ApiErrorSchema = z.object({
