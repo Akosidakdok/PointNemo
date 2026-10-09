@@ -1,6 +1,22 @@
 /* Hallmark · macrostructure: Narrative Workflow · tone: atmospheric · anchor hue: cool cyan · theme: Midnight · nav: N8 · footer: Ft4 */
 /* Hallmark · pre-emit critique: P5 H5 E4 S5 R5 V5 */
 
+@font-face {
+  font-family: 'Press Start 2P';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/PressStart2P-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Pixelify Sans';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/PixelifySans-Variable.ttf') format('truetype');
+}
+
 :root {
   --abyss: #061426;
   --deep-indigo: #0b1e38;
@@ -16,7 +32,8 @@
   --text-muted: #a1b5cc;
   --outline: #030912;
 
-  --font-display: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
+  --font-pixel: "Press Start 2P", "Pixelify Sans", monospace;
+  --font-display: "Pixelify Sans", "Press Start 2P", ui-monospace, monospace;
   --font-body: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
 }
@@ -510,10 +527,12 @@ kbd {
 }
 
 .title-main-logo {
-  font-size: clamp(32px, 6vw, 44px);
+  font-family: var(--font-pixel);
+  font-size: clamp(20px, 4.2vw, 32px);
   color: var(--visor-cyan);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
   text-shadow: 3px 3px 0 var(--outline);
+  -webkit-font-smoothing: none;
 }
 
 .title-subhead {
@@ -1289,10 +1308,13 @@ kbd {
 }
 
 .preloader-title {
-  font-size: 26px;
+  font-family: var(--font-pixel);
+  font-size: 18px;
   color: var(--text-main);
-  letter-spacing: 0.1em;
-  margin: 4px 0 8px;
+  letter-spacing: 0.08em;
+  margin: 6px 0 10px;
+  text-shadow: 2px 2px 0 var(--outline);
+  -webkit-font-smoothing: none;
 }
 
 .preloader-depth {
@@ -1464,9 +1486,12 @@ kbd {
 }
 
 .library-title {
-  font-size: 20px;
+  font-family: var(--font-pixel);
+  font-size: clamp(14px, 2vw, 17px);
   color: var(--visor-cyan);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
+  text-shadow: 2px 2px 0 var(--outline);
+  -webkit-font-smoothing: none;
 }
 
 .library-subtitle {
@@ -1964,9 +1989,12 @@ kbd {
 }
 
 .sonar-title {
-  font-size: 18px;
+  font-family: var(--font-pixel);
+  font-size: clamp(14px, 2vw, 17px);
   color: var(--text-main);
   letter-spacing: 0.06em;
+  text-shadow: 2px 2px 0 var(--outline);
+  -webkit-font-smoothing: none;
 }
 
 .sonar-filename {
@@ -2908,15 +2936,18 @@ kbd {
 }
 
 .rpg-main-title {
-  font-family: var(--font-display);
-  font-size: clamp(2.5rem, 8vw, 4.2rem);
-  font-weight: 700;
+  font-family: var(--font-pixel);
+  font-size: clamp(1.8rem, 5.6vw, 2.9rem);
+  font-weight: 400;
   font-style: normal;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: var(--text-main);
   margin: 0;
   text-shadow: 4px 4px 0 var(--outline);
-  line-height: 0.95;
+  line-height: 1.15;
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .rpg-main-tagline {
@@ -3623,7 +3654,7 @@ kbd {
   }
 
   .rpg-main-title {
-    font-size: 2.6rem;
+    font-size: 2.2rem;
   }
 
   .rpg-auth-panel {
@@ -3649,7 +3680,7 @@ kbd {
   }
 
   .rpg-main-title {
-    font-size: clamp(2.2rem, 11vw, 3.2rem);
+    font-size: clamp(1.4rem, 6.8vw, 1.95rem);
   }
 
   .rpg-auth-panel {
@@ -3659,7 +3690,7 @@ kbd {
 
 @media (max-width: 375px) {
   .rpg-main-title {
-    font-size: 2.1rem;
+    font-size: 1.35rem;
   }
 
   .rpg-sys-btn span:last-child {

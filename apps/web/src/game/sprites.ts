@@ -66,10 +66,24 @@ export async function loadAssetBundle(
   manifestUrl: string = "/assets/runtime/manifest.json",
   onProgress?: (loaded: number, total: number) => void
 ): Promise<AssetBundle> {
-  const url = new URL(manifestUrl, window.location.href);
-  const response = await fetch(url.href);
+  let url = new URL(manifestUrl, window.location.href);
+  let response = await fetch(url.href);
+  const contentType = response.headers.get("content-type") ?? "";
+  if ((!response.ok || contentType.includes("text/html")) && manifestUrl !== "/manifest.json") {
+    const fallbackUrl = new URL("/manifest.json", window.location.href);
+    const fallbackResp = await fetch(fallbackUrl.href);
+    const fallbackType = fallbackResp.headers.get("content-type") ?? "";
+    if (fallbackResp.ok && !fallbackType.includes("text/html")) {
+      url = fallbackUrl;
+      response = fallbackResp;
+    }
+  }
   if (!response.ok) {
     throw new Error(`Asset manifest failed: HTTP ${response.status}`);
+  }
+  const finalType = response.headers.get("content-type") ?? "";
+  if (finalType.includes("text/html")) {
+    throw new Error(`Asset manifest failed: received HTML instead of JSON from ${url.pathname}`);
   }
   const manifest = (await response.json()) as AssetManifest;
   const images: Record<string, HTMLImageElement> = {};

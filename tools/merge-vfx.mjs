@@ -20,6 +20,12 @@ export async function mergeVfxRuntime() {
   Object.assign(runtime.animations, effects.animations);
   await copyFile(new URL('effects.png', effectDir), new URL('effects.png', runtimeDir));
   await writeFile(new URL('manifest.json', runtimeDir), `${JSON.stringify(runtime, null, 2)}\n`);
+  const webRuntimeDir = new URL('../apps/web/public/assets/runtime/', import.meta.url);
+  try {
+    await copyFile(new URL('effects.png', effectDir), new URL('effects.png', webRuntimeDir));
+    await writeFile(new URL('manifest.json', webRuntimeDir), `${JSON.stringify(runtime, null, 2)}\n`);
+    await writeFile(new URL('../apps/web/public/manifest.json', import.meta.url), `${JSON.stringify(runtime, null, 2)}\n`);
+  } catch {}
   console.log(`Merged ${Object.keys(effects.frames).length} VFX frames into runtime bundle.`);
 }
 
