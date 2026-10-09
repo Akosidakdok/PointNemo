@@ -1,10 +1,4 @@
-import { useEffect, useRef } from "react";
-import {
-  type AssetBundle,
-  SpriteAnimation,
-  drawFrame,
-  speciesScale,
-} from "../../game/sprites";
+import { type AssetBundle } from "../../game/sprites";
 import { type QuestionSet } from "@point-nemo/shared";
 
 interface LibraryHubViewProps {
@@ -13,7 +7,7 @@ interface LibraryHubViewProps {
   onOpenUpload: () => void;
   onGoToSeas: () => void;
   onSelectLesson?: (lessonId: string, action: "resume" | "new") => void;
-  bundle: AssetBundle | null;
+  bundle?: AssetBundle | null;
   reducedMotion?: boolean;
 }
 
@@ -23,61 +17,7 @@ export function LibraryHubView({
   onOpenUpload,
   onGoToSeas,
   onSelectLesson,
-  bundle,
-  reducedMotion = false,
 }: LibraryHubViewProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-
-  // Animated Diver & Barreleye banner
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !bundle) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animId = 0;
-    let prev = performance.now();
-
-    const playerAnim = new SpriteAnimation(bundle, "explorer.swim.right");
-    const creatureAnim = new SpriteAnimation(bundle, "barreleye.swim");
-
-    const render = (time: number) => {
-      const dt = Math.max(0, Math.min((time - prev) / 1000, 0.1));
-      prev = time;
-
-      if (!reducedMotion) {
-        playerAnim.update(dt);
-        creatureAnim.update(dt);
-      }
-
-      const width = canvas.width;
-      const height = canvas.height;
-
-      ctx.clearRect(0, 0, width, height);
-      ctx.imageSmoothingEnabled = false;
-
-      // Water gradient
-      const grad = ctx.createLinearGradient(0, 0, 0, height);
-      grad.addColorStop(0, "#0e3456");
-      grad.addColorStop(1, "#06172c");
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, width, height);
-
-      // Draw swimming explorer
-      const pScale = speciesScale(bundle, "explorer", 70);
-      drawFrame(ctx, bundle, playerAnim.frameName, Math.round(width * 0.32), Math.round(height * 0.52), pScale);
-
-      // Draw swimming barreleye
-      const cScale = speciesScale(bundle, "barreleye", 80);
-      drawFrame(ctx, bundle, creatureAnim.frameName, Math.round(width * 0.72), Math.round(height * 0.54), cScale);
-
-      animId = requestAnimationFrame(render);
-    };
-
-    animId = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(animId);
-  }, [bundle, reducedMotion]);
-
   return (
     <section className="library-hub-view" aria-labelledby="library-title">
       <div className="eyebrow">STEP 01 · STUDY LIBRARY</div>
@@ -87,11 +27,6 @@ export function LibraryHubView({
           <p>Interactive study lessons and practice quizzes saved privately on your device.</p>
         </div>
       </div>
-
-      <section className="art-banner" aria-label="Interactive lesson preview banner">
-        <canvas ref={canvasRef} width={800} height={180} className="pixel-scene" />
-        <span className="depth-mark">INTERACTIVE LESSON PREVIEW</span>
-      </section>
 
       <div className="library-grid">
         <section className="panel upload-panel" aria-labelledby="upload-box-title">
