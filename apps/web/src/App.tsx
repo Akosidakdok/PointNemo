@@ -1,45 +1,33 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   type DescentRun,
   type QuestionSet,
-  type RunDetail,
 } from "@point-nemo/shared";
 import {
   getAppStatus,
   uploadDocument,
   getGenerationJob,
   getQuestionSet,
-  createRun,
-  getRun,
-  submitRunAnswer,
   fetchRuns,
-  tryAgainRun,
-  deleteRun,
-  toDescentRun,
   type AppStatus,
 } from "./api";
 import { loadAssetBundle, type AssetBundle } from "./game/sprites";
-import { OceanCanvas } from "./game/OceanCanvas";
-import { LocalLibrary } from "./components/LocalLibrary";
-import { UploadDialog } from "./components/UploadDialog";
-import { SonarProcessing, type SonarStageStatus } from "./components/SonarProcessing";
-import { DescentEncounter } from "./components/DescentEncounter";
-import { ResultsScreen } from "./components/ResultsScreen";
+import { questionSetToLessonRecord, type LessonRecord } from "./game/lessonCatalog";
 import { SettingsModal } from "./components/SettingsModal";
 import { SonarPreloader } from "./components/ui/SonarPreloader";
 import { AuthPage } from "./components/auth/AuthPage";
 import { type AuthenticatedUser } from "./components/auth/auth.types";
-import { AuthoritativeBattle } from "./components/AuthoritativeBattle";
-import { BattleEncounter } from "./components/BattleEncounter";
-import { DocumentIntake } from "./components/DocumentIntake";
-import { ExpeditionMap, mapNodes, type MapNode } from "./components/ExpeditionMap";
+import { AppHeader, type AppNavScreen } from "./components/navigation/AppHeader";
+import { LibraryHubView } from "./components/library/LibraryHubView";
+import { DocumentIntakeModule } from "./components/intake/DocumentIntakeModule";
+import { GameplayModule } from "./components/gameplay/GameplayModule";
+import { ProfileView } from "./components/profile/ProfileView";
+import { LeaderboardView } from "./components/leaderboard/LeaderboardView";
 
 const initialStatus: AppStatus = {
   api: { available: false, message: "Checking local API…" },
   ai: { available: false, message: "Checking Ollama…" },
 };
-
-type AppView = "library" | "processing" | "encounter" | "results" | "expedition";
 
 export function App() {
   // Preloading & assets
@@ -48,27 +36,43 @@ export function App() {
   const [preloadTotal, setPreloadTotal] = useState(8);
   const [preloadError, setPreloadError] = useState<string | null>(null);
 
-  // App Navigation
-  const [view, setView] = useState<AppView>("library");
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  // App Navigation Screen
+  const [currentScreen, setCurrentScreen] = useState<AppNavScreen>("library");
+  const [navKey, setNavKey] = useState(0);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [activeInstanceId, setActiveInstanceId] = useState<string | null>("PN-001");
+  const [bossUnlocked, setBossUnlocked] = useState(false);
 
-  // App & Run Data
+  const handleNavigate = useCallback(
+    (screen: AppNavScreen) => {
+      setCurrentScreen(screen);
+      setNavKey((k) => k + 1);
+      if (screen === "boss") {
+        setBossUnlocked(true);
+      }
+      if (screen === "descent" && !activeInstanceId) {
+        setActiveInstanceId("PN-001");
+      }
+    },
+    [activeInstanceId]
+  );
+
+  // Theme State
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
+
+  // App & Run Data from SQLite
   const [status, setStatus] = useState<AppStatus>(initialStatus);
-  const [runs, setRuns] = useState<DescentRun[]>([]);
+  const [, setRuns] = useState<DescentRun[]>([]);
   const [questionSets, setQuestionSets] = useState<QuestionSet[]>([]);
-  const [currentRun, setCurrentRun] = useState<DescentRun | null>(null);
-  const [currentRunDetail, setCurrentRunDetail] = useState<RunDetail | null>(null);
-  const [currentQuestionSet, setCurrentQuestionSet] = useState<QuestionSet | null>(null);
 
-  // Classic Expedition Map state
-  const [selectedNode, setSelectedNode] = useState<MapNode>(mapNodes[0]);
-
-  // Sonar Processing Stage State
-  const [processingFile, setProcessingFile] = useState<File | null>(null);
-  const [extractionStatus, setExtractionStatus] = useState<SonarStageStatus>("waiting");
-  const [generationStatus, setGenerationStatus] = useState<SonarStageStatus>("waiting");
-  const [validationStatus, setValidationStatus] = useState<SonarStageStatus>("waiting");
+  // Sonar Processing Stage State for Real Document Upload
+  const [extractionStatus, setExtractionStatus] = useState<"waiting" | "active" | "complete" | "failed">("waiting");
+  const [generationStatus, setGenerationStatus] = useState<"waiting" | "active" | "complete" | "failed">("waiting");
+  const [validationStatus, setValidationStatus] = useState<"waiting" | "active" | "complete" | "failed">("waiting");
   const [processingError, setProcessingError] = useState<string | null>(null);
   const [isOllamaOffline, setIsOllamaOffline] = useState(false);
 
@@ -103,7 +107,7 @@ export function App() {
     try {
       localStorage.removeItem("point_nemo_explorer");
     } catch {}
-    setView("library");
+    setCurrentScreen("library");
   }, []);
 
   // Preferences
@@ -138,7 +142,7 @@ export function App() {
   const refreshLibraryData = useCallback(async () => {
     try {
       const [appStat, libraryData] = await Promise.all([
-        getAppStatus(),
+        getAppStatus().catch(() => initialStatus),
         fetchRuns().catch(() => ({ runs: [], questionSets: [] })),
       ]);
       setStatus(appStat);
@@ -153,15 +157,9 @@ export function App() {
     void refreshLibraryData();
   }, [refreshLibraryData]);
 
-  // Determine active run (unfinished run)
-  const activeRun = runs.find((r) => r.status === "active") || null;
-
   // Handler: Start Sonar Processing for Uploaded File via Authoritative Backend
   const handleStartProcessing = useCallback(
-    async (file: File) => {
-      setProcessingFile(file);
-      setIsUploadOpen(false);
-      setView("processing");
+    async (file: File): Promise<QuestionSet | void> => {
       setExtractionStatus("active");
       setGenerationStatus("waiting");
       setValidationStatus("waiting");
@@ -205,20 +203,8 @@ export function App() {
 
           // 3. Load question set
           const qSet = await getQuestionSet(job.questionSetId);
-
-          // 4. Create authoritative run (18 slots)
-          const runDetail = await createRun(job.questionSetId);
-          const descentRun = toDescentRun(runDetail, qSet, file.name);
-
-          setCurrentRun(descentRun);
-          setCurrentRunDetail(runDetail);
-          setCurrentQuestionSet(qSet);
-
           await refreshLibraryData();
-
-          setTimeout(() => {
-            setView("encounter");
-          }, 800);
+          return qSet;
         }
       } catch (err: any) {
         const msg = err?.message || "Document processing failed.";
@@ -235,141 +221,16 @@ export function App() {
         if (msg.includes("Ollama") || msg.includes("local AI") || err?.code === "OLLAMA_UNAVAILABLE") {
           setIsOllamaOffline(true);
         }
+        throw err;
       }
     },
     [extractionStatus, refreshLibraryData]
   );
 
-  // Handler: Start Run from Classic View
-  const handleStartClassicRun = useCallback(
-    async (questionSetId: string) => {
-      try {
-        const runDetail = await createRun(questionSetId);
-        const qSet = await getQuestionSet(questionSetId);
-        const descentRun = toDescentRun(runDetail, qSet);
-        setCurrentRunDetail(runDetail);
-        setCurrentRun(descentRun);
-        setCurrentQuestionSet(qSet);
-        localStorage.setItem("point_nemo_active_run_id", runDetail.id);
-        const encounterNode = mapNodes.find((node) => node.id === "anglerfish");
-        if (encounterNode) setSelectedNode(encounterNode);
-      } catch (err) {
-        alert(err instanceof Error ? err.message : "Could not start expedition run.");
-      }
-    },
-    []
-  );
-
-  // Handler: Resume Run
-  const handleResumeRun = useCallback(
-    async (runId: string) => {
-      const run = runs.find((r) => r.id === runId);
-      if (!run) return;
-      const qSet = questionSets.find((qs) => qs.id === run.questionSetId);
-      if (!qSet) return;
-
-      try {
-        const runDetail = await getRun(runId);
-        setCurrentRunDetail(runDetail);
-      } catch {
-        // fallback
-      }
-
-      setCurrentRun(run);
-      setCurrentQuestionSet(qSet);
-
-      if (run.stage === "results") {
-        setView("results");
-      } else {
-        setView("encounter");
-      }
-    },
-    [runs, questionSets]
-  );
-
-  // Handler: Submit Answer in Encounter
-  const handleAnswerSubmit = useCallback(
-    async (selectedAnswer: number) => {
-      if (!currentRun) return;
-
-      try {
-        const response = await submitRunAnswer(currentRun.id, selectedAnswer);
-        setCurrentRun(response.run);
-        setCurrentRunDetail(response.runDetail);
-        await refreshLibraryData();
-
-        // Check if run transitioned to results
-        if (response.run.stage === "results" || response.runDetail.state !== "active") {
-          setTimeout(() => {
-            setView("results");
-          }, 1200);
-        }
-        return response.runDetail.latestFeedback;
-      } catch (err) {
-        console.error("Failed to submit answer:", err);
-      }
-    },
-    [currentRun, refreshLibraryData]
-  );
-
-  // Handler: Try Again (uses SAME question set)
-  const handleTryAgain = useCallback(
-    async (runId: string) => {
-      try {
-        const result = await tryAgainRun(runId);
-        setCurrentRun(result.run);
-        const runDetail = await getRun(result.run.id);
-        setCurrentRunDetail(runDetail);
-        setCurrentQuestionSet(result.questionSet);
-        await refreshLibraryData();
-        setView("encounter");
-      } catch (err) {
-        console.error("Failed to restart run:", err);
-      }
-    },
-    [refreshLibraryData]
-  );
-
-  // Handler: Delete Run
-  const handleDeleteRun = useCallback(
-    async (runId: string) => {
-      try {
-        await deleteRun(runId);
-        await refreshLibraryData();
-        if (currentRun?.id === runId) {
-          setCurrentRun(null);
-          setCurrentRunDetail(null);
-          setCurrentQuestionSet(null);
-          setView("library");
-        }
-      } catch (err) {
-        console.error("Failed to delete run:", err);
-      }
-    },
-    [currentRun, refreshLibraryData]
-  );
-
-  // Handler: View Results of finished run
-  const handleViewResults = useCallback(
-    async (runId: string) => {
-      const run = runs.find((r) => r.id === runId);
-      if (!run) return;
-      const qSet = questionSets.find((qs) => qs.id === run.questionSetId);
-      if (!qSet) return;
-
-      try {
-        const runDetail = await getRun(runId);
-        setCurrentRunDetail(runDetail);
-      } catch {
-        // fallback
-      }
-
-      setCurrentRun(run);
-      setCurrentQuestionSet(qSet);
-      setView("results");
-    },
-    [runs, questionSets]
-  );
+  // Convert real SQLite questionSets into playable LessonRecords
+  const customLessonRecords = useMemo<LessonRecord[]>(() => {
+    return questionSets.map((qs) => questionSetToLessonRecord(qs));
+  }, [questionSets]);
 
   // Preloading View
   if (!bundle) {
@@ -385,9 +246,14 @@ export function App() {
     );
   }
 
+  // RPG Title & Authentication Gateway (Before Login)
   if (!currentUser) {
     return (
-      <main className="pointnemo-app auth-gateway-app" role="application" aria-label="Point Nemo Authentication Gateway">
+      <main
+        className="pointnemo-app auth-gateway-app"
+        role="application"
+        aria-label="Point Nemo Authentication Gateway"
+      >
         <AuthPage
           onAuthSuccess={handleAuthSuccess}
           onGuestAccess={handleGuestAccess}
@@ -408,183 +274,105 @@ export function App() {
     );
   }
 
+  // Main Integrated Post-Login Application Shell
   return (
-    <main className="pointnemo-app" role="application" aria-label="Point Nemo Educational Descent">
-      {/* 2D Interactive Ocean Viewport in Background */}
-      <div className="viewport-container" aria-hidden="true">
-        <OceanCanvas
-          bundle={bundle}
-          depthMeters={
-            currentRun
-              ? currentRun.stage === "surface"
-                ? 100
-                : currentRun.stage === "twilight"
-                ? 800
-                : currentRun.stage === "midnight"
-                ? 3200
-                : 10935
-              : 0
-          }
-          sonarTriggerCount={0}
-          paused={view !== "encounter"}
-          reducedMotion={reducedMotion}
-        />
-      </div>
-
-      {/* Screen 1: Local Library (Home) */}
-      {view === "library" && (
-        <LocalLibrary
-          runs={runs}
-          questionSets={questionSets}
-          activeRun={activeRun}
-          onUploadClick={() => setIsUploadOpen(true)}
-          onResumeRun={handleResumeRun}
-          onTryAgain={handleTryAgain}
-          onViewResults={handleViewResults}
-          onDeleteRun={handleDeleteRun}
-          isOnline={status.api.available}
-          onOpenSettings={() => setIsSettingsOpen(true)}
+    <div
+      className="playground-shell"
+      role="application"
+      aria-label="Point Nemo Educational Descent"
+    >
+      <div className="app-frame">
+        {/* Top Header Navigation */}
+        <AppHeader
+          currentScreen={currentScreen}
+          onNavigate={handleNavigate}
           currentUser={currentUser}
           onLogout={handleLogout}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          theme={theme}
+          onToggleTheme={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
+          activeInstanceId={activeInstanceId}
+          bossUnlocked={bossUnlocked}
         />
-      )}
 
-      {/* Screen 2: Sonar Processing */}
-      {view === "processing" && (
-        <SonarProcessing
-          filename={processingFile?.name || "document.pdf"}
-          extractionStatus={extractionStatus}
-          generationStatus={generationStatus}
-          validationStatus={validationStatus}
-          error={processingError}
-          isOllamaOffline={isOllamaOffline}
-          onCancel={() => setView("library")}
-          onRetry={() => {
-            if (processingFile) void handleStartProcessing(processingFile);
-          }}
-          onChooseAnotherPdf={() => {
-            setView("library");
-            setIsUploadOpen(true);
-          }}
-        />
-      )}
+        {/* Active Screen Content */}
+        <main className="playground-main">
+          {/* Module 1: Local Library Hub */}
+          {currentScreen === "library" && (
+            <LibraryHubView
+              questionSets={questionSets}
+              activeInstanceId={activeInstanceId}
+              onOpenUpload={() => handleNavigate("upload")}
+              onGoToSeas={() => handleNavigate("seas")}
+              bundle={bundle}
+              reducedMotion={reducedMotion}
+            />
+          )}
 
-      {/* Screen 3: Descent Encounter (Surface, Twilight, Midnight, Boss) */}
-      {view === "encounter" && currentRun && currentQuestionSet && (
-        <DescentEncounter
-          run={currentRun}
-          runDetail={currentRunDetail ?? undefined}
-          latestFeedback={currentRunDetail?.latestFeedback}
-          questionSet={currentQuestionSet}
-          bundle={bundle}
-          onAnswerSubmit={handleAnswerSubmit}
-          reducedMotion={reducedMotion}
-        />
-      )}
+          {/* Module 2: Document Intake & Sonar Processing */}
+          {(currentScreen === "upload" || currentScreen === "sonar") && (
+            <DocumentIntakeModule
+              onStartRealProcessing={handleStartProcessing}
+              onProcessingFinished={(newQSet) => {
+                if (newQSet) {
+                  setQuestionSets((prev) => [newQSet, ...prev]);
+                }
+                handleNavigate("seas");
+              }}
+              onCancel={() => handleNavigate("library")}
+              realExtractionStatus={extractionStatus}
+              realGenerationStatus={generationStatus}
+              realValidationStatus={validationStatus}
+              realError={processingError}
+              isOllamaOffline={isOllamaOffline}
+            />
+          )}
 
-      {/* Screen 4: Results */}
-      {view === "results" && currentRun && currentQuestionSet && (
-        <ResultsScreen
-          run={currentRun}
-          questionSet={currentQuestionSet}
-          onTryAgain={() => handleTryAgain(currentRun.id)}
-          onReturnToLibrary={() => setView("library")}
-          onStartNewPdf={() => {
-            setView("library");
-            setIsUploadOpen(true);
-          }}
-        />
-      )}
+          {/* Module 3: Gameplay Module (Choose Sea, WASD Map, Combat, Boss, Results) */}
+          {(currentScreen === "seas" ||
+            currentScreen === "descent" ||
+            currentScreen === "boss" ||
+            currentScreen === "results") && (
+            <GameplayModule
+              bundle={bundle}
+              customLessons={customLessonRecords}
+              navKey={navKey}
+              initialSubscreen={
+                currentScreen === "seas"
+                  ? "seas"
+                  : currentScreen === "descent"
+                  ? "descent"
+                  : currentScreen === "boss"
+                  ? "boss"
+                  : "results"
+              }
+              onNavigateScreen={(screen) => handleNavigate(screen)}
+              onUploadNewPdf={() => handleNavigate("upload")}
+              reducedMotion={reducedMotion}
+              onUpdateActiveInstanceId={(id) => setActiveInstanceId(id)}
+            />
+          )}
 
-      {/* Screen 5: Optional Classic Expedition Map Dashboard */}
-      {view === "expedition" && (
-        <div className="app-shell" style={{ position: "relative", zIndex: 10, width: "100%", background: "rgba(6,20,38,0.92)", minHeight: "100vh" }}>
-          <header className="topbar">
-            <div className="brand">
-              <span className="brand-mark" aria-hidden="true"><i /><i /></span>
-              <span>POINT <b>NEMO</b></span>
-            </div>
-            <div className="topbar-center">
-              <span className="live-dot" aria-hidden="true" />
-              <span>CLASSIC EXPEDITION DASHBOARD</span>
-            </div>
-            <div style={{ display: "flex", gap: "10px" }}>
-              <button
-                type="button"
-                className="connection-pill"
-                onClick={() => setView("library")}
-                style={{ cursor: "pointer", background: "none" }}
-              >
-                ← RETURN TO RETRO VIEW
-              </button>
-            </div>
-          </header>
+          {/* Standalone Extra: Diver Profile */}
+          {currentScreen === "profile" && (
+            <ProfileView
+              currentUser={currentUser}
+              bundle={bundle}
+              reducedMotion={reducedMotion}
+            />
+          )}
 
-          <section className="expedition-layout" aria-label="Expedition dashboard">
-            <div className="map-column">
-              <ExpeditionMap selectedId={selectedNode.id} onSelect={setSelectedNode} />
-              <section className="selected-location" aria-live="polite">
-                <div className="location-index">{String(mapNodes.findIndex((node) => node.id === selectedNode.id) + 1).padStart(2, "0")}</div>
-                <div className="location-copy">
-                  <p className="eyebrow">SELECTED WAYPOINT <span>· {selectedNode.short.toUpperCase()}</span></p>
-                  <h3>{selectedNode.label}</h3>
-                  <p>{selectedNode.detail}</p>
-                </div>
-                {(selectedNode.kind === "encounter" || currentRunDetail) && <span className="waypoint-open">ENCOUNTER OPEN <i>↗</i></span>}
-              </section>
-            </div>
+          {/* Standalone Extra: Leaderboard */}
+          {currentScreen === "leaderboard" && (
+            <LeaderboardView currentUser={currentUser} />
+          )}
+        </main>
 
-            <aside className="side-column" aria-label="Expedition details">
-              {currentRunDetail ? (
-                <AuthoritativeBattle
-                  run={currentRunDetail}
-                  onRunUpdated={(updated) => {
-                    setCurrentRunDetail(updated);
-                    if (currentQuestionSet) {
-                      setCurrentRun(toDescentRun(updated, currentQuestionSet));
-                    }
-                    if (updated.state === "completed" || updated.state === "failed") {
-                      localStorage.removeItem("point_nemo_active_run_id");
-                    }
-                  }}
-                  onNewRun={() => {
-                    setCurrentRunDetail(null);
-                    setCurrentRun(null);
-                    localStorage.removeItem("point_nemo_active_run_id");
-                  }}
-                  onRetryQuestionSet={(questionSetId) => void handleStartClassicRun(questionSetId)}
-                />
-              ) : selectedNode.kind === "encounter" ? (
-                <BattleEncounter />
-              ) : (
-                <section className="mission-card">
-                  <div className="mission-header"><p className="eyebrow">CURRENT MISSION</p><span className="mission-number">01 — 04</span></div>
-                  <h2>Pressure<br /><em>makes life.</em></h2>
-                  <p className="mission-description">Meet the organisms that turn darkness, cold, and immense pressure into a way of life.</p>
-                  <div className="mission-separator" />
-                  <div className="mission-stat"><span>SUBMERSIBLE</span><b>NAUTILUS-01</b></div>
-                  <div className="mission-stat"><span>DEPTH</span><b>10,935 <small>m</small></b></div>
-                  <div className="mission-stat"><span>EST. DURATION</span><b>~ 12 <small>min</small></b></div>
-                  <button className="mission-button" type="button" onClick={() => setSelectedNode(mapNodes.find((node) => node.id === "adaptation")!)}>
-                    Open lesson briefing <span aria-hidden="true">↗</span>
-                  </button>
-                </section>
-              )}
-
-              <DocumentIntake onStartRun={handleStartClassicRun} activeRunId={currentRunDetail?.id} />
-
-              <div className="ambient-note"><span>↳</span> The map is only the beginning. Every lesson opens a deeper route.</div>
-            </aside>
-          </section>
-        </div>
-      )}
-
-      {/* Upload Dialog */}
-      <UploadDialog
-        isOpen={isUploadOpen}
-        onClose={() => setIsUploadOpen(false)}
-        onConfirmFile={(file) => void handleStartProcessing(file)}
-      />
+        <footer className="playground-footer">
+          <span>POINT NEMO · OCEAN EXPEDITION</span>
+          <span>LOCAL FIRST · OFFLINE PWA</span>
+        </footer>
+      </div>
 
       {/* Settings Modal */}
       <SettingsModal
@@ -594,7 +382,7 @@ export function App() {
         reducedMotion={reducedMotion}
         onToggleReducedMotion={() => setReducedMotion((m) => !m)}
       />
-    </main>
+    </div>
   );
 }
 
