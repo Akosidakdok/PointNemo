@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
+    "dev:playground": "vite --configLoader runner --config ui-playground/vite.config.js ui-playground --host 127.0.0.1 --port 5174",
     "build": "tsc -b && vite build --configLoader runner",
     "typecheck": "tsc -b --pretty false"
   },
