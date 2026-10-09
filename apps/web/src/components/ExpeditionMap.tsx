@@ -1,111 +1,193 @@
 import type { CSSProperties } from "react";
+import { GameButton } from "./ui/GameButton";
 
 export interface MapNode {
   id: string;
   label: string;
-  kind: "start" | "lesson" | "hazard" | "encounter" | "boss";
+  kind: "start" | "hazard" | "lesson" | "encounter" | "boss";
   short: string;
   detail: string;
   progress: string;
+  depth: number;
 }
 
 export const mapNodes: MapNode[] = [
   {
     id: "nemo",
-    label: "Point Nemo",
+    label: "Point Nemo Surface",
     kind: "start",
-    short: "Your starting point",
-    detail: "The most remote point in the ocean. Your expedition begins here.",
-    progress: "START",
+    short: "Expedition Origin",
+    detail: "The oceanic pole of inaccessibility. Coordinates: 48°52.6′S 123°23.6′W. Furthest point from all landmasses.",
+    progress: "ORIGIN",
+    depth: 0,
   },
   {
     id: "iceberg",
-    label: "Iceberg drift",
+    label: "Drift Hazard Sector",
     kind: "hazard",
-    short: "Hazard · shifting ice",
-    detail: "Navigate the cold current carefully before it pushes the submersible off route.",
+    short: "Hazard · Shifting Ice",
+    detail: "Subsurface shelf fragments drifting across abyssal currents. Navigate sonar pulses around mass contours.",
     progress: "AHEAD",
+    depth: 1850,
   },
   {
     id: "adaptation",
-    label: "Pressure & adaptation",
+    label: "Pressure & Adaptation",
     kind: "lesson",
     short: "Lesson 01 · 12 min",
-    detail: "Explore how deep-sea life adapts to darkness, cold, and crushing pressure.",
-    progress: "LESSON",
+    detail: "Field study on deep-sea barophiles and gelatinous organisms surviving extreme hydrostatic pressure.",
+    progress: "STUDY",
+    depth: 4180,
   },
   {
-    id: "anglerfish",
-    label: "Anglerfish encounter",
+    id: "encounter",
+    label: "Hadal Creature Zone",
     kind: "encounter",
-    short: "Encounter · turn battle",
-    detail: "Use a sonar pulse to clear the path and continue your expedition.",
-    progress: "BATTLE",
+    short: "Encounter · Turn Battle",
+    detail: "Sensors pick up an organic bio-signature. Blobfish and abyssal organisms detected in the trench.",
+    progress: "ACTIVE",
+    depth: 7200,
   },
   {
     id: "megalodon",
-    label: "Megalodon trench",
+    label: "Megalodon Abyss Trench",
     kind: "boss",
-    short: "Lesson boss · locked",
-    detail: "A final challenge waits beyond this lesson route.",
+    short: "Trench Apex · Locked",
+    detail: "Ultimate hadal depth marker at 10,935m. Deep-sea sonar signals reflect enormous unknown structures.",
     progress: "LOCKED",
+    depth: 10935,
   },
 ];
 
-interface ExpeditionMapProps {
+export interface ExpeditionMapProps {
   selectedId: string;
   onSelect: (node: MapNode) => void;
+  onLaunchEncounter?: () => void;
+  onClose?: () => void;
 }
 
-const iconByKind: Record<MapNode["kind"], string> = {
+const kindGlyphs: Record<MapNode["kind"], string> = {
   start: "⌖",
-  lesson: "◈",
   hazard: "✳",
+  lesson: "◈",
   encounter: "◉",
   boss: "✦",
 };
 
-export function ExpeditionMap({ selectedId, onSelect }: ExpeditionMapProps) {
+export function ExpeditionMap({
+  selectedId,
+  onSelect,
+  onLaunchEncounter,
+  onClose,
+}: ExpeditionMapProps) {
+  const selectedNode = mapNodes.find((n) => n.id === selectedId) || mapNodes[0];
+
   return (
-    <section className="map-card" aria-labelledby="map-title">
-      <div className="section-heading">
+    <section className="expedition-map pixel-panel" aria-labelledby="map-heading">
+      <div className="map-topbar">
         <div>
-          <p className="eyebrow">LIVE EXPEDITION · ROUTE 01</p>
-          <h2 id="map-title">The hadal descent</h2>
+          <p className="panel-eyebrow">BATHYMETRIC TACTICAL CHART</p>
+          <h2 id="map-heading" className="map-heading">HADAL DESCENT ROUTE 01</h2>
         </div>
-        <span className="depth-chip">10,935 m <span>MAX DEPTH</span></span>
+        <div className="map-top-actions">
+          <span className="depth-badge">
+            MAX DEPTH: <b>10,935 M</b>
+          </span>
+          {onClose && (
+            <GameButton variant="secondary" size="sm" onClick={onClose} aria-label="Close route map">
+              ✕
+            </GameButton>
+          )}
+        </div>
       </div>
 
-      <div className="route-map" aria-label="Lesson route from Point Nemo to the Megalodon trench">
-        <div className="sea-grid" aria-hidden="true" />
-        <svg className="route-line" viewBox="0 0 800 220" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M40 174 C145 174 130 60 254 66 S350 174 433 156 S541 44 625 73 S710 150 770 24" />
-          <path className="route-progress" d="M40 174 C145 174 130 60 254 66" />
+      {/* Sonar Chart Area */}
+      <div className="radar-route-area" role="region" aria-label="Tactical navigation chart">
+        <div className="bathymetric-grid" aria-hidden="true" />
+        <svg
+          className="route-vector-svg"
+          viewBox="0 0 800 220"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path
+            className="route-track-bg"
+            d="M50 170 C140 170 150 70 260 70 S370 160 450 150 S550 50 630 80 S710 140 760 30"
+          />
+          <path
+            className="route-track-active"
+            d="M50 170 C140 170 150 70 260 70 S370 160 450 150"
+          />
         </svg>
-        {mapNodes.map((node, index) => (
-          <button
-            className={`map-node node-${node.kind}${selectedId === node.id ? " is-selected" : ""}${index > 2 ? " is-distant" : ""}`}
-            key={node.id}
-            style={{ "--node-x": `${5 + index * 22.5}%`, "--node-y": `${76 - [0, 50, 5, 43, 66][index]}%` } as CSSProperties}
-            type="button"
-            aria-pressed={selectedId === node.id}
-            onClick={() => onSelect(node)}
-          >
-            <span className="node-orb" aria-hidden="true">{iconByKind[node.kind]}</span>
-            <span className="node-label">{node.label}</span>
-            <span className="node-type">{node.progress}</span>
-          </button>
-        ))}
-        <div className="map-coordinate coordinate-one" aria-hidden="true">48°52′S<br />123°23′W</div>
-        <div className="map-coordinate coordinate-two" aria-hidden="true">HADAL ZONE<br />BATHYAL EDGE</div>
-        <div className="sonar-sweep" aria-hidden="true" />
+
+        {mapNodes.map((node, index) => {
+          const isSelected = selectedId === node.id;
+          const xPercent = 6 + index * 22;
+          const yOffsets = [76, 28, 68, 34, 14];
+          const yPercent = yOffsets[index];
+
+          return (
+            <button
+              key={node.id}
+              type="button"
+              className={`waypoint-node node-${node.kind} ${isSelected ? "is-selected" : ""}`}
+              style={
+                {
+                  "--node-x": `${xPercent}%`,
+                  "--node-y": `${yPercent}%`,
+                } as CSSProperties
+              }
+              aria-pressed={isSelected}
+              onClick={() => onSelect(node)}
+            >
+              <span className="waypoint-orb" aria-hidden="true">
+                {kindGlyphs[node.kind]}
+              </span>
+              <span className="waypoint-label">{node.label}</span>
+              <span className="waypoint-meta">{node.progress} · {node.depth}M</span>
+            </button>
+          );
+        })}
+
+        <div className="radar-coordinates" aria-hidden="true">
+          <span>48°52′S · 123°23′W</span>
+          <span>BATHYAL CONTOUR 04</span>
+        </div>
       </div>
 
-      <div className="map-legend" aria-label="Map legend">
-        <span><i className="legend-dot legend-current" />Current position</span>
-        <span><i className="legend-dot legend-lesson" />Lesson</span>
-        <span><i className="legend-dot legend-hazard" />Hazard</span>
-        <span><i className="legend-dot legend-encounter" />Encounter</span>
+      {/* Waypoint Detail Card */}
+      <div className="waypoint-detail-panel" aria-live="polite">
+        <div className="waypoint-index-badge">
+          WAYPOINT #{String(mapNodes.findIndex((n) => n.id === selectedNode.id) + 1).padStart(2, "0")}
+        </div>
+        <div className="waypoint-info">
+          <p className="waypoint-type-tag">
+            {selectedNode.kind.toUpperCase()} // DEPTH {selectedNode.depth} METERS
+          </p>
+          <h3 className="waypoint-title">{selectedNode.label}</h3>
+          <p className="waypoint-desc">{selectedNode.detail}</p>
+        </div>
+        <div className="waypoint-action">
+          {selectedNode.kind === "encounter" && onLaunchEncounter && (
+            <GameButton variant="primary" size="md" onClick={onLaunchEncounter}>
+              ENGAGE CREATURE ↗
+            </GameButton>
+          )}
+          {selectedNode.kind === "lesson" && (
+            <GameButton variant="gold" size="md">
+              START LESSON ↗
+            </GameButton>
+          )}
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="map-legend-row" aria-label="Route symbols legend">
+        <span className="legend-item"><i className="legend-dot dot-origin" /> Surface Origin</span>
+        <span className="legend-item"><i className="legend-dot dot-hazard" /> Current Hazard</span>
+        <span className="legend-item"><i className="legend-dot dot-lesson" /> Study Module</span>
+        <span className="legend-item"><i className="legend-dot dot-encounter" /> Creature Encounter</span>
+        <span className="legend-item"><i className="legend-dot dot-boss" /> Hadal Apex</span>
       </div>
     </section>
   );
