@@ -342,12 +342,21 @@ export function App() {
         role="application"
         aria-label="Point Nemo Authentication Gateway"
       >
+        {/* Full-Screen Ambient Ocean (Diver, Marine Life & Floating Bubbles Swimming Across Whole Landing Background) */}
+        <OceanAmbientBackground
+          bundle={bundle}
+          reducedMotion={reducedMotion}
+          theme={theme}
+        />
+
         <AuthPage
           onAuthSuccess={handleAuthSuccess}
           onGuestAccess={handleGuestAccess}
           onOpenSettings={() => setIsSettingsOpen(true)}
           reducedMotion={reducedMotion}
           onToggleReducedMotion={() => setReducedMotion((m) => !m)}
+          theme={theme}
+          onToggleTheme={() => setTheme((t) => (t === "light" ? "dark" : "light"))}
         />
 
         {/* Settings Modal */}
