@@ -37,6 +37,11 @@ export function DescentMapView({
   const [mapLoaded, setMapLoaded] = useState(false);
   const [pendingNode, setPendingNode] = useState<number | null>(null);
   const [ignoredNode, setIgnoredNode] = useState<number | null>(null);
+  const stepMovingUntilRef = useRef<number>(0);
+  const playerAnimRef = useRef<SpriteAnimation | null>(null);
+  const creaturesRef = useRef<SpriteAnimation[] | null>(null);
+  const lastReportedPosRef = useRef({ x: 0, y: 0, facing: "" });
+  const lastReportTimeRef = useRef(0);
 
   // Synchronize internal ref with external instance player state
   useEffect(() => {
@@ -97,6 +102,7 @@ export function DescentMapView({
 
   const stepDirection=(direction:"up"|"down"|"left"|"right")=>{
     if(instance.activeEncounter || pendingNode!==null)return;
+    stepMovingUntilRef.current = performance.now() + 400;
     const player=playerPosRef.current;
     player.x=Math.max(0.05,Math.min(0.95,player.x+(direction==="left"?-0.055:direction==="right"?0.055:0)));
     player.y=Math.max(0.05,Math.min(0.95,player.y+(direction==="up"?-0.055:direction==="down"?0.055:0)));
@@ -141,15 +147,23 @@ export function DescentMapView({
     let prevTime: number | null = null;
     let elapsed=0;
     const particles=Array.from({length:24},()=>({x:Math.random()*650,y:Math.random()*650,speedY:0.25+Math.random()*0.45,size:Math.random()>0.7?2:1,opacity:0.15+Math.random()*0.35}));
+    const diverBubbles: Array<{ x: number; y: number; radius: number; speedY: number; alpha: number; phase: number }> = [];
 
-    // Creature animations
-    const creatures = [
-      new SpriteAnimation(bundle, "barreleye.swim"),
-      new SpriteAnimation(bundle, "gulper.swim"),
-      new SpriteAnimation(bundle, "fringehead.swim"),
-      new SpriteAnimation(bundle, "goblin.idle.profile"),
-    ];
-    const playerAnim = new SpriteAnimation(bundle, "explorer.idle.up");
+    // Persistent Creature & Player animations
+    if (!creaturesRef.current) {
+      creaturesRef.current = [
+        new SpriteAnimation(bundle, "barreleye.swim"),
+        new SpriteAnimation(bundle, "gulper.swim"),
+        new SpriteAnimation(bundle, "fringehead.swim"),
+        new SpriteAnimation(bundle, "goblin.idle.profile"),
+      ];
+    }
+    const creatures = creaturesRef.current;
+
+    if (!playerAnimRef.current) {
+      playerAnimRef.current = new SpriteAnimation(bundle, "explorer.swim.down");
+    }
+    const playerAnim = playerAnimRef.current;
 
     const render = (time: number) => {
       const dt = frameDeltaSeconds(time, prevTime);
@@ -168,9 +182,11 @@ export function DescentMapView({
         Number(heldKeysRef.current.has("KeyW") || heldKeysRef.current.has("ArrowUp"));
 
       const length = Math.hypot(dx, dy);
-      const isMoving = length > 0 && !instance.activeEncounter && pendingNode===null;
+      const isKeyMoving = length > 0 && !instance.activeEncounter && pendingNode === null;
+      const now = performance.now();
+      const isMoving = isKeyMoving || (stepMovingUntilRef.current > now && !instance.activeEncounter && pendingNode === null);
 
-      if (isMoving) {
+      if (isKeyMoving) {
         dx /= length;
         dy /= length;
         const speed = 0.52 * dt;
@@ -183,11 +199,18 @@ export function DescentMapView({
           playerPosRef.current.facing = dy < 0 ? "up" : "down";
         }
 
-        onUpdatePlayer(
-          playerPosRef.current.x,
-          playerPosRef.current.y,
-          playerPosRef.current.facing
-        );
+        // Throttle player updates to avoid 60fps React state re-render thrashing
+        const last = lastReportedPosRef.current;
+        const moved = Math.hypot(playerPosRef.current.x - last.x, playerPosRef.current.y - last.y) > 0.012 || playerPosRef.current.facing !== last.facing;
+        if (moved && now - lastReportTimeRef.current > 180) {
+          lastReportTimeRef.current = now;
+          lastReportedPosRef.current = { ...playerPosRef.current };
+          onUpdatePlayer(
+            playerPosRef.current.x,
+            playerPosRef.current.y,
+            playerPosRef.current.facing
+          );
+        }
 
         // Check distance to target node
         const target = BASE_ROUTE_POINTS[instance.routeNode];
@@ -359,13 +382,15 @@ export function DescentMapView({
 
         const isCurrent = m === instance.routeNode;
         const isPast = m < instance.routeNode;
+        const markerSway = !reducedMotion ? Math.sin(elapsed * 2.2 + m * 1.5) * (3.5 * s) : 0;
+        const markerY = marker.y + markerSway;
 
         ctx.save();
         ctx.globalAlpha = isPast ? 0.45 : 1.0;
 
         // Glowing circle under marker
         ctx.beginPath();
-        ctx.arc(marker.x, marker.y, Math.max(24, width * 0.05), 0, Math.PI * 2);
+        ctx.arc(marker.x, markerY, Math.max(24, width * 0.05), 0, Math.PI * 2);
         ctx.fillStyle = isCurrent ? "rgba(48, 214, 242, 0.35)" : "rgba(6, 20, 38, 0.45)";
         ctx.strokeStyle = isCurrent ? "#d7f6ff" : "rgba(48, 214, 242, 0.4)";
         ctx.lineWidth = isCurrent ? 3 : 1;
@@ -376,7 +401,7 @@ export function DescentMapView({
         const creatureSpecies =
           m === 1 ? "barreleye" : m === 2 ? "gulper" : m === 3 ? "fringehead" : "goblin";
         const creatureScale = speciesScale(bundle, creatureSpecies, 58) * (width / 600);
-        drawFrame(ctx, bundle, creature.frameName, marker.x, marker.y, creatureScale);
+        drawFrame(ctx, bundle, creature.frameName, marker.x, markerY, creatureScale);
 
         // Marker label
         ctx.font = "bold 9px monospace";
@@ -385,18 +410,64 @@ export function DescentMapView({
         ctx.fillStyle = isCurrent ? "#30d6f2" : "#7ea0b8";
         const rawLabel = lesson.topics[m] || BASE_ROUTE_POINTS[m].label;
         const stopLabel = isPast ? `✓ ${rawLabel.toUpperCase()}` : rawLabel.toUpperCase();
-        ctx.fillText(stopLabel, marker.x, marker.y + width * 0.058);
+        ctx.fillText(stopLabel, marker.x, markerY + width * 0.058);
         ctx.restore();
       }
 
-      // 5. Draw Player Diver
-      const playerAnimName = `explorer.${isMoving && !reducedMotion ? "swim" : "idle"}.${playerPosRef.current.facing}`;
+      // 5. Draw Player Diver with continuous water-treading / swimming animation
+      const playerAnimName = `explorer.swim.${playerPosRef.current.facing}`;
       playerAnim.play(playerAnimName);
-      if (!reducedMotion) playerAnim.update(dt);
+      if (!reducedMotion) {
+        // Brisk stroke when swimming, gentle water-treading stroke when idle
+        playerAnim.update(isMoving ? dt * 1.35 : dt * 0.45);
+      }
+
+      const idleBob = !reducedMotion && !isMoving ? Math.sin(elapsed * 2.8) * (3.5 * s) : 0;
+      const px = Math.round(playerPosRef.current.x * width);
+      const py = Math.round(playerPosRef.current.y * height + idleBob);
+
+      // Scuba regulator bubble exhalations
+      if (!reducedMotion) {
+        if (Math.random() < (isMoving ? 0.09 : 0.04) && diverBubbles.length < 16) {
+          diverBubbles.push({
+            x: px + (Math.random() * 8 - 4) * s,
+            y: py - 12 * s,
+            radius: (1.2 + Math.random() * 1.8) * s,
+            speedY: (20 + Math.random() * 25) * s,
+            alpha: 0.75 + Math.random() * 0.2,
+            phase: Math.random() * Math.PI * 2,
+          });
+        }
+        for (let b = diverBubbles.length - 1; b >= 0; b--) {
+          const bub = diverBubbles[b];
+          bub.y -= bub.speedY * dt;
+          bub.x += Math.sin(elapsed * 4 + bub.phase) * (6 * dt * s);
+          bub.alpha -= dt * 0.4;
+          if (bub.alpha <= 0 || bub.y < 0) {
+            diverBubbles.splice(b, 1);
+            continue;
+          }
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(bub.x, bub.y, bub.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(180, 240, 255, ${Math.max(0, bub.alpha * 0.6)})`;
+          ctx.strokeStyle = `rgba(215, 246, 255, ${Math.max(0, bub.alpha)})`;
+          ctx.lineWidth = 1;
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      // Visor cyan glow halo
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(px, py - 4 * s, 12 * s, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(48, 214, 242, ${0.12 + Math.sin(elapsed * 3) * 0.06})`;
+      ctx.fill();
+      ctx.restore();
 
       const pScale = speciesScale(bundle, "explorer", 64) * (width / 600);
-      const px = Math.round(playerPosRef.current.x * width);
-      const py = Math.round(playerPosRef.current.y * height);
       playerAnim.draw(ctx, px, py, pScale);
 
       animId = requestAnimationFrame(render);

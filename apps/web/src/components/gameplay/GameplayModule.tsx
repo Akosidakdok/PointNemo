@@ -145,11 +145,14 @@ export function GameplayModule({
   );
 
   // Synchronize when parent requests specific lesson selection or retake
+  const lastHandledNavKey = useRef<string | null>(null);
   useEffect(() => {
-    if (initialLessonId && initialSubscreen === "descent") {
+    const key = `${initialLessonId}:${initialAction}:${navKey}`;
+    if (initialLessonId && key !== lastHandledNavKey.current) {
+      lastHandledNavKey.current = key;
       handleSelectLesson(initialLessonId, initialAction || "resume");
     }
-  }, [initialLessonId, initialAction, navKey, initialSubscreen, handleSelectLesson]);
+  }, [initialLessonId, initialAction, navKey, handleSelectLesson]);
 
   const handleUpdatePlayer = useCallback(
     (x: number, y: number, facing: "up" | "down" | "left" | "right") => {
@@ -311,20 +314,35 @@ export function GameplayModule({
           reducedMotion={reducedMotion}
         />
       )}
-      {subscreen === "encounter" && currentQuestion && (
-        <EncounterCombatView
-          key={activeInstanceId + ":" + currentInstance.routeNode + ":" + questionIndex}
-          instance={currentInstance}
-          question={currentQuestion}
-          topicName={activeLesson.topics[currentInstance.routeNode]}
-          partNumber={currentInstance.routeNode}
-          bundle={bundle}
-          questionNumber={questionIndex + 1}
-          totalQuestions={part.length}
-          onAnswer={handleAnswerCombat}
-          onClearPart={handleContinuePart}
-          reducedMotion={reducedMotion}
-        />
+      {subscreen === "encounter" && (
+        currentQuestion ? (
+          <EncounterCombatView
+            key={activeInstanceId + ":" + currentInstance.routeNode + ":" + questionIndex}
+            instance={currentInstance}
+            question={currentQuestion}
+            topicName={activeLesson.topics[currentInstance.routeNode]}
+            partNumber={currentInstance.routeNode}
+            bundle={bundle}
+            questionNumber={questionIndex + 1}
+            totalQuestions={part.length}
+            onAnswer={handleAnswerCombat}
+            onClearPart={handleContinuePart}
+            reducedMotion={reducedMotion}
+          />
+        ) : (
+          <div className="panel" style={{ textAlign: "center", padding: "40px 20px" }}>
+            <p className="eyebrow">ENCOUNTER PREPARATION</p>
+            <h3>Preparing Question Challenge...</h3>
+            <p className="muted">Synchronizing lesson questions for Part {currentInstance.routeNode}.</p>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => setSubscreen("descent")}
+            >
+              Return to Map
+            </button>
+          </div>
+        )
       )}
       {subscreen === "boss" && currentInstance.bossReached && (
         <LessonBossView
