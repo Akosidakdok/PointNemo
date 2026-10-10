@@ -167,26 +167,30 @@ export function AppHeader({
           </button>
         )}
 
-        <button
-          type="button"
-          className={`nav-step ${currentScreen === "boss" ? "active" : ""}`}
-          onClick={() => onNavigate("boss")}
-          disabled={!bossUnlocked}
-          aria-current={currentScreen === "boss" ? "page" : undefined}
-          title={bossUnlocked ? "Final Review Boss (Unlocked)" : "Clear all three parts and reach the boss marker"}
-        >
-          Final Review
-        </button>
+        {(bossUnlocked || currentScreen === "boss") && (
+          <button
+            type="button"
+            className={`nav-step ${currentScreen === "boss" ? "active" : ""}`}
+            onClick={() => onNavigate("boss")}
+            disabled={!bossUnlocked}
+            aria-current={currentScreen === "boss" ? "page" : undefined}
+            title={bossUnlocked ? "Final Review Boss (Unlocked)" : "Clear all three parts and reach the boss marker"}
+          >
+            Final Review
+          </button>
+        )}
 
-        <button
-          type="button"
-          className={`nav-step ${currentScreen === "results" ? "active" : ""}`}
-          onClick={() => onNavigate("results")}
-          disabled={!resultsUnlocked}
-          aria-current={currentScreen === "results" ? "page" : undefined}
-        >
-          <b>05</b> Results
-        </button>
+        {(resultsUnlocked || currentScreen === "results") && (
+          <button
+            type="button"
+            className={`nav-step ${currentScreen === "results" ? "active" : ""}`}
+            onClick={() => onNavigate("results")}
+            disabled={!resultsUnlocked}
+            aria-current={currentScreen === "results" ? "page" : undefined}
+          >
+            <b>05</b> Results
+          </button>
+        )}
 
       </nav>
     </header>

@@ -1,4 +1,3 @@
-import { OceanBackdrop } from "./OceanBackdrop";
 import { ExplorerHero } from "./ExplorerHero";
 import { ExpeditionStatus } from "./ExpeditionStatus";
 import { AuthPanel } from "./AuthPanel";
@@ -10,6 +9,8 @@ export interface AuthPageProps {
   onOpenSettings: () => void;
   reducedMotion: boolean;
   onToggleReducedMotion: () => void;
+  theme?: "dark" | "light";
+  onToggleTheme?: () => void;
 }
 
 export function AuthPage({
@@ -18,14 +19,26 @@ export function AuthPage({
   onOpenSettings,
   reducedMotion,
   onToggleReducedMotion,
+  theme = "light",
+  onToggleTheme,
 }: AuthPageProps) {
   return (
     <div className="auth-page-root" role="main" aria-label="Point Nemo RPG Title Screen">
-      {/* Dynamic Ocean Environment Backdrop */}
-      <OceanBackdrop reducedMotion={reducedMotion} />
-
       {/* Floating System Controls (Top Right) */}
       <nav className="auth-top-controls" aria-label="System Settings">
+        {onToggleTheme && (
+          <button
+            type="button"
+            className="rpg-sys-btn"
+            onClick={onToggleTheme}
+            title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+            aria-label={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+          >
+            <span aria-hidden="true">{theme === "light" ? "🌙" : "☀️"}</span>
+            <span>{theme === "light" ? "DARK" : "LIGHT"}</span>
+          </button>
+        )}
+
         <button
           type="button"
           className="rpg-sys-btn"

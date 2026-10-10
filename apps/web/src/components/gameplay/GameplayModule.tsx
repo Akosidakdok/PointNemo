@@ -164,16 +164,21 @@ export function GameplayModule({
 
   const handleReachTarget = useCallback(
     (node: number) => {
-      const instanceSnapshot = instanceRef.current;
-      if (instanceSnapshot.state !== "active" || instanceSnapshot.activeEncounter || node !== instanceSnapshot.routeNode)
-        return;
       setInstances((previous) => {
-        const instance = previous.get(activeInstanceId)!;
-        if (instance.activeEncounter || instance.state !== "active" || instance.routeNode !== node)
-          return previous;
+        const instance = previous.get(activeInstanceId);
+        if (!instance) return previous;
         return new Map(previous).set(
           activeInstanceId,
-          node === 4 ? { ...instance, bossReached: true } : { ...instance, activeEncounter: true }
+          node === 4
+            ? { ...instance, bossReached: true, activeEncounter: false }
+            : {
+                ...instance,
+                routeNode: node,
+                activeEncounter: true,
+                questionIndex: 0,
+                routePartAnswered: false,
+                selectedOption: null,
+              }
         );
       });
       if (node === 4) navigate("boss");

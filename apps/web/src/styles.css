@@ -40,6 +40,22 @@
   --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, Consolas, monospace;
 }
 
+:root[data-theme="light"] {
+  --abyss: #eaf4fb;
+  --deep-indigo: #d9ebf8;
+  --ocean-slate: #b5d5ec;
+  --steel-blue: #6499c2;
+
+  --visor-cyan: #0b7cb8;
+  --signal-red: #d32f2f;
+  --blobfish-pink: #b85478;
+  --equipment-gold: #b37f14;
+
+  --text-main: #143048;
+  --text-muted: #4e6c86;
+  --outline: #9ec2de;
+}
+
 * { box-sizing: border-box; }
 *, *::before, *::after {
   box-sizing: border-box;
@@ -2925,7 +2941,7 @@ kbd {
   position: relative;
   min-height: 100dvh;
   width: 100%;
-  background-color: var(--abyss);
+  background-color: transparent;
   color: var(--text-main);
   overflow-x: clip;
   display: flex;
@@ -3743,6 +3759,121 @@ kbd {
   font-size: 10px;
   color: var(--ocean-slate);
   letter-spacing: 0.06em;
+}
+
+/* ==========================================================================
+   RPG TITLE & AUTH SCREEN — LIGHT MODE OVERRIDES
+   ========================================================================== */
+:root[data-theme="light"] .rpg-auth-panel {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: #6499c2;
+  box-shadow: 4px 4px 0 rgba(100, 153, 194, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+:root[data-theme="light"] .terminal-top-badge {
+  border-bottom-color: #b5d5ec;
+}
+
+:root[data-theme="light"] .rpg-title-badge {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: #b5d5ec;
+  color: #0b7cb8;
+  backdrop-filter: blur(8px);
+}
+
+:root[data-theme="light"] .expedition-status-strip {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: #b5d5ec;
+  backdrop-filter: blur(8px);
+}
+
+:root[data-theme="light"] .rpg-main-title {
+  color: #143048;
+  text-shadow: 3px 3px 0 rgba(181, 213, 236, 0.9);
+}
+
+:root[data-theme="light"] .rpg-sys-btn {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: #b5d5ec;
+  color: #143048;
+  box-shadow: 2px 2px 0 rgba(100, 153, 194, 0.3);
+  backdrop-filter: blur(6px);
+}
+
+:root[data-theme="light"] .rpg-sys-btn:hover {
+  background: #ffffff;
+  border-color: #0b7cb8;
+  color: #0b7cb8;
+}
+
+:root[data-theme="light"] .ocean-vignette {
+  background: radial-gradient(circle at 50% 30%, transparent 20%, rgba(181, 213, 236, 0.45) 85%);
+}
+
+:root[data-theme="light"] .auth-mode-selector-rpg {
+  border-color: #b5d5ec;
+  background: #eaf4fb;
+}
+
+:root[data-theme="light"] .rpg-mode-btn {
+  background: #d9ebf8;
+  color: #4e6c86;
+}
+
+:root[data-theme="light"] .rpg-mode-btn.is-active {
+  background: #ffffff;
+  color: #0b7cb8;
+  box-shadow: inset 0 -3px 0 #0b7cb8;
+}
+
+:root[data-theme="light"] .terminal-text-input {
+  background: #ffffff;
+  border-color: #b5d5ec;
+  color: #143048;
+}
+
+:root[data-theme="light"] .terminal-text-input:focus {
+  border-color: #0b7cb8;
+  box-shadow: 0 0 0 2px #0b7cb8;
+}
+
+:root[data-theme="light"] .rpg-btn {
+  background: #227ebd;
+  border-color: #0b7cb8;
+  color: #ffffff;
+  box-shadow: 3px 3px 0 rgba(100, 153, 194, 0.35);
+}
+
+:root[data-theme="light"] .rpg-btn:hover {
+  background: #1969a2;
+}
+
+:root[data-theme="light"] .rpg-guest-btn {
+  background: #eaf4fb;
+  border-color: #b5d5ec;
+  color: #143048;
+  box-shadow: 2px 2px 0 rgba(100, 153, 194, 0.25);
+}
+
+:root[data-theme="light"] .rpg-guest-btn:hover {
+  background: #ffffff;
+  border-color: #0b7cb8;
+  color: #0b7cb8;
+}
+
+:root[data-theme="light"] .guest-divider::before {
+  background: #b5d5ec;
+}
+
+:root[data-theme="light"] .guest-divider span {
+  background: rgba(255, 255, 255, 0.95);
+  color: #5e7890;
+}
+
+:root[data-theme="light"] .auth-footer-coordinates {
+  color: #5e7890;
 }
 
 /* Shake Microinteraction */
