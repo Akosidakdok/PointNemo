@@ -28,6 +28,8 @@ export const GenerationJobSchema = z.object({
   id: z.string().uuid(),
   documentId: z.string().uuid(),
   state: JobStateSchema,
+  phase: z.enum(["reading", "selecting", "creating", "checking", "repairing", "ready", "failed", "cancelled"]).optional(),
+  canRetry: z.boolean().optional(),
   questionSetId: z.string().uuid().optional(),
   errorCode: z.string().optional(),
   errorMessage: z.string().optional(),

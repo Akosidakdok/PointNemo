@@ -95,7 +95,7 @@ export class GameRunService {
     if (!set) throw new NotFoundError("QUESTION_SET_NOT_FOUND", "Question set was not found.");
     if (
       Object.values(set).some((value) => !value || value === "legacy-incompatible") ||
-      set.document_hash !== set.source_hash || set.model_tag !== "qwen2.5:1.5b"
+      set.document_hash !== set.source_hash || set.schema_version !== "point-nemo-questions-v2"
     ) {
       throw new ConflictError("QUESTION_SET_INCOMPATIBLE", "Generate a fresh question set with the current local setup.");
     }

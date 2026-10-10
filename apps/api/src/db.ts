@@ -200,7 +200,16 @@ function migration005(db: SqliteDatabase): void {
 // Migration runner — applies only pending migrations transactionally
 // ---------------------------------------------------------------------------
 
-const MIGRATIONS = [migration001, migration002, migration003, migration004, migration005];
+function migration006(db: SqliteDatabase): void {
+  db.exec(`
+    ALTER TABLE documents ADD COLUMN extractor_version TEXT NOT NULL DEFAULT 'legacy-incompatible';
+    ALTER TABLE generation_jobs ADD COLUMN phase TEXT;
+    CREATE INDEX IF NOT EXISTS documents_hash_lookup ON documents(sha256);
+    CREATE INDEX IF NOT EXISTS question_sets_document_lookup ON question_sets(document_id);
+  `);
+}
+
+const MIGRATIONS = [migration001, migration002, migration003, migration004, migration005, migration006];
 
 function runMigrations(db: SqliteDatabase): void {
   const currentVersion = db.pragma("user_version", { simple: true }) as number;

@@ -77,11 +77,11 @@ Current main accepts one English, text-based PDF per run with these admission ru
 | Admission rule | MVP limit |
 | --- | --- |
 | File count | One PDF per document and generation run; different PDFs remain isolated |
-| File size | Exact 5 MiB (5,242,880 bytes) upper admission limit |
-| Pages | At most 3 pages; no pages are silently truncated |
-| Extracted text | At least 300 non-whitespace characters; maximum 8,000 normalized NFC characters |
+| File size | Integrated frontend safety gate: at most 5 MiB; API multipart ceiling: 100 MiB |
+| Pages | No fixed parser page cap; extraction has a 60-second deadline |
+| Extracted text | At least 300 non-whitespace characters; generation samples complete passages within a token budget |
 | Language/content | English text (at least 80% Latin letters) tied to verbatim page-level source locations |
-| Unsupported input | Scanned/image-only, embedded figures, drawings, encrypted, unreadable, empty, or out-of-limit PDF |
+| Unsupported input | Image-only scans, password-required, unreadable, empty, or insufficient-text PDF; figures and tables are not interpreted |
 
 Validate before generation and show a specific, actionable reason when a file is rejected. Require usable text on each nonblank content page; figures and tables are not interpreted. Do not add OCR or silently truncate content. Keep uploaded PDF bytes in memory for extraction, then release them. Store normalized extracted pages and source passages needed for questions and feedback; do not retain the original PDF by default. A library record represents this saved extracted material and its generated data, not an archived copy of the uploaded file.
 
@@ -94,7 +94,7 @@ After admission, show a real three-stage loading view. Each stage changes only w
 | Visible state | Work performed | Completion condition |
 | --- | --- | --- |
 | **Extraction** | Parse the admitted PDF locally and retain page locations with normalized text | Text passes the character/content limits and source locations are available |
-| **Generation** | Send only this document's extracted text and generation instructions to local Ollama using `qwen2.5:1.5b` | Model returns 3 distinct topics and 9 questions: one Easy, one Medium, and one Hard question per topic |
+| **Generation** | Send selected source passages to local Ollama using `qwen2.5:3b` by default | Model returns 3 distinct topics and 9 questions: one Easy, one Medium, and one Hard question per topic |
 | **Validation** | Validate structure, exact count, topic/difficulty coverage, answer key, explanation, and source evidence | Exactly 9 questions pass checks; each has a defensible answer and an exact supporting PDF quote/page |
 
 The final question set contains exactly 9 source-grounded questions: 3 distinct topics × 3 difficulty levels. A schema-valid response alone is not sufficient: reject unsupported claims, missing/incorrect quotes, ambiguous answer keys, duplicates, or malformed questions. Allow at most one bounded model repair attempt per job using validation feedback. If that fails, offer **Retry generation** as an explicit user action using the saved extracted text; each retry starts a new job with the same limits, and retries are never automatic. Extraction failures require the learner to select the PDF again. A cancelled job cannot commit later. If validation still fails, report the failure and return the learner to the library without starting a run.

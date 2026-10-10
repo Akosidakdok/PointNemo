@@ -4,6 +4,7 @@ import { type QuestionSet } from "@point-nemo/shared";
 interface LibraryHubViewProps {
   questionSets: QuestionSet[];
   activeInstanceId?: string | null;
+  activeLessonTitle?: string;
   onOpenUpload: () => void;
   onGoToSeas: () => void;
   onSelectLesson?: (lessonId: string, action: "resume" | "new") => void;
@@ -14,6 +15,7 @@ interface LibraryHubViewProps {
 export function LibraryHubView({
   questionSets,
   activeInstanceId = "PN-001",
+  activeLessonTitle = "Introduction to Marine Biology (sample)",
   onOpenUpload,
   onGoToSeas,
   onSelectLesson,
@@ -71,6 +73,8 @@ export function LibraryHubView({
               const lessonTitle =
                 "documentName" in qs
                   ? qs.documentName
+                  : "filename" in qs && qs.filename
+                  ? qs.filename
                   : "title" in (qs as Record<string, unknown>)
                   ? String((qs as Record<string, unknown>).title)
                   : "Study Lesson";
@@ -146,7 +150,7 @@ export function LibraryHubView({
               >
                 In-Progress Lesson · {activeInstanceId || "PN-001"}
               </button>
-              <span>Introduction to Marine Biology</span>
+              <span>{activeLessonTitle || "Introduction to Marine Biology"}</span>
             </div>
             <button
               className="text-button"

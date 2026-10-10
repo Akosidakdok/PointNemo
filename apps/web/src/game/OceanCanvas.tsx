@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from "react";
 import {
   type AssetBundle,
   SpriteAnimation,
+  frameDeltaSeconds,
   speciesScale,
   drawWater,
   drawFrame,
@@ -218,13 +219,13 @@ export function OceanCanvas({
     if (!ctx) return;
 
     let animId: number;
-    let lastTime = performance.now();
+    let lastTime: number | null = null;
     let beaconPhase = 0;
     let worldTime = 0;
 
     const render = (now: number) => {
       animId = requestAnimationFrame(render);
-      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      const dt = frameDeltaSeconds(now, lastTime);
       lastTime = now;
       if (!paused && !reducedMotion) worldTime += dt;
 

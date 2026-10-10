@@ -64,7 +64,7 @@ test("release configuration uses port 3000, external app-data storage, and the p
   const localAppData = join(tmpdir(), "point-nemo-config-app-data");
   const defaults = readConfig({ LOCALAPPDATA: localAppData });
   assert.equal(defaults.port, 3000);
-  assert.equal(defaults.ollamaModel, "qwen2.5:1.5b");
+  assert.equal(defaults.ollamaModel, "qwen2.5:3b");
   assert.equal(defaults.ollamaBaseUrl, "http://127.0.0.1:11434");
   assert.equal(defaults.databasePath.startsWith(resolve("apps")), false);
   if (process.platform === "win32") assert.equal(defaults.databasePath, join(localAppData, "PointNemo", "point-nemo.sqlite"));
@@ -132,7 +132,7 @@ test("v4 migration preserves descendants, permits independent duplicate hashes, 
   let database: SqliteDatabase | undefined;
   try {
     database = initializeDatabase(path);
-    assert.equal(database.pragma("user_version", { simple: true }), 5);
+    assert.equal(database.pragma("user_version", { simple: true }), 6);
     assert.equal(database.pragma("foreign_keys", { simple: true }), 1);
     assert.deepEqual(database.pragma("foreign_key_check"), []);
     for (const table of ["subjects", "documents", "generation_jobs", "question_sets", "topics_p0", "questions_p0", "runs", "run_slots", "run_attempts"]) {

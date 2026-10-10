@@ -109,6 +109,12 @@ export async function loadAssetBundle(
   return { manifest, images };
 }
 
+/** Use animation-frame timestamps together; the first frame has no elapsed time. */
+export function frameDeltaSeconds(time: number, previousTime: number | null): number {
+  if (previousTime === null || !Number.isFinite(time) || !Number.isFinite(previousTime)) return 0;
+  return Math.max(0, Math.min((time - previousTime) / 1000, 0.1));
+}
+
 export class SpriteAnimation {
   bundle: AssetBundle;
   name: string = "";
