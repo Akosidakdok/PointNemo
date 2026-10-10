@@ -7,6 +7,7 @@ export interface RouteQuestion {
   answer: string;
   explanation: string;
   supportingQuote?: string;
+  sourcePage?: number;
 }
 
 export interface LessonRecord {
@@ -15,6 +16,7 @@ export interface LessonRecord {
   topics: string[];
   questions: (RouteQuestion | null)[];
   isCustom?: boolean;
+  parts?: RouteQuestion[][];
 }
 
 export interface RoutePoint {
@@ -37,7 +39,22 @@ export interface DescentInstance {
   feedbackIncorrect?: boolean;
   clearedParts?: number;
   bossScore?: number;
+  questionIndex?: number;
+  partCorrect?: number;
+  selectedOption?: number | null;
+  xp?: number;
+  state?: "active" | "completed" | "failed";
+  bossOrder?: number[];
+  bossQuestionIndex?: number;
+  bossAnswers?: number[];
+  bossStarted?: boolean;
 }
+
+export function lessonParts(lesson: LessonRecord): RouteQuestion[][] {
+  return lesson.parts ?? [1,2,3].map((node)=>lesson.questions[node] ? [lesson.questions[node]!] : []);
+}
+
+export function bossPassScore(total: number): number { return Math.ceil(total * 8 / 9); }
 
 export const BASE_ROUTE_POINTS: RoutePoint[] = [
   { x: 0.5, y: 0.5, label: "POINT NEMO" },
@@ -148,31 +165,41 @@ export const INITIAL_LESSON_CATALOG: Record<string, LessonRecord> = {
 
 /** Convert a real QuestionSet from Ollama/SQLite into a playable lesson record */
 export function questionSetToLessonRecord(qSet: QuestionSet): LessonRecord {
-  const topics = ["", "Surface Zone", "Twilight Zone", "Midnight Zone", "Lesson boss"];
+  const topicNames = qSet.topics.map((topic)=>typeof topic==="string" ? topic : topic.name);
+  const topics = ["", ...topicNames, "Lesson boss"];
   const questions: (RouteQuestion | null)[] = [null];
+  const parts: RouteQuestion[][] = [];
 
-  // Pick up to 3 distinct questions for route nodes 1, 2, 3
   const qList = qSet.questions || [];
-  for (let i = 0; i < Math.min(3, qList.length); i++) {
-    const q = qList[i];
+  for (const topic of qSet.topics) {
+    const topicQuestions = qList.filter((q)=>typeof topic==="string" ? "topic" in q && q.topic===topic : "topicId" in q && q.topicId===topic.id);
+    const difficulties = ["easy","medium","hard"];
+    topicQuestions.sort((a,b)=>difficulties.indexOf(a.difficulty)-difficulties.indexOf(b.difficulty));
+    const part: RouteQuestion[] = [];
+    for (const q of topicQuestions) {
     const correctIdx = q.answerIndex >= 0 && q.answerIndex < q.options.length ? q.answerIndex : 0;
     const answer = q.options[correctIdx] || "";
     const quote = "sourceQuote" in q ? q.sourceQuote : (q.evidence?.[0]?.quote ?? undefined);
 
-    questions.push({
+    const converted: RouteQuestion = {
       prompt: q.prompt,
       options: q.options,
       correct: correctIdx,
       answer,
       explanation: q.explanation || "Source-grounded concept from document extraction.",
       supportingQuote: quote,
-    });
+      sourcePage: "sourcePage" in q ? q.sourcePage : q.evidence?.[0]?.pageNumber,
+    };
+    part.push(converted);
+    questions.push(converted);
+    }
+    parts.push(part);
   }
 
   const title =
     "documentName" in qSet
       ? qSet.documentName
-      : "title" in (qSet as Record<string, unknown>)
+      : "filename" in qSet && qSet.filename ? qSet.filename : "title" in (qSet as Record<string, unknown>)
       ? String((qSet as Record<string, unknown>).title)
       : "Custom Study Expedition";
 
@@ -182,5 +209,6 @@ export function questionSetToLessonRecord(qSet: QuestionSet): LessonRecord {
     topics,
     questions,
     isCustom: true,
+    parts,
   };
 }

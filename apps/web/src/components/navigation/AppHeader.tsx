@@ -19,6 +19,7 @@ interface AppHeaderProps {
   theme: "dark" | "light";
   onToggleTheme: () => void;
   bossUnlocked?: boolean;
+  resultsUnlocked?: boolean;
   activeInstanceId?: string | null;
   maxUnlockedStep?: number;
 }
@@ -32,6 +33,7 @@ export function AppHeader({
   theme,
   onToggleTheme,
   bossUnlocked = false,
+  resultsUnlocked = false,
   activeInstanceId,
   maxUnlockedStep = 1,
 }: AppHeaderProps) {
@@ -165,17 +167,27 @@ export function AppHeader({
           </button>
         )}
 
-        {(maxUnlockedStep >= 5 || currentScreen === "results") && (
-          <button
-            type="button"
-            className={`nav-step ${currentScreen === "results" ? "active" : ""}`}
-            onClick={() => onNavigate("results")}
-            aria-current={currentScreen === "results" ? "page" : undefined}
-            disabled={currentScreen !== "results" && !bossUnlocked}
-          >
-            <b>05</b> Results
-          </button>
-        )}
+        <button
+          type="button"
+          className={`nav-step ${currentScreen === "boss" ? "active" : ""}`}
+          onClick={() => onNavigate("boss")}
+          disabled={!bossUnlocked}
+          aria-current={currentScreen === "boss" ? "page" : undefined}
+          title={bossUnlocked ? "Final Review Boss (Unlocked)" : "Clear all three parts and reach the boss marker"}
+        >
+          Final Review
+        </button>
+
+        <button
+          type="button"
+          className={`nav-step ${currentScreen === "results" ? "active" : ""}`}
+          onClick={() => onNavigate("results")}
+          disabled={!resultsUnlocked}
+          aria-current={currentScreen === "results" ? "page" : undefined}
+        >
+          <b>05</b> Results
+        </button>
+
       </nav>
     </header>
   );

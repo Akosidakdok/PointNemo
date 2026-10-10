@@ -192,12 +192,12 @@ test("run routes reject incompatible saved metadata and rules on create/resume/a
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
     });
     const metadata = generationMetadata(testConfig, "fixture-digest", TOKENIZER_DIGEST, "hash-route-test");
-    db.prepare("UPDATE question_sets SET settings_hash='changed-settings' WHERE id=?").run(questionSetId);
+    db.prepare("UPDATE question_sets SET schema_version='unsupported-schema' WHERE id=?").run(questionSetId);
     assert.equal((await post("/api/runs", { questionSetId })).status, 409);
     assert.equal((await fetch(`${baseUrl}/api/runs/${run.id}`)).status, 409);
     assert.equal((await post(`/api/runs/${run.id}/answers`, { slotId: run.currentSlot!.id, selectedOptionIndex: 0 })).status, 409);
     assert.deepEqual(game.getRun(run.id), run);
-    db.prepare("UPDATE question_sets SET settings_hash=? WHERE id=?").run(metadata.settingsHash, questionSetId);
+    db.prepare("UPDATE question_sets SET schema_version=? WHERE id=?").run(metadata.schemaVersion, questionSetId);
     db.prepare("UPDATE runs SET rules_version='previous-rules' WHERE id=?").run(run.id);
     const resume = await fetch(`${baseUrl}/api/runs/${run.id}`);
     assert.equal(resume.status, 409);

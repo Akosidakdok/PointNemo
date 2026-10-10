@@ -5,7 +5,7 @@ Point Nemo is a local-first study expedition. Students travel from Point Nemo th
 ## Prerequisites
 
 - Node.js `^20.19.0` or `>=22.12.0` and npm. These versions satisfy the Vite 7 engine requirement.
-- **Local Ollama** (default `http://127.0.0.1:11434` with configured model, e.g. `qwen2.5:1.5b` or `qwen3:4b`). All runtime inference is strictly local Ollama with zero cloud API dependencies. Ollama is optional for the app and API to start; mock and deterministic validation flows are supported without an active Ollama instance.
+- **Local Ollama** at `http://127.0.0.1:11434`, with `qwen2.5:1.5b` or `qwen2.5:3b` installed. All runtime inference stays on the local machine. Saved lessons remain playable without Ollama; generating a new lesson requires it.
 
 ## Run locally
 
@@ -14,6 +14,7 @@ From the repository root:
 ```cmd
 npm install
 copy .env.example .env
+ollama pull qwen2.5:3b
 npm run dev
 ```
 
@@ -44,14 +45,16 @@ The checked-in `.env.example` contains local defaults:
 API_PORT=3000
 DATABASE_PATH=
 OLLAMA_BASE_URL=http://127.0.0.1:11434
-OLLAMA_MODEL=qwen2.5:1.5b
+OLLAMA_MODEL=qwen2.5:3b
 ```
 
 Change `OLLAMA_BASE_URL` or `OLLAMA_MODEL` in your `.env` as needed. All inference calls are dispatched to your local Ollama loopback host. No document text, prompts, or answers are ever sent to remote or cloud AI endpoints.
 
+See [the local AI pipeline guide](docs/LOCAL_AI_PIPELINE.md) for token budgets, saved-lesson reuse, retries, measured model comparisons, and current quality limitations.
+
 ## What is included
 
-- **Local Document Intake**: Accepts English text-based PDFs within strict admission bounds: maximum 5 MiB (5,242,880 bytes), at most 3 pages, at least 300 non-whitespace characters, and at most 8,000 normalized NFC characters. Scans and embedded images are rejected to guarantee source-grounded active recall. `POST /api/documents` admits the file, `GET /api/jobs/:id` reports bounded job status, and `GET /api/question-sets/:id` returns the persisted 3-topic/9-question set with source evidence.
+- **Local Document Intake**: The browser accepts one PDF up to 5 MiB. The API requires English text with at least 300 non-whitespace characters. Scans require readable text; figures and tables are not interpreted. Large documents are sampled across pages within a token budget. `POST /api/documents` admits the file, `GET /api/jobs/:id` reports processing phases, and `GET /api/question-sets/:id` returns the saved 3-topic/9-question set with exact source passages. Compatible saved lessons can be reused; failed generation can retry from extracted text.
 - **Authoritative Game Run Backend**:
   - `POST /api/runs`: Creates an authoritative run from a ready question set with 18 fixed, persisted slots.
     - 3 easy questions (Surface: Clownfish)
@@ -66,9 +69,9 @@ Change `OLLAMA_BASE_URL` or `OLLAMA_MODEL` in your `.env` as needed. All inferen
 - **Connected Web Interface**:
   - Retro Submersible UI with 2D Ocean Viewport (`OceanCanvas`), `LocalLibrary`, `UploadDialog`, 3-stage `SonarProcessing` (`extracting` -> `generating` -> `validating` -> `ready`), 16-bit `DescentEncounter` combat canvas, and `ResultsScreen`.
   - Classic Expedition Map dashboard view with interactive waypoints, battle card, and document intake.
-  - "Begin descent run" starts the authoritative game run via the API.
-  - Authoritative combat interface displays creature threats, depth zones, live player HP and enemy HP bars, XP, combo, question options, feedback explanations, and source-text quotes with page numbers.
-  - Automatic resume: Saved runs continue seamlessly across page refreshes.
+  - The main study map groups each saved topic into a three-question part, followed by a shuffled final review of all nine questions.
+  - Combat displays player HP, enemy HP, XP, feedback explanations, and source-text quotes with page numbers.
+  - Study map progress survives navigation between app tabs within the current page session. Refreshing resets that frontend run; integration with the separate persisted API run engine remains pending.
   - Results screen with "Descent Complete" badge upon boss victory, or mistake review with supporting source evidence upon failure.
 - **Offline & Local Architecture**: SQLite via `better-sqlite3` with transactional migrations, Zod schema validation across backend and web client, and full offline test coverage.
 - **Art and asset generation**: Bundled image sheets, prompts, and asset-generation CLI documented in [the asset guide](docs/assets/README.md).

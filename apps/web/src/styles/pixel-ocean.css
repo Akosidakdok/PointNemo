@@ -266,4 +266,3 @@
 @media (prefers-reduced-motion: reduce) {
   .playground-shell, .playground-shell *, .playground-shell::before, .playground-shell::after { transition: none !important; }
 }
-

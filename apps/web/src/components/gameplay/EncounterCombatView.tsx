@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import {
   type AssetBundle,
   SpriteAnimation,
+  frameDeltaSeconds,
   drawFrame,
   speciesScale,
 } from "../../game/sprites";
@@ -13,8 +14,10 @@ interface EncounterCombatViewProps {
   topicName: string;
   partNumber: number;
   bundle: AssetBundle | null;
-  onAnswer: (isCorrect: boolean) => void;
+  onAnswer: (optionIndex: number) => void;
   onClearPart: () => void;
+  questionNumber: number;
+  totalQuestions: number;
   reducedMotion?: boolean;
 }
 
@@ -26,12 +29,18 @@ export function EncounterCombatView({
   bundle,
   onAnswer,
   onClearPart,
+  questionNumber,
+  totalQuestions,
   reducedMotion = false,
 }: EncounterCombatViewProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
-  const [answered, setAnswered] = useState(instance.routePartAnswered);
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const headingRef=useRef<HTMLHeadingElement | null>(null);
+  const selectedIdx = instance.selectedOption ?? null;
+  const answered = instance.routePartAnswered;
+  const isCorrect = answered && selectedIdx===question.correct;
+  const answerLocked = useRef(false);
+  useEffect(()=>{ answerLocked.current=answered; },[answered,questionNumber]);
+  useEffect(()=>{headingRef.current?.focus();},[questionNumber]);
 
   // Species mapping per part
   const species = partNumber === 1 ? "barreleye" : partNumber === 2 ? "gulper" : "fringehead";
@@ -44,7 +53,7 @@ export function EncounterCombatView({
     if (!ctx) return;
 
     let animId = 0;
-    let prev = performance.now();
+    let prev: number | null = null;
 
     const playerAnim = new SpriteAnimation(bundle, "explorer.swim.right");
     const creatureAnim = new SpriteAnimation(
@@ -53,7 +62,7 @@ export function EncounterCombatView({
     );
 
     const render = (time: number) => {
-      const dt = Math.min((time - prev) / 1000, 0.1);
+      const dt = frameDeltaSeconds(time, prev);
       prev = time;
 
       if (!reducedMotion) {
@@ -100,12 +109,9 @@ export function EncounterCombatView({
   }, [bundle, species, reducedMotion]);
 
   const handleSelectOption = (index: number) => {
-    if (answered) return;
-    setSelectedIdx(index);
-    const correct = index === question.correct;
-    setIsCorrect(correct);
-    setAnswered(true);
-    onAnswer(correct);
+    if (answered || answerLocked.current) return;
+    answerLocked.current=true;
+    onAnswer(index);
   };
 
   return (
@@ -140,11 +146,11 @@ export function EncounterCombatView({
 
         <div className="question-panel">
           <div className="question-meta">
-            <span>{`PRACTICE QUESTION · 0${partNumber} / 03`}</span>
-            <span>{`TOPIC: ${topicName.toUpperCase()}`}</span>
+            <span>{`TACTICAL ENCOUNTER · 0${partNumber} / 03`}</span>
+            <span>{`TOPIC: ${topicName.toUpperCase()} · QUESTION ${questionNumber} OF ${totalQuestions}`}</span>
           </div>
 
-          <h2 id="combat-heading">{question.prompt}</h2>
+          <h2 ref={headingRef} tabIndex={-1} id="combat-heading">{question.prompt}</h2>
 
           <div className="answer-list" role="group" aria-label="Multiple choice answer options">
             {question.options.map((opt, idx) => {
@@ -160,7 +166,7 @@ export function EncounterCombatView({
 
               return (
                 <button
-                  key={opt}
+                  key={idx}
                   type="button"
                   className={btnClass}
                   disabled={answered}
@@ -198,6 +204,8 @@ export function EncounterCombatView({
                   </div>
                 </>
               )}
+              {isCorrect && <div className="source-evidence"><small>EXPLANATION</small><p>{question.explanation}</p>{question.supportingQuote && <blockquote>“{question.supportingQuote}”</blockquote>}</div>}
+              {question.sourcePage && <p>Source: PDF page {question.sourcePage}</p>}
             </div>
           )}
 
@@ -211,7 +219,7 @@ export function EncounterCombatView({
               disabled={!answered}
               onClick={onClearPart}
             >
-              {partNumber < 3 ? "Next Topic →" : "Proceed to Final Quiz →"}
+              {questionNumber < totalQuestions ? "Next question →" : !answered ? "Finish part →" : (instance.partCorrect ?? 0) >= Math.ceil(totalQuestions*2/3) ? "Return to map →" : "View results →"}
             </button>
           </div>
         </div>

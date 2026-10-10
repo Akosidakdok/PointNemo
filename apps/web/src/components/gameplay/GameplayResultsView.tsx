@@ -3,6 +3,7 @@ interface GameplayResultsViewProps {
   bossScore: number;
   totalBossQuestions: number;
   earnedXP: number;
+  completed: boolean;
   onReturnToLibrary: () => void;
   onChooseSea: () => void;
   onRetryLesson: () => void;
@@ -13,11 +14,12 @@ export function GameplayResultsView({
   bossScore,
   totalBossQuestions,
   earnedXP,
+  completed,
   onReturnToLibrary,
   onChooseSea,
   onRetryLesson,
 }: GameplayResultsViewProps) {
-  const passed = bossScore >= Math.min(8, totalBossQuestions);
+  const passed = completed && partsCleared===3 && totalBossQuestions>0 && bossScore >= Math.ceil(totalBossQuestions*8/9);
 
   return (
     <section className="gameplay-results-view" aria-labelledby="results-title">
@@ -36,8 +38,8 @@ export function GameplayResultsView({
 
         <p className="muted" style={{ margin: "10px auto 0", maxWidth: "420px" }}>
           {passed
-            ? "Congratulations! You mastered all topics in this study lesson."
-            : "Good effort! Review your notes and try the quiz again to improve your score."}
+            ? "You completed all lesson parts and met the final review threshold."
+            : "The required score was not reached. Review the answer explanations and source notes, then try again."}
         </p>
 
         <div className="score-grid">

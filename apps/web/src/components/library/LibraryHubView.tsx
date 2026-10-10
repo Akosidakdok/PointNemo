@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import {
   type AssetBundle,
   SpriteAnimation,
+  frameDeltaSeconds,
   drawFrame,
   speciesScale,
 } from "../../game/sprites";
@@ -10,6 +11,7 @@ import { type QuestionSet } from "@point-nemo/shared";
 interface LibraryHubViewProps {
   questionSets: QuestionSet[];
   activeInstanceId?: string | null;
+  activeLessonTitle?: string;
   onOpenUpload: () => void;
   onGoToSeas: () => void;
   bundle: AssetBundle | null;
@@ -19,6 +21,7 @@ interface LibraryHubViewProps {
 export function LibraryHubView({
   questionSets,
   activeInstanceId = "PN-001",
+  activeLessonTitle = "Introduction to Marine Biology (sample)",
   onOpenUpload,
   onGoToSeas,
   bundle,
@@ -34,13 +37,13 @@ export function LibraryHubView({
     if (!ctx) return;
 
     let animId = 0;
-    let prev = performance.now();
+    let prev: number | null = null;
 
     const playerAnim = new SpriteAnimation(bundle, "explorer.swim.right");
     const creatureAnim = new SpriteAnimation(bundle, "barreleye.swim");
 
     const render = (time: number) => {
-      const dt = Math.max(0, Math.min((time - prev) / 1000, 0.1));
+      const dt = frameDeltaSeconds(time, prev);
       prev = time;
 
       if (!reducedMotion) {
@@ -137,7 +140,7 @@ export function LibraryHubView({
                   <strong>
                     {"documentName" in qs
                       ? qs.documentName
-                      : "title" in (qs as Record<string, unknown>)
+                      : "filename" in qs && qs.filename ? qs.filename : "title" in (qs as Record<string, unknown>)
                       ? String((qs as Record<string, unknown>).title)
                       : "Study Lesson"}
                   </strong>
@@ -151,7 +154,7 @@ export function LibraryHubView({
               <div className="pdf-mark">PDF</div>
               <div className="saved-copy">
                 <strong>Introduction to Marine Biology</strong>
-                <span>3 topics · 9 questions · Ready</span>
+                <span>Sample · 3 topics · 3 questions</span>
               </div>
               <span className="ready-dot" aria-label="Ready" />
             </article>
@@ -160,8 +163,8 @@ export function LibraryHubView({
           <article className="saved-card active-run">
             <div className="resume-mark">↗</div>
             <div className="saved-copy">
-              <strong>In-Progress Lesson · {activeInstanceId || "PN-001"}</strong>
-              <span>Introduction to Marine Biology</span>
+              <strong>Active descent · {activeInstanceId || "PN-001"}</strong>
+              <span>{activeLessonTitle}</span>
             </div>
             <button className="text-button" type="button" onClick={onGoToSeas}>
               Resume Lesson

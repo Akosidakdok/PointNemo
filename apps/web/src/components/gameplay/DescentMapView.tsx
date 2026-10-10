@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import {
   type AssetBundle,
   SpriteAnimation,
+  frameDeltaSeconds,
   drawFrame,
   drawWater,
   speciesScale,
@@ -59,6 +60,9 @@ export function DescentMapView({
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (pendingNode !== null) return;
+      const target=e.target as HTMLElement | null;
+      if(target?.closest("input,textarea,select,[contenteditable='true']") || e.ctrlKey || e.metaKey || e.altKey)return;
       const code = e.code;
       if (
         code === "KeyW" ||
@@ -89,7 +93,22 @@ export function DescentMapView({
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("blur", handleBlur);
     };
-  }, []);
+  }, [pendingNode]);
+
+  const stepDirection=(direction:"up"|"down"|"left"|"right")=>{
+    if(instance.activeEncounter || pendingNode!==null)return;
+    const player=playerPosRef.current;
+    player.x=Math.max(0.05,Math.min(0.95,player.x+(direction==="left"?-0.03:direction==="right"?0.03:0)));
+    player.y=Math.max(0.05,Math.min(0.95,player.y+(direction==="up"?-0.03:direction==="down"?0.03:0)));
+    player.facing=direction;
+    onUpdatePlayer(player.x,player.y,direction);
+    const target=BASE_ROUTE_POINTS[instance.routeNode];
+    if(target) {
+      const distance=Math.hypot(player.x-target.x,player.y-target.y);
+      if(distance<0.07 && ignoredNode!==instance.routeNode){heldKeysRef.current.clear();setPendingNode(instance.routeNode);}
+      else if(distance>0.12 && ignoredNode===instance.routeNode)setIgnoredNode(null);
+    }
+  };
 
   // Virtual D-pad for mobile / touch accessibility
   const handleVirtualDirection = useCallback((dir: "up" | "down" | "left" | "right", active: boolean) => {
@@ -115,17 +134,9 @@ export function DescentMapView({
     if (!ctx) return;
 
     let animId = 0;
-    let prevTime = performance.now();
-    let elapsed = 0;
-
-    // Ambient floating marine snow particles (same as login scene)
-    const particles = Array.from({ length: 24 }, () => ({
-      x: Math.random() * 650,
-      y: Math.random() * 650,
-      speedY: 0.25 + Math.random() * 0.45,
-      size: Math.random() > 0.7 ? 2 : 1,
-      opacity: 0.15 + Math.random() * 0.35,
-    }));
+    let prevTime: number | null = null;
+    let elapsed=0;
+    const particles=Array.from({length:24},()=>({x:Math.random()*650,y:Math.random()*650,speedY:0.25+Math.random()*0.45,size:Math.random()>0.7?2:1,opacity:0.15+Math.random()*0.35}));
 
     // Creature animations
     const creatures = [
@@ -137,9 +148,9 @@ export function DescentMapView({
     const playerAnim = new SpriteAnimation(bundle, "explorer.idle.up");
 
     const render = (time: number) => {
-      const dt = Math.min((time - prevTime) / 1000, 0.1);
+      const dt = frameDeltaSeconds(time, prevTime);
       prevTime = time;
-      elapsed += dt;
+      if(!reducedMotion)elapsed += dt;
 
       const width = canvas.width;
       const height = canvas.height;
@@ -153,7 +164,7 @@ export function DescentMapView({
         Number(heldKeysRef.current.has("KeyW") || heldKeysRef.current.has("ArrowUp"));
 
       const length = Math.hypot(dx, dy);
-      const isMoving = length > 0 && !instance.activeEncounter;
+      const isMoving = length > 0 && !instance.activeEncounter && pendingNode===null;
 
       if (isMoving) {
         dx /= length;
@@ -194,7 +205,9 @@ export function DescentMapView({
       // 2. Draw Animated Water Waves Background (identical to login scene)
       ctx.imageSmoothingEnabled = false;
       const waterImg = bundle?.images[bundle.manifest.world.waterAtlas] || bundle?.images?.water;
-      if (waterImg) {
+      if (mapImageRef.current) {
+        ctx.drawImage(mapImageRef.current,0,0,width,height);
+      } else if (waterImg) {
         const current = elapsed * 20;
         drawWater(ctx, waterImg, width, height, 320, current, -current * 0.35);
 
@@ -209,7 +222,7 @@ export function DescentMapView({
 
         // Ambient floating marine snow particles
         for (const p of particles) {
-          p.y -= p.speedY;
+          if(!reducedMotion)p.y -= p.speedY*dt*60;
           if (p.y < 0) {
             p.y = height + 10;
             p.x = Math.random() * width;
@@ -219,8 +232,6 @@ export function DescentMapView({
           ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size);
         }
         ctx.globalAlpha = 1;
-      } else if (mapImageRef.current) {
-        ctx.drawImage(mapImageRef.current, 0, 0, width, height);
       } else {
         const grad = ctx.createLinearGradient(0, 0, 0, height);
         grad.addColorStop(0, "#061426");
@@ -235,25 +246,25 @@ export function DescentMapView({
         y: p.y * height,
       }));
 
-      ctx.lineDashOffset = -time * 0.015;
+      ctx.lineDashOffset = -elapsed * 15;
       for (let i = 1; i <= Math.min(instance.routeNode, pts.length - 1); i++) {
         ctx.beginPath();
         ctx.moveTo(pts[i - 1].x, pts[i - 1].y);
         ctx.lineTo(pts[i].x, pts[i].y);
-        
+
         ctx.setLineDash([8, 10]);
         ctx.lineCap = "round";
         ctx.lineWidth = Math.max(3, width * 0.006);
-        
+
         const isPast = i < instance.routeNode;
         const isCurrent = i === instance.routeNode;
-        
-        ctx.strokeStyle = isPast 
-          ? "rgba(48, 214, 242, 0.4)" 
-          : isCurrent 
-          ? "rgba(220, 249, 255, 0.95)" 
+
+        ctx.strokeStyle = isPast
+          ? "rgba(48, 214, 242, 0.4)"
+          : isCurrent
+          ? "rgba(220, 249, 255, 0.95)"
           : "rgba(66, 104, 135, 0.25)";
-          
+
         if (isCurrent) {
           ctx.shadowColor = "rgba(48, 214, 242, 0.8)";
           ctx.shadowBlur = 8;
@@ -270,10 +281,10 @@ export function DescentMapView({
       const originPt = pts[0];
       const s = width / 650;
       ctx.save();
-      
+
       // Animated concentric water ripples emanating from buoy base
       for (let r = 0; r < 3; r++) {
-        const progress = ((time * 0.0008 + r / 3) % 1);
+        const progress = ((elapsed * 0.8 + r / 3) % 1);
         const rx = (20 + progress * 32) * s;
         const ry = rx * 0.42;
         const alpha = (1 - progress) * 0.55;
@@ -286,10 +297,10 @@ export function DescentMapView({
 
       // Draw the autonomous buoy sprite fixed at the center point
       const buoyScale = speciesScale(bundle, "buoy", 74) * s;
-      drawFrame(ctx, bundle, "buoy", originPt.x, originPt.y, buoyScale);
+      if(!mapImageRef.current)drawFrame(ctx, bundle, "buoy", originPt.x, originPt.y, buoyScale);
 
       // Red beacon light pulse at the buoy tip
-      const beaconPhase = (time * 0.003) % (Math.PI * 2);
+      const beaconPhase = (elapsed * 3) % (Math.PI * 2);
       const pulseR = (10 + Math.sin(beaconPhase) * 4) * s;
       const pulseAlpha = 0.25 + Math.sin(beaconPhase) * 0.15;
       ctx.beginPath();
@@ -370,7 +381,7 @@ export function DescentMapView({
 
     animId = requestAnimationFrame(render);
     return () => cancelAnimationFrame(animId);
-  }, [bundle, mapLoaded, instance.routeNode, instance.activeEncounter, lesson, reducedMotion, onReachTarget, onUpdatePlayer]);
+  }, [bundle, mapLoaded, instance.routeNode, instance.activeEncounter, pendingNode, ignoredNode, lesson, reducedMotion, onReachTarget, onUpdatePlayer]);
 
   const activeTopic = lesson.topics[instance.routeNode] || "Encounter";
 
@@ -414,6 +425,7 @@ export function DescentMapView({
                   type="button"
                   className="primary-button"
                   onClick={() => {
+                    heldKeysRef.current.clear();
                     onReachTarget(pendingNode);
                     setPendingNode(null);
                   }}
@@ -424,6 +436,7 @@ export function DescentMapView({
                   type="button"
                   className="secondary-button"
                   onClick={() => {
+                    heldKeysRef.current.clear();
                     setIgnoredNode(pendingNode);
                     setPendingNode(null);
                   }}
@@ -452,19 +465,12 @@ export function DescentMapView({
         <button
           type="button"
           className="secondary-button"
-          style={{
-            width: "44px",
-            height: "44px",
-            minWidth: "44px",
-            minHeight: "44px",
-            padding: 0,
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          style={{ width: "44px", height: "44px", padding: 0 }}
           onPointerDown={() => handleVirtualDirection("up", true)}
           onPointerUp={() => handleVirtualDirection("up", false)}
           onPointerLeave={() => handleVirtualDirection("up", false)}
+          onPointerCancel={() => handleVirtualDirection("up", false)}
+          onClick={()=>stepDirection("up")}
           aria-label="Swim Up"
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -474,19 +480,12 @@ export function DescentMapView({
         <button
           type="button"
           className="secondary-button"
-          style={{
-            width: "44px",
-            height: "44px",
-            minWidth: "44px",
-            minHeight: "44px",
-            padding: 0,
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          style={{ width: "44px", height: "44px", padding: 0 }}
           onPointerDown={() => handleVirtualDirection("left", true)}
           onPointerUp={() => handleVirtualDirection("left", false)}
           onPointerLeave={() => handleVirtualDirection("left", false)}
+          onPointerCancel={() => handleVirtualDirection("left", false)}
+          onClick={()=>stepDirection("left")}
           aria-label="Swim Left"
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -496,19 +495,12 @@ export function DescentMapView({
         <button
           type="button"
           className="secondary-button"
-          style={{
-            width: "44px",
-            height: "44px",
-            minWidth: "44px",
-            minHeight: "44px",
-            padding: 0,
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          style={{ width: "44px", height: "44px", padding: 0 }}
           onPointerDown={() => handleVirtualDirection("down", true)}
           onPointerUp={() => handleVirtualDirection("down", false)}
           onPointerLeave={() => handleVirtualDirection("down", false)}
+          onPointerCancel={() => handleVirtualDirection("down", false)}
+          onClick={()=>stepDirection("down")}
           aria-label="Swim Down"
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -518,19 +510,12 @@ export function DescentMapView({
         <button
           type="button"
           className="secondary-button"
-          style={{
-            width: "44px",
-            height: "44px",
-            minWidth: "44px",
-            minHeight: "44px",
-            padding: 0,
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          style={{ width: "44px", height: "44px", padding: 0 }}
           onPointerDown={() => handleVirtualDirection("right", true)}
           onPointerUp={() => handleVirtualDirection("right", false)}
           onPointerLeave={() => handleVirtualDirection("right", false)}
+          onPointerCancel={() => handleVirtualDirection("right", false)}
+          onClick={()=>stepDirection("right")}
           aria-label="Swim Right"
         >
           <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">

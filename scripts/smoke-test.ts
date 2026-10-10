@@ -36,24 +36,27 @@ async function runSmokeTest() {
 
   const mockOllama: OllamaService = {
     generateQuestions: async () => {
-      const quote = "IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1). IPv6 uses 128 bits";
       const topics = ["IP Addressing", "DNS Resolution", "HTTP Protocol"];
-      const questions = topics.flatMap((topicName) =>
-        (["easy", "medium", "hard"] as const).map((difficulty, idx) => ({
-          topicName,
-          difficulty,
-          prompt: `What is true regarding ${topicName} (${difficulty})?`,
-          options: [
-            `Verified truth for ${topicName} ${idx}`,
-            "False option one",
-            "False option two",
-            "False option three",
-          ],
+      const facts = [
+        ["How many bits does IPv4 use?", "32 bits", "IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1)."],
+        ["How many bits does IPv6 use?", "128 bits", "IPv6 uses 128 bits, represented in hexadecimal."],
+        ["What does a router examine when choosing where to forward a packet?", "destination IP address", "A router examines the destination IP address when choosing where to forward a packet."],
+        ["What does DNS translate domain names into?", "IP addresses", "DNS translates human-readable domain names into IP addresses."],
+        ["Which record contains an IPv6 address?", "AAAA record", "An AAAA record contains an IPv6 address."],
+        ["Which lookup result can avoid another DNS lookup?", "unexpired cached answer", "Reusing an unexpired cached answer avoids another lookup."],
+        ["What does the server return in HTTP's client-server model?", "response", "In its client-server model, a client sends a request and a server returns a response."],
+        ["Which request submits data to a resource for processing?", "POST request", "A POST request submits data to a resource for processing."],
+        ["What does status code 404 mean?", "requested resource was not found", "Status code 404 means the requested resource was not found."],
+      ];
+      const questions = facts.map(([prompt, answer, quote], index) => ({
+          topicName: topics[Math.floor(index / 3)]!,
+          difficulty: (["easy", "medium", "hard"] as const)[index % 3]!,
+          prompt: prompt!,
+          options: [answer!, "Gamma rays", "Ocean currents", "Volcanic ash"],
           answerIndex: 0,
-          explanation: `Explanation based on source text for ${topicName}.`,
-          evidence: [{ pageNumber: 1, chunkId: "chunk-1", quote }],
-        }))
-      );
+          explanation: "The quoted source passage supports the answer.",
+          evidence: [{ pageNumber: Math.floor(index / 3) + 1, chunkId: `chunk-${Math.floor(index / 3) + 1}`, quote: quote! }],
+        }));
       return {
         topics: topics.map((name) => ({ name })),
         questions,

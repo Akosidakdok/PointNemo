@@ -120,7 +120,7 @@ export function PdfSafetyGate({ onFileChange }: PdfSafetyGateProps) {
       </div>
 
       {error && <p className="pdf-safety-error" role="alert">{error}</p>}
-      <p className="pdf-safety-note">The local API then checks the 3-page and 300–8,000 character limits, English text, and usable source content. Image-only or encrypted PDFs are rejected.</p>
+      <p className="pdf-safety-note">The local API then checks for readable English text and at least 300 non-whitespace characters. Image-only and password-protected PDFs need a readable, unlocked export. Large documents are sampled for the lesson.</p>
     </section>
   );
 }

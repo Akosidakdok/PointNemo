@@ -7,6 +7,7 @@ import test from "node:test";
 import type { AIQuestionSetOutput } from "@point-nemo/shared";
 import { initializeDatabase } from "../src/db.js";
 import { GenerationJobService } from "../src/services/generation-job.js";
+import { inspectQuestions, parseQuestionPlan } from "../src/services/question-quality.js";
 import { LocalPdfExtractor, type DocumentExtractor, type ExtractedDocument, type UploadedDocument } from "../src/services/document-extractor.js";
 import type { ApiConfig } from "../src/config.js";
 import type { OllamaService } from "../src/services/ollama.js";
@@ -24,7 +25,7 @@ const config: ApiConfig = {
   jobTimeoutMs: 2_000,
 };
 
-const sourceQuote = "IPv4 uses 32 bits and IPv6 uses 128 bits for routing data packets.";
+const sourceQuote = "IPv4 addresses use 32 bits. IPv6 addresses use 128 bits. IPv4 addresses use dotted decimal notation. Domain Name System (DNS) translates domain names into IP addresses. A resolver queries DNS servers for records. DNS records map names to addresses. Hypertext Transfer Protocol (HTTP) uses methods to describe requests. GET requests retrieve a resource. POST requests send data to a server.";
 const source: ExtractedDocument = {
   sha256: "fixture-hash",
   pageCount: 1,
@@ -34,17 +35,76 @@ const source: ExtractedDocument = {
 
 function validOutput(): AIQuestionSetOutput {
   const topics = ["IP Addressing", "DNS", "HTTP"];
-  const questions = topics.flatMap((topicName) => (["easy", "medium", "hard"] as const).map((difficulty, index) => ({
-    topicName,
-    difficulty,
-    prompt: `${topicName} question ${difficulty}?`,
-    options: [`Correct ${index}`, "Alternative one", "Alternative two", "Alternative three"],
+  const drafts = [
+    { prompt: "How many bits do IPv4 addresses use?", answer: "32 bits", choices: ["128 bits", "16 bits", "64 bits"] },
+    { prompt: "How are IPv4 addresses written?", answer: "dotted decimal notation", choices: ["binary notation", "hexadecimal notation", "slash notation"] },
+    { prompt: "How many bits does IPv6 provide for an address?", answer: "128 bits", choices: ["32 bits", "16 bits", "64 bits"] },
+    { prompt: "What does DNS translate domain names into?", answer: "IP addresses", choices: ["DNS records", "DNS servers", "GET requests"] },
+    { prompt: "Which servers does a resolver query?", answer: "DNS servers", choices: ["domain names", "IP addresses", "DNS records"] },
+    { prompt: "What do DNS records do?", answer: "map names to addresses", choices: ["use dotted decimal notation", "retrieve a resource", "send data to a server"] },
+    { prompt: "What does HTTP use to describe requests?", answer: "methods", choices: ["packets", "IP addresses", "DNS records"] },
+    { prompt: "What does a GET request do?", answer: "retrieve a resource", choices: ["send data to a server", "translate domain names", "map names to addresses"] },
+    { prompt: "Which method sends data to a server?", answer: "POST", choices: ["GET", "IPv4", "DNS"] },
+  ];
+  const questions = drafts.map((draft,index) => ({
+    topicName: topics[Math.floor(index/3)]!,
+    difficulty: (["easy", "medium", "hard"] as const)[index%3]!,
+    prompt: draft.prompt,
+    options: [draft.answer,...draft.choices],
     answerIndex: 0,
     explanation: "The source text supports the selected answer.",
     evidence: [{ pageNumber: 1, chunkId: "chunk-1", quote: sourceQuote }],
-  })));
+  }));
   return { topics: topics.map((name) => ({ name })), questions };
 }
+
+test("calibration catches reworded duplicate facts and overlapping answer choices", () => {
+  const duplicate = validOutput();
+  duplicate.questions[1]!.prompt = "How many bits are in an IPv4 address?";
+  duplicate.questions[1]!.options = ["32 bits", "128 bits", "16 bits", "64 bits"];
+  duplicate.questions[1]!.answerIndex = 0;
+  const duplicateReport = inspectQuestions(duplicate, source.pagesJson);
+  assert.ok(duplicateReport.issues.some((issue) => issue.index === 1 && issue.code === "DUPLICATE_QUESTION"));
+
+  const overlap = validOutput();
+  overlap.questions[0]!.options = ["32 bits", "uses 32 bits", "16 bits", "64 bits"];
+  const overlapReport = inspectQuestions(overlap, source.pagesJson);
+  assert.ok(overlapReport.issues.some((issue) => issue.index === 0 && issue.message.includes("[answer_choices]")));
+
+  const synonyms = validOutput();
+  synonyms.questions[0]!.options = ["32 bits", "where to send a packet", "where to deliver a packet", "64 bits"];
+  const synonymReport = inspectQuestions(synonyms, source.pagesJson);
+  assert.ok(synonymReport.issues.some((issue) => issue.index === 0 && issue.message.includes("[answer_choices]")));
+
+  const unsupportedAnswer = validOutput();
+  unsupportedAnswer.questions[0]!.options[0] = "IPv4 address capacity";
+  const unsupportedAnswerReport = inspectQuestions(unsupportedAnswer, source.pagesJson);
+  assert.ok(unsupportedAnswerReport.issues.some((issue) => issue.index === 0 && issue.code === "SOURCE_EVIDENCE_INVALID" && issue.message.includes("short exact phrase")));
+});
+
+test("planner rejects reusing the same focus fact in multiple slots", () => {
+  const ids = Array.from({ length: 9 }, (_,index)=>`p1s${index+1}`);
+  const topics = ["IP Addressing", "DNS", "HTTP"].map((name,topicIndex)=>({
+    name,
+    objectives:Array.from({length:3},(_,objectiveIndex)=>{
+      const index=topicIndex*3+objectiveIndex;
+      return {evidenceId:ids[index]!,goal:`Objective ${index+1}`};
+    }),
+  }));
+  const focuses = new Map(ids.map((id,index)=>[id,index<2 ? "One repeated factual statement." : `Unique fact ${index+1}.`]));
+  assert.throws(()=>parseQuestionPlan({topics},new Set(ids),focuses),{code:"INVALID_MODEL_OUTPUT"});
+});
+
+test("planner allows repeated generic goal wording when each slot has a different source fact", () => {
+  const ids = Array.from({ length: 9 }, (_,index)=>`p1s${index+1}`);
+  const topics = ["IP Addressing", "DNS", "HTTP"].map((name,topicIndex)=>({
+    name,
+    objectives: ids.slice(topicIndex*3,topicIndex*3+3).map((evidenceId)=>({evidenceId,goal:"Explain the source fact."})),
+  }));
+  const focuses = new Map(ids.map((id,index)=>[id,`Unique source fact ${index+1}.`]));
+  const plan = parseQuestionPlan({topics},new Set(ids),focuses);
+  assert.equal(plan.slots.length,9);
+});
 
 function mockExtractor(result: ExtractedDocument): DocumentExtractor {
   return { extractText: async (_file: UploadedDocument) => result };

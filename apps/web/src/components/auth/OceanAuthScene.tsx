@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { type AssetBundle, drawFrame, drawWater, speciesScale, SpriteAnimation } from "../../game/sprites";
+import { type AssetBundle, drawFrame, drawWater, speciesScale, SpriteAnimation, frameDeltaSeconds } from "../../game/sprites";
 
 export interface OceanAuthSceneProps {
   bundle: AssetBundle | null;
@@ -27,7 +27,7 @@ export function OceanAuthScene({ bundle, reducedMotion = false }: OceanAuthScene
 
     let animId: number;
     let t = 0;
-    let lastFrame = performance.now();
+    let lastFrame: number | null = null;
     const explorerSwim = bundle ? new SpriteAnimation(bundle, "explorer.swim.right") : null;
     const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
     const css = getComputedStyle(canvas);
@@ -60,7 +60,7 @@ export function OceanAuthScene({ bundle, reducedMotion = false }: OceanAuthScene
     }));
 
     const render = (now: number) => {
-      const dt = Math.min((now - lastFrame) / 1000, 0.1);
+      const dt = frameDeltaSeconds(now, lastFrame);
       lastFrame = now;
       if (!reducedMotion && document.visibilityState === "visible") {
         t += dt;
@@ -174,14 +174,14 @@ export function OceanAuthScene({ bundle, reducedMotion = false }: OceanAuthScene
 
     const handleVisibilityChange = () => {
       cancelAnimationFrame(animId);
-      lastFrame = performance.now();
-      render(lastFrame);
+      lastFrame = null;
+      render(performance.now());
     };
     const handleResize = () => {
       resize();
       cancelAnimationFrame(animId);
-      lastFrame = performance.now();
-      render(lastFrame);
+      lastFrame = null;
+      render(performance.now());
     };
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("resize", handleResize);

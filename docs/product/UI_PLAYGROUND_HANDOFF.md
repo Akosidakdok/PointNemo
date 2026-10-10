@@ -8,9 +8,9 @@ The playground is a frontend-only preview at `apps/web/ui-playground`. It helps 
 
 ## Integration status
 
-This PR retains main's API, SQLite migrations, shared contracts, and React login flow unchanged. Earlier competing backend implementations and their API documentation have been excluded. Approved playground screens must be integrated into React in a separate change; running the main app does not display this preview after signup.
+The standalone playground remains a sample preview. The main React app now integrates the library, intake, map, encounters, and final review with saved question sets from the local API. Its map progression remains in React memory rather than the SQLite run engine. Local AI pipeline changes and their migrations are documented in `docs/LOCAL_AI_PIPELINE.md`; the existing local login and guest flow is preserved.
 
-PDF selection checks the extension/type only and does not read or upload file contents. Current main has no upper file-size, page-count, or extracted-character limit and requires at least 300 extracted characters. This preview cannot validate extracted text or language. Sonar stages, questions, Profile, Leaderboard, and Results use sample content; instance progress lasts only until reload.
+PDF selection in the standalone preview checks the extension/type only and does not read or upload file contents. The integrated safety gate checks PDF signatures and limits files to 5 MiB before upload. The API requires at least 300 non-whitespace characters and samples larger documents within a token budget; it has no fixed three-page or 8,000-character limit. This preview cannot validate extracted text or language. Its Sonar stages, questions, Profile, Leaderboard, and Results use sample content; instance progress lasts only until reload. Leaderboard navigation remains removed from the main app.
 
 ## Module order
 
