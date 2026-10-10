@@ -38,10 +38,14 @@ export function DescentMapView({
   const [pendingNode, setPendingNode] = useState<number | null>(null);
   const [ignoredNode, setIgnoredNode] = useState<number | null>(null);
   const stepMovingUntilRef = useRef<number>(0);
-  const playerAnimRef = useRef<SpriteAnimation | null>(null);
+  const diverAnimsRef = useRef<{
+    up: SpriteAnimation;
+    down: SpriteAnimation;
+    left: SpriteAnimation;
+    right: SpriteAnimation;
+  } | null>(null);
   const creaturesRef = useRef<SpriteAnimation[] | null>(null);
-  const lastReportedPosRef = useRef({ x: 0, y: 0, facing: "" });
-  const lastReportTimeRef = useRef(0);
+  const velRef = useRef({ vx: 0, vy: 0 });
 
   // Synchronize internal ref with external instance player state
   useEffect(() => {
@@ -100,21 +104,23 @@ export function DescentMapView({
     };
   }, [pendingNode]);
 
-  const stepDirection=(direction:"up"|"down"|"left"|"right")=>{
-    if(instance.activeEncounter || pendingNode!==null)return;
-    stepMovingUntilRef.current = performance.now() + 400;
-    const player=playerPosRef.current;
-    player.x=Math.max(0.05,Math.min(0.95,player.x+(direction==="left"?-0.055:direction==="right"?0.055:0)));
-    player.y=Math.max(0.05,Math.min(0.95,player.y+(direction==="up"?-0.055:direction==="down"?0.055:0)));
-    player.facing=direction;
-    onUpdatePlayer(player.x,player.y,direction);
-    const target=BASE_ROUTE_POINTS[instance.routeNode];
-    if(target) {
-      const distance=Math.hypot(player.x-target.x,player.y-target.y);
-      if(distance<0.075 && ignoredNode!==instance.routeNode){
+  const stepDirection = (direction: "up" | "down" | "left" | "right") => {
+    if (instance.activeEncounter || pendingNode !== null) return;
+    stepMovingUntilRef.current = performance.now() + 450;
+    const impulse = 0.38;
+    if (direction === "left") velRef.current.vx = -impulse;
+    else if (direction === "right") velRef.current.vx = impulse;
+    else if (direction === "up") velRef.current.vy = -impulse;
+    else if (direction === "down") velRef.current.vy = impulse;
+    playerPosRef.current.facing = direction;
+    const target = BASE_ROUTE_POINTS[instance.routeNode];
+    if (target) {
+      const distance = Math.hypot(playerPosRef.current.x - target.x, playerPosRef.current.y - target.y);
+      if (distance < 0.075 && ignoredNode !== instance.routeNode) {
         heldKeysRef.current.clear();
+        velRef.current = { vx: 0, vy: 0 };
         setPendingNode(instance.routeNode);
-      } else if(distance>0.085 && ignoredNode===instance.routeNode) {
+      } else if (distance > 0.085 && ignoredNode === instance.routeNode) {
         setIgnoredNode(null);
       }
     }
@@ -160,20 +166,25 @@ export function DescentMapView({
     }
     const creatures = creaturesRef.current;
 
-    if (!playerAnimRef.current) {
-      playerAnimRef.current = new SpriteAnimation(bundle, "explorer.swim.down");
+    if (!diverAnimsRef.current) {
+      diverAnimsRef.current = {
+        up: new SpriteAnimation(bundle, "explorer.swim.up"),
+        down: new SpriteAnimation(bundle, "explorer.swim.down"),
+        left: new SpriteAnimation(bundle, "explorer.swim.left"),
+        right: new SpriteAnimation(bundle, "explorer.swim.right"),
+      };
     }
-    const playerAnim = playerAnimRef.current;
+    const diverAnims = diverAnimsRef.current;
 
     const render = (time: number) => {
       const dt = frameDeltaSeconds(time, prevTime);
       prevTime = time;
-      if(!reducedMotion)elapsed += dt;
+      if (!reducedMotion) elapsed += dt;
 
       const width = canvas.width;
       const height = canvas.height;
 
-      // 1. Process Player Movement
+      // 1. Process Fluid Player Movement & Inertia
       let dx =
         Number(heldKeysRef.current.has("KeyD") || heldKeysRef.current.has("ArrowRight")) -
         Number(heldKeysRef.current.has("KeyA") || heldKeysRef.current.has("ArrowLeft"));
@@ -184,47 +195,56 @@ export function DescentMapView({
       const length = Math.hypot(dx, dy);
       const isKeyMoving = length > 0 && !instance.activeEncounter && pendingNode === null;
       const now = performance.now();
-      const isMoving = isKeyMoving || (stepMovingUntilRef.current > now && !instance.activeEncounter && pendingNode === null);
 
+      let targetVx = 0;
+      let targetVy = 0;
       if (isKeyMoving) {
-        dx /= length;
-        dy /= length;
-        const speed = 0.52 * dt;
-        playerPosRef.current.x = Math.max(0.05, Math.min(0.95, playerPosRef.current.x + dx * speed));
-        playerPosRef.current.y = Math.max(0.05, Math.min(0.95, playerPosRef.current.y + dy * speed));
+        targetVx = (dx / length) * 0.48;
+        targetVy = (dy / length) * 0.48;
+      }
 
-        if (Math.abs(dx) > Math.abs(dy)) {
-          playerPosRef.current.facing = dx < 0 ? "left" : "right";
+      // Acceleration when actively steering, exponential water drag when drifting
+      if (isKeyMoving) {
+        const accel = 14 * dt;
+        velRef.current.vx += (targetVx - velRef.current.vx) * Math.min(1, accel);
+        velRef.current.vy += (targetVy - velRef.current.vy) * Math.min(1, accel);
+      } else {
+        const drag = Math.pow(0.85, dt * 60);
+        velRef.current.vx *= drag;
+        velRef.current.vy *= drag;
+        if (Math.hypot(velRef.current.vx, velRef.current.vy) < 0.005) {
+          velRef.current.vx = 0;
+          velRef.current.vy = 0;
+        }
+      }
+
+      const speed = Math.hypot(velRef.current.vx, velRef.current.vy);
+      const isMoving = speed > 0.02 || (stepMovingUntilRef.current > now && !instance.activeEncounter && pendingNode === null);
+
+      if (speed > 0.01) {
+        playerPosRef.current.x = Math.max(0.05, Math.min(0.95, playerPosRef.current.x + velRef.current.vx * dt));
+        playerPosRef.current.y = Math.max(0.05, Math.min(0.95, playerPosRef.current.y + velRef.current.vy * dt));
+
+        if (Math.abs(velRef.current.vx) > Math.abs(velRef.current.vy) * 0.8) {
+          playerPosRef.current.facing = velRef.current.vx < 0 ? "left" : "right";
         } else {
-          playerPosRef.current.facing = dy < 0 ? "up" : "down";
+          playerPosRef.current.facing = velRef.current.vy < 0 ? "up" : "down";
         }
+      }
 
-        // Throttle player updates to avoid 60fps React state re-render thrashing
-        const last = lastReportedPosRef.current;
-        const moved = Math.hypot(playerPosRef.current.x - last.x, playerPosRef.current.y - last.y) > 0.012 || playerPosRef.current.facing !== last.facing;
-        if (moved && now - lastReportTimeRef.current > 180) {
-          lastReportTimeRef.current = now;
-          lastReportedPosRef.current = { ...playerPosRef.current };
-          onUpdatePlayer(
-            playerPosRef.current.x,
-            playerPosRef.current.y,
-            playerPosRef.current.facing
-          );
-        }
-
-        // Check distance to target node
-        const target = BASE_ROUTE_POINTS[instance.routeNode];
-        if (target && !instance.activeEncounter && pendingNode === null) {
-          const dist = Math.hypot(playerPosRef.current.x - target.x, playerPosRef.current.y - target.y);
-          if (dist < 0.075) {
-            if (ignoredNode !== instance.routeNode) {
-              heldKeysRef.current.clear();
-              setPendingNode(instance.routeNode);
-            }
-          } else if (dist > 0.085) {
-            if (ignoredNode === instance.routeNode) {
-              setIgnoredNode(null);
-            }
+      // Check distance to target node (evaluated continuously every frame)
+      const target = BASE_ROUTE_POINTS[instance.routeNode];
+      if (target && !instance.activeEncounter && pendingNode === null) {
+        const dist = Math.hypot(playerPosRef.current.x - target.x, playerPosRef.current.y - target.y);
+        if (dist < 0.075) {
+          if (ignoredNode !== instance.routeNode) {
+            heldKeysRef.current.clear();
+            velRef.current = { vx: 0, vy: 0 };
+            setPendingNode(instance.routeNode);
+          }
+        } else if (dist > 0.085) {
+          if (ignoredNode === instance.routeNode) {
+            setIgnoredNode(null);
           }
         }
       }
@@ -414,23 +434,27 @@ export function DescentMapView({
         ctx.restore();
       }
 
-      // 5. Draw Player Diver with continuous water-treading / swimming animation
-      const playerAnimName = `explorer.swim.${playerPosRef.current.facing}`;
-      playerAnim.play(playerAnimName);
+      // Advance synchronized swimming stroke cycle across all directions
       if (!reducedMotion) {
-        // Brisk stroke when swimming, gentle water-treading stroke when idle
-        playerAnim.update(isMoving ? dt * 1.35 : dt * 0.45);
+        const strokeDt = isMoving ? dt * 1.35 : dt * 0.45;
+        diverAnims.up.update(strokeDt);
+        diverAnims.down.update(strokeDt);
+        diverAnims.left.update(strokeDt);
+        diverAnims.right.update(strokeDt);
       }
 
+      // 5. Draw Player Diver with hydrodynamic pitch tilt & synchronized strokes
+      const activeDiverAnim = diverAnims[playerPosRef.current.facing];
+      const pScale = speciesScale(bundle, "explorer", 64) * (width / 600);
       const idleBob = !reducedMotion && !isMoving ? Math.sin(elapsed * 2.8) * (3.5 * s) : 0;
       const px = Math.round(playerPosRef.current.x * width);
       const py = Math.round(playerPosRef.current.y * height + idleBob);
 
-      // Scuba regulator bubble exhalations
+      // Scuba regulator bubble exhalations with momentum drift
       if (!reducedMotion) {
-        if (Math.random() < (isMoving ? 0.09 : 0.04) && diverBubbles.length < 16) {
+        if (Math.random() < (isMoving ? 0.09 : 0.035) && diverBubbles.length < 16) {
           diverBubbles.push({
-            x: px + (Math.random() * 8 - 4) * s,
+            x: px + (Math.random() * 8 - 4) * s - velRef.current.vx * 15 * s,
             y: py - 12 * s,
             radius: (1.2 + Math.random() * 1.8) * s,
             speedY: (20 + Math.random() * 25) * s,
@@ -467,14 +491,38 @@ export function DescentMapView({
       ctx.fill();
       ctx.restore();
 
-      const pScale = speciesScale(bundle, "explorer", 64) * (width / 600);
-      playerAnim.draw(ctx, px, py, pScale);
+      // Hydrodynamic swimming pitch tilt
+      let swimTilt = 0;
+      if (!reducedMotion) {
+        if (playerPosRef.current.facing === "right") {
+          swimTilt = velRef.current.vy * 0.28 + Math.sin(activeDiverAnim.elapsed * 4.2) * 0.04;
+        } else if (playerPosRef.current.facing === "left") {
+          swimTilt = -velRef.current.vy * 0.28 - Math.sin(activeDiverAnim.elapsed * 4.2) * 0.04;
+        } else if (playerPosRef.current.facing === "up" || playerPosRef.current.facing === "down") {
+          swimTilt = velRef.current.vx * 0.22;
+        }
+      }
+
+      ctx.save();
+      ctx.translate(px, py);
+      if (swimTilt !== 0) {
+        ctx.rotate(swimTilt);
+      }
+      activeDiverAnim.draw(ctx, 0, 0, pScale);
+      ctx.restore();
 
       animId = requestAnimationFrame(render);
     };
 
     animId = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(animId);
+    return () => {
+      cancelAnimationFrame(animId);
+      onUpdatePlayer(
+        playerPosRef.current.x,
+        playerPosRef.current.y,
+        playerPosRef.current.facing
+      );
+    };
   }, [bundle, mapLoaded, instance.routeNode, instance.activeEncounter, pendingNode, ignoredNode, lesson, reducedMotion, onReachTarget, onUpdatePlayer]);
 
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -539,6 +587,11 @@ export function DescentMapView({
                   className="primary-button"
                   onClick={() => {
                     heldKeysRef.current.clear();
+                    onUpdatePlayer(
+                      playerPosRef.current.x,
+                      playerPosRef.current.y,
+                      playerPosRef.current.facing
+                    );
                     onReachTarget(pendingNode);
                     setPendingNode(null);
                   }}
