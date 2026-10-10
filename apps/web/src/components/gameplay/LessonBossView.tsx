@@ -191,6 +191,8 @@ export function LessonBossView({
           {showFeedback && (
             <div
               className={`feedback ${selectedOption === currentQuestion.correct ? "" : "incorrect"}`}
+              role="status"
+              aria-live="polite"
               style={{ marginTop: "16px" }}
             >
               {selectedOption === currentQuestion.correct ? (

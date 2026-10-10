@@ -1,0 +1,412 @@
+{
+  "createdAt": "2026-10-09T22:47:43.788Z",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 3050 6GB Laptop GPU, 6144 MiB",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12450HX",
+    "ramGiB": 7.714714050292969
+  },
+  "baseline": "7451e5d863790eb6b4d81611560dbcb4b102b3ba",
+  "databasePath": "C:\\Users\\redd\\AppData\\Local\\Temp\\point-nemo-benchmark-obDpAM\\benchmark.sqlite",
+  "note": "Small synthetic-fixture benchmark. Automated validation is not a proof of answer correctness; review exported questions and evidence.",
+  "summary": [
+    {
+      "model": "qwen2.5:1.5b",
+      "samples": 2,
+      "medianMs": 35930.5,
+      "p95Ms": 51707,
+      "startup": [
+        {
+          "startup": "cold",
+          "samples": 2,
+          "medianMs": 35930.5
+        },
+        {
+          "startup": "warm",
+          "samples": 0,
+          "medianMs": null
+        }
+      ],
+      "firstPassRate": 0.5,
+      "completionRate": 0.5
+    }
+  ],
+  "skipped": [],
+  "records": [
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "4a891814-fc3a-463d-b943-ab2cd74ed562",
+        "documentId": "740958ba-d80e-47e8-8f6e-5a0349e9ead7",
+        "state": "ready",
+        "questionSetId": "24b742a8-f368-4680-8f7f-bf6c3bcdc667",
+        "elapsedTimeMs": 20157,
+        "createdAt": "2026-10-09T22:46:31.350Z",
+        "retryCount": 0,
+        "timings": {
+          "extractionMs": 1201,
+          "inputTokens": 1184,
+          "generationMs": 18878,
+          "validationStorageMs": 8,
+          "totalMs": 20154
+        }
+      },
+      "questionSet": {
+        "id": "24b742a8-f368-4680-8f7f-bf6c3bcdc667",
+        "documentId": "740958ba-d80e-47e8-8f6e-5a0349e9ead7",
+        "filename": "networking-demo.pdf",
+        "extractedPages": [
+          {
+            "pageNumber": 1,
+            "chunkId": "chunk-1",
+            "text": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination. IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1). IPv6 uses 128 bits, represented in hexadecimal. Each IPv4 decimal number represents an 8-bit octet and ranges from 0 to 255. The four octets together account for the 32 bits in an IPv4 address. A router examines the destination IP address when choosing where to forward a packet. An address tells the network where to deliver data; it does not describe the contents of that data."
+          },
+          {
+            "pageNumber": 2,
+            "chunkId": "chunk-2",
+            "text": "Topic 2: DNS DNS translates human-readable domain names into IP addresses. For example, a fictional lookup for study.example can return 192.0.2.25 to the client. A DNS resolver receives a name lookup from a client and obtains the requested record. An A record contains an IPv4 address. An AAAA record contains an IPv6 address. A DNS cache keeps a previous lookup result for the record's time to live (TTL). Reusing an unexpired cached answer avoids another lookup. Once that lifetime expires, the resolver must obtain a current answer rather than treating the expired entry as fresh."
+          },
+          {
+            "pageNumber": 3,
+            "chunkId": "chunk-3",
+            "text": "Topic 3: HTTP HTTP is an application-layer protocol used to exchange requests and responses. In its client-server model, a client sends a request and a server returns a response. A GET request asks for a representation of a resource. In this synthetic example, GET /notes requests the study notes stored at the /notes path. A POST request submits data to a resource for processing. An HTTP response includes a status code and may include a body. Status code 200 means the request succeeded. Status code 404 means the requested resource was not found. The client can use the status code to distinguish a successful /notes response from a missing resource."
+          }
+        ],
+        "metadata": {
+          "documentHash": "559955e2e5b78308a7d7caadd1fde078decf06f9bd3152ffcd66cff3ce7aae76",
+          "extractorVersion": "pdf-parse@2.4.5/point-nemo-text-v3",
+          "promptVersion": "point-nemo-reviewed-passages-v8",
+          "schemaVersion": "point-nemo-questions-v2",
+          "tokenizerDigest": "d9011691d2d6b47762206b71f4a78429b5614850725b47ae06bef96674eed416",
+          "modelTag": "qwen2.5:1.5b",
+          "modelDigest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+          "settingsHash": "a24da3956a4dbd5dad5368e9054d72dc7115f75eb3bf59b0e55f787788d47722",
+          "createdAt": "2026-10-09T22:46:51.506Z"
+        },
+        "compatible": true,
+        "topics": [
+          {
+            "id": "8b9b8e53-2d93-433c-9b80-93f64c75454d",
+            "name": "IP Addressing"
+          },
+          {
+            "id": "39529733-7893-43ba-b58a-cc7d0a8097e9",
+            "name": "DNS"
+          },
+          {
+            "id": "5eb288cf-f4a4-4f49-a385-6d4fc6207fee",
+            "name": "HTTP"
+          }
+        ],
+        "questions": [
+          {
+            "id": "7375659b-775f-4f27-b307-1215df2edd27",
+            "topicId": "8b9b8e53-2d93-433c-9b80-93f64c75454d",
+            "difficulty": "easy",
+            "prompt": "What does an IPv4 address typically look like?",
+            "options": [
+              "192.168.1.1",
+              "192.168.1.0",
+              "192.168.1.255",
+              "192.168.1.256"
+            ],
+            "answerIndex": 0,
+            "explanation": "An IPv4 address is typically formatted as four decimal numbers, such as 192.168.1.1.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1)."
+              }
+            ]
+          },
+          {
+            "id": "94c52230-c3c1-41eb-8c71-377276c15abb",
+            "topicId": "8b9b8e53-2d93-433c-9b80-93f64c75454d",
+            "difficulty": "medium",
+            "prompt": "What does an IPv6 address typically look like?",
+            "options": [
+              "192.168.1.1",
+              "192.168.1.0",
+              "192.168.1.255",
+              "192.168.1.256"
+            ],
+            "answerIndex": 2,
+            "explanation": "An IPv6 address is typically represented in hexadecimal, such as 2001:0db8:85a3:0000:0000:8a2e:0370:7334.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "IPv6 uses 128 bits, represented in hexadecimal."
+              }
+            ]
+          },
+          {
+            "id": "af653b79-096c-477b-bc5a-5b31d7487c9c",
+            "topicId": "8b9b8e53-2d93-433c-9b80-93f64c75454d",
+            "difficulty": "hard",
+            "prompt": "What does an IPv4 address represent?",
+            "options": [
+              "The network interface's hardware address",
+              "The destination of a packet",
+              "The contents of the data being transmitted",
+              "The source of the data being transmitted"
+            ],
+            "answerIndex": 2,
+            "explanation": "An IPv4 address represents the network interface and helps routers direct packets to a destination.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "An address tells the network where to deliver data; it does not describe the contents of that data."
+              }
+            ]
+          },
+          {
+            "id": "929e1a02-7640-468e-92db-b17a53b9fd82",
+            "topicId": "39529733-7893-43ba-b58a-cc7d0a8097e9",
+            "difficulty": "easy",
+            "prompt": "What does an A record contain?",
+            "options": [
+              "An IPv4 address",
+              "An IPv6 address",
+              "The domain name",
+              "The IP address of the DNS server"
+            ],
+            "answerIndex": 0,
+            "explanation": "An A record contains an IPv4 address.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "An A record contains an IPv4 address."
+              }
+            ]
+          },
+          {
+            "id": "5c919ab0-4d46-40b2-b4e7-c663c970b0ac",
+            "topicId": "39529733-7893-43ba-b58a-cc7d0a8097e9",
+            "difficulty": "medium",
+            "prompt": "What does an AAAA record contain?",
+            "options": [
+              "An IPv4 address",
+              "An IPv6 address",
+              "The domain name",
+              "The IP address of the DNS server"
+            ],
+            "answerIndex": 1,
+            "explanation": "An AAAA record contains an IPv6 address.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "An AAAA record contains an IPv6 address."
+              }
+            ]
+          },
+          {
+            "id": "1e69cca5-6172-4337-9510-93a5db1309dc",
+            "topicId": "39529733-7893-43ba-b58a-cc7d0a8097e9",
+            "difficulty": "hard",
+            "prompt": "What does a DNS cache keep?",
+            "options": [
+              "The entire DNS record",
+              "The domain name",
+              "The IP address of the DNS server",
+              "Previous lookup results for a record"
+            ],
+            "answerIndex": 3,
+            "explanation": "A DNS cache keeps a previous lookup result for the record's time to live (TTL).",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "A DNS cache keeps a previous lookup result for the record's time to live (TTL)."
+              }
+            ]
+          },
+          {
+            "id": "36e45269-d678-46ee-ae11-5d04b14d5e16",
+            "topicId": "5eb288cf-f4a4-4f49-a385-6d4fc6207fee",
+            "difficulty": "easy",
+            "prompt": "What does a GET request ask for?",
+            "options": [
+              "The contents of a resource",
+              "The IP address of a server",
+              "The domain name of a resource",
+              "The HTTP status code of a resource"
+            ],
+            "answerIndex": 0,
+            "explanation": "A GET request asks for a representation of a resource.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "In its client-server model, a client sends a request and a server returns a response. A GET request asks for a representation of a resource."
+              }
+            ]
+          },
+          {
+            "id": "8bc07ff6-dfda-4cd5-8910-851baeea9464",
+            "topicId": "5eb288cf-f4a4-4f49-a385-6d4fc6207fee",
+            "difficulty": "medium",
+            "prompt": "What does a POST request submit?",
+            "options": [
+              "The contents of a resource",
+              "The domain name of a resource",
+              "The IP address of a server",
+              "The HTTP status code of a resource"
+            ],
+            "answerIndex": 1,
+            "explanation": "A POST request submits data to a resource for processing.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "A POST request submits data to a resource for processing."
+              }
+            ]
+          },
+          {
+            "id": "9bb85268-be47-44e8-b65f-49e7ce1082ce",
+            "topicId": "5eb288cf-f4a4-4f49-a385-6d4fc6207fee",
+            "difficulty": "hard",
+            "prompt": "What does an HTTP response include?",
+            "options": [
+              "The contents of a resource",
+              "The domain name of a resource",
+              "The IP address of a server",
+              "The HTTP status code and body"
+            ],
+            "answerIndex": 3,
+            "explanation": "An HTTP response includes a status code and may include a body.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "An HTTP response includes a status code and may include a body."
+              }
+            ]
+          }
+        ],
+        "createdAt": "2026-10-09T22:46:51.506Z"
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:16:20.5391668+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T06:51:51.4979579+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": []
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "acc5b60a-e16e-4870-b6bd-16e238789845",
+        "documentId": "d2bb8611-32d3-447f-b1e4-b4c62c20cfed",
+        "state": "failed",
+        "errorCode": "INVALID_MODEL_OUTPUT",
+        "errorMessage": "Every topic needs exactly one easy, medium, and hard question.",
+        "errorStage": "validating",
+        "elapsedTimeMs": 51709,
+        "createdAt": "2026-10-09T22:46:51.739Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 21,
+          "inputTokens": 1354,
+          "generationMs": 51634,
+          "repairInputTokens": 1404,
+          "totalMs": 51707
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:16:20.5391668+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T06:52:43.4462965+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": []
+    }
+  ]
+}

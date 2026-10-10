@@ -1,0 +1,3018 @@
+{
+  "createdAt": "2026-10-09T22:43:37.181Z",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 3050 6GB Laptop GPU, 6144 MiB",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12450HX",
+    "ramGiB": 7.714714050292969
+  },
+  "baseline": null,
+  "databasePath": "C:\\Users\\redd\\AppData\\Local\\Temp\\point-nemo-benchmark-eD6q0l\\benchmark.sqlite",
+  "note": "Small synthetic-fixture benchmark. Automated validation is not a proof of answer correctness; review exported questions and evidence.",
+  "summary": [
+    {
+      "model": "qwen2.5:1.5b",
+      "samples": 4,
+      "medianMs": 16048,
+      "p95Ms": 24965,
+      "firstPassRate": 0.5,
+      "completionRate": 0.75
+    },
+    {
+      "model": "qwen2.5:3b",
+      "samples": 4,
+      "medianMs": 24781,
+      "p95Ms": 28110,
+      "firstPassRate": 0.5,
+      "completionRate": 0.5
+    }
+  ],
+  "skipped": [],
+  "records": [
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "5cb7f0b3-4e82-4c54-8ae4-350cc6bd7257",
+        "documentId": "c757b0e8-d121-4687-960a-c52e881ea440",
+        "state": "ready",
+        "phase": "ready",
+        "canRetry": false,
+        "questionSetId": "7b3afbca-81f5-4295-aa57-570e7cd63e76",
+        "elapsedTimeMs": 17347,
+        "createdAt": "2026-10-09T22:40:42.649Z",
+        "retryCount": 0,
+        "timings": {
+          "extractionMs": 1465,
+          "sourceReused": 0,
+          "selectionMs": 13,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "seed": 42,
+          "inputTokens": 1026,
+          "plan_total_duration": 7081933800,
+          "plan_load_duration": 4070586400,
+          "plan_prompt_eval_duration": 300076000,
+          "plan_eval_duration": 2686499000,
+          "plan_prompt_eval_count": 773,
+          "plan_prompt_eval_cached_count": 0,
+          "plan_eval_count": 306,
+          "plan_tokensPerSecond": 113.90288996943606,
+          "createdQuestions": 9,
+          "initial_total_duration": 8712381800,
+          "initial_load_duration": 165858900,
+          "initial_prompt_eval_duration": 266798000,
+          "initial_eval_duration": 8169476000,
+          "initial_prompt_eval_count": 1988,
+          "initial_prompt_eval_cached_count": 698,
+          "initial_eval_count": 901,
+          "initial_tokensPerSecond": 110.28859133682504,
+          "generationMs": 15818,
+          "validationMs": 4,
+          "validationStorageMs": 7,
+          "totalMs": 17347
+        }
+      },
+      "questionSet": {
+        "id": "7b3afbca-81f5-4295-aa57-570e7cd63e76",
+        "documentId": "c757b0e8-d121-4687-960a-c52e881ea440",
+        "filename": "networking-demo.pdf",
+        "extractedPages": [
+          {
+            "pageNumber": 1,
+            "chunkId": "chunk-1",
+            "text": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination. IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1). IPv6 uses 128 bits, represented in hexadecimal. Each IPv4 decimal number represents an 8-bit octet and ranges from 0 to 255. The four octets together account for the 32 bits in an IPv4 address. A router examines the destination IP address when choosing where to forward a packet. An address tells the network where to deliver data; it does not describe the contents of that data."
+          },
+          {
+            "pageNumber": 2,
+            "chunkId": "chunk-2",
+            "text": "Topic 2: DNS DNS translates human-readable domain names into IP addresses. For example, a fictional lookup for study.example can return 192.0.2.25 to the client. A DNS resolver receives a name lookup from a client and obtains the requested record. An A record contains an IPv4 address. An AAAA record contains an IPv6 address. A DNS cache keeps a previous lookup result for the record's time to live (TTL). Reusing an unexpired cached answer avoids another lookup. Once that lifetime expires, the resolver must obtain a current answer rather than treating the expired entry as fresh."
+          },
+          {
+            "pageNumber": 3,
+            "chunkId": "chunk-3",
+            "text": "Topic 3: HTTP HTTP is an application-layer protocol used to exchange requests and responses. In its client-server model, a client sends a request and a server returns a response. A GET request asks for a representation of a resource. In this synthetic example, GET /notes requests the study notes stored at the /notes path. A POST request submits data to a resource for processing. An HTTP response includes a status code and may include a body. Status code 200 means the request succeeded. Status code 404 means the requested resource was not found. The client can use the status code to distinguish a successful /notes response from a missing resource."
+          }
+        ],
+        "metadata": {
+          "documentHash": "559955e2e5b78308a7d7caadd1fde078decf06f9bd3152ffcd66cff3ce7aae76",
+          "extractorVersion": "pdf-parse@2.4.5/point-nemo-text-v3",
+          "promptVersion": "point-nemo-planned-passages-v6",
+          "schemaVersion": "point-nemo-questions-v2",
+          "tokenizerDigest": "d9011691d2d6b47762206b71f4a78429b5614850725b47ae06bef96674eed416",
+          "modelTag": "qwen2.5:1.5b",
+          "modelDigest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+          "settingsHash": "a24da3956a4dbd5dad5368e9054d72dc7115f75eb3bf59b0e55f787788d47722",
+          "createdAt": "2026-10-09T22:40:59.996Z"
+        },
+        "compatible": true,
+        "topics": [
+          {
+            "id": "6ce53198-2b43-4928-a5fb-2768e2e5fe9e",
+            "name": "IP Addressing"
+          },
+          {
+            "id": "a227f2bf-e783-4ace-a2d2-30db55a6f7ac",
+            "name": "DNS"
+          },
+          {
+            "id": "06bf029a-1edb-48b2-9716-4d9f9c32afd5",
+            "name": "HTTP"
+          }
+        ],
+        "questions": [
+          {
+            "id": "d7922944-95cd-466c-a762-9cd33e186433",
+            "topicId": "6ce53198-2b43-4928-a5fb-2768e2e5fe9e",
+            "difficulty": "easy",
+            "prompt": "What does an IP address identify?",
+            "options": [
+              "A specific device",
+              "A network interface",
+              "A website",
+              "A user's username"
+            ],
+            "answerIndex": 1,
+            "explanation": "An IP address identifies a network interface and helps routers direct packets to a destination.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination."
+              }
+            ]
+          },
+          {
+            "id": "fb99703c-e18d-4a26-ba08-5748bb520776",
+            "topicId": "6ce53198-2b43-4928-a5fb-2768e2e5fe9e",
+            "difficulty": "medium",
+            "prompt": "What is the typical format of an IPv4 address?",
+            "options": [
+              "Three hexadecimal numbers",
+              "Sixteen binary numbers",
+              "Eight octal numbers",
+              "Four decimal numbers"
+            ],
+            "answerIndex": 3,
+            "explanation": "IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1).",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1)."
+              }
+            ]
+          },
+          {
+            "id": "3526ee2a-a39f-47bd-96f8-6bbbd9e25d5d",
+            "topicId": "6ce53198-2b43-4928-a5fb-2768e2e5fe9e",
+            "difficulty": "hard",
+            "prompt": "What does an IPv6 address represent?",
+            "options": [
+              "128 bits",
+              "1024 bits",
+              "256 bits",
+              "64 bits"
+            ],
+            "answerIndex": 0,
+            "explanation": "IPv6 uses 128 bits, represented in hexadecimal.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "IPv6 uses 128 bits, represented in hexadecimal."
+              }
+            ]
+          },
+          {
+            "id": "08120be8-8f6b-4de6-bfdd-3dea153e5d5b",
+            "topicId": "a227f2bf-e783-4ace-a2d2-30db55a6f7ac",
+            "difficulty": "easy",
+            "prompt": "What does DNS translate from human-readable domain names to?",
+            "options": [
+              "URLs",
+              "MAC addresses",
+              "email addresses",
+              "IP addresses"
+            ],
+            "answerIndex": 3,
+            "explanation": "DNS stands for Domain Name System and translates human-readable domain names into IP addresses.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "Topic 2: DNS DNS translates human-readable domain names into IP addresses."
+              }
+            ]
+          },
+          {
+            "id": "03786ba5-7253-44ad-a156-3d899aaa8310",
+            "topicId": "a227f2bf-e783-4ace-a2d2-30db55a6f7ac",
+            "difficulty": "medium",
+            "prompt": "What does a fictional lookup for 'study.example' return?",
+            "options": [
+              "192.0.2.25",
+              "192.0.2.24",
+              "192.0.2.26",
+              "192.0.2.28"
+            ],
+            "answerIndex": 0,
+            "explanation": "A fictional lookup for 'study.example' returns 192.0.2.25, which is an IP address.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "For example, a fictional lookup for study.example can return 192.0.2.25 to the client."
+              }
+            ]
+          },
+          {
+            "id": "fceb927f-d1e7-4738-862e-d5c45a475d3a",
+            "topicId": "a227f2bf-e783-4ace-a2d2-30db55a6f7ac",
+            "difficulty": "hard",
+            "prompt": "What does a DNS resolver do when it receives a name lookup from a client?",
+            "options": [
+              "Receives the request",
+              "Deletes the record",
+              "Obtains the requested record",
+              "Updates the record"
+            ],
+            "answerIndex": 2,
+            "explanation": "A DNS resolver receives a name lookup from a client and obtains the requested record.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "A DNS resolver receives a name lookup from a client and obtains the requested record."
+              }
+            ]
+          },
+          {
+            "id": "9f92f8f9-8be9-4bfb-8454-875dff9d5e34",
+            "topicId": "06bf029a-1edb-48b2-9716-4d9f9c32afd5",
+            "difficulty": "easy",
+            "prompt": "HTTP is an application-layer protocol used to exchange requests and responses.",
+            "options": [
+              "False",
+              "FTP",
+              "True",
+              "SMTP"
+            ],
+            "answerIndex": 2,
+            "explanation": "HTTP is indeed an application-layer protocol used for exchanging requests and responses.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "Topic 3: HTTP HTTP is an application-layer protocol used to exchange requests and responses."
+              }
+            ]
+          },
+          {
+            "id": "77a50e05-4df3-46c0-acc3-287bb392c7e1",
+            "topicId": "06bf029a-1edb-48b2-9716-4d9f9c32afd5",
+            "difficulty": "medium",
+            "prompt": "In its client-server model, a client sends a request and a server returns a response.",
+            "options": [
+              "True",
+              "False",
+              "Client-server model is not used in HTTP",
+              "HTTP uses a peer-to-peer model"
+            ],
+            "answerIndex": 0,
+            "explanation": "The client-server model is a fundamental concept in HTTP, where a client sends requests and a server responds with a response.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "In its client-server model, a client sends a request and a server returns a response."
+              }
+            ]
+          },
+          {
+            "id": "1a35fd6a-41fc-4140-b80a-76165af59efd",
+            "topicId": "06bf029a-1edb-48b2-9716-4d9f9c32afd5",
+            "difficulty": "hard",
+            "prompt": "A GET request asks for a representation of a resource.",
+            "options": [
+              "True",
+              "False",
+              "GET request is used for uploading files",
+              "GET request is used for deleting resources"
+            ],
+            "answerIndex": 0,
+            "explanation": "A GET request is specifically used to retrieve a representation of a resource, such as a file or data.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "A GET request asks for a representation of a resource."
+              }
+            ]
+          }
+        ],
+        "createdAt": "2026-10-09T22:40:59.996Z"
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:10:59.9889305+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:04:53.8465014+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s1",
+              "prompt": "What does an IP address identify?",
+              "correctAnswer": "A network interface",
+              "distractors": [
+                "A specific device",
+                "A website",
+                "A user's username"
+              ],
+              "explanation": "An IP address identifies a network interface and helps routers direct packets to a destination."
+            },
+            "1": {
+              "evidenceId": "p1s2",
+              "prompt": "What is the typical format of an IPv4 address?",
+              "correctAnswer": "Four decimal numbers",
+              "distractors": [
+                "Three hexadecimal numbers",
+                "Sixteen binary numbers",
+                "Eight octal numbers"
+              ],
+              "explanation": "IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1)."
+            },
+            "2": {
+              "evidenceId": "p1s3",
+              "prompt": "What does an IPv6 address represent?",
+              "correctAnswer": "128 bits",
+              "distractors": [
+                "1024 bits",
+                "256 bits",
+                "64 bits"
+              ],
+              "explanation": "IPv6 uses 128 bits, represented in hexadecimal."
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s1",
+              "prompt": "What does DNS translate from human-readable domain names to?",
+              "correctAnswer": "IP addresses",
+              "distractors": [
+                "URLs",
+                "MAC addresses",
+                "email addresses"
+              ],
+              "explanation": "DNS stands for Domain Name System and translates human-readable domain names into IP addresses."
+            },
+            "4": {
+              "evidenceId": "p2s2",
+              "prompt": "What does a fictional lookup for 'study.example' return?",
+              "correctAnswer": "192.0.2.25",
+              "distractors": [
+                "192.0.2.24",
+                "192.0.2.26",
+                "192.0.2.28"
+              ],
+              "explanation": "A fictional lookup for 'study.example' returns 192.0.2.25, which is an IP address."
+            },
+            "5": {
+              "evidenceId": "p2s3",
+              "prompt": "What does a DNS resolver do when it receives a name lookup from a client?",
+              "correctAnswer": "Obtains the requested record",
+              "distractors": [
+                "Receives the request",
+                "Deletes the record",
+                "Updates the record"
+              ],
+              "explanation": "A DNS resolver receives a name lookup from a client and obtains the requested record."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s1",
+              "prompt": "HTTP is an application-layer protocol used to exchange requests and responses.",
+              "correctAnswer": "True",
+              "distractors": [
+                "False",
+                "FTP",
+                "SMTP"
+              ],
+              "explanation": "HTTP is indeed an application-layer protocol used for exchanging requests and responses."
+            },
+            "7": {
+              "evidenceId": "p3s2",
+              "prompt": "In its client-server model, a client sends a request and a server returns a response.",
+              "correctAnswer": "True",
+              "distractors": [
+                "False",
+                "Client-server model is not used in HTTP",
+                "HTTP uses a peer-to-peer model"
+              ],
+              "explanation": "The client-server model is a fundamental concept in HTTP, where a client sends requests and a server responds with a response."
+            },
+            "8": {
+              "evidenceId": "p3s3",
+              "prompt": "A GET request asks for a representation of a resource.",
+              "correctAnswer": "True",
+              "distractors": [
+                "False",
+                "GET request is used for uploading files",
+                "GET request is used for deleting resources"
+              ],
+              "explanation": "A GET request is specifically used to retrieve a representation of a resource, such as a file or data."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "cache",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "elapsedMs": 70.22359999999753,
+      "reused": true
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "startup": "warm",
+      "job": {
+        "id": "75d9bd01-684b-4277-8cf5-dc0217ccd6ed",
+        "documentId": "a82d3ade-f149-4cc1-8f6b-4571ab4f1629",
+        "state": "ready",
+        "phase": "ready",
+        "canRetry": false,
+        "questionSetId": "5d1694f0-a2d6-457f-80cf-347608f740b7",
+        "elapsedTimeMs": 12349,
+        "createdAt": "2026-10-09T22:41:00.191Z",
+        "retryCount": 0,
+        "timings": {
+          "extractionMs": 17,
+          "sourceReused": 0,
+          "selectionMs": 2,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "seed": 42,
+          "inputTokens": 1026,
+          "plan_total_duration": 2850570000,
+          "plan_load_duration": 39313300,
+          "plan_prompt_eval_duration": 43117000,
+          "plan_eval_duration": 2712693000,
+          "plan_prompt_eval_count": 773,
+          "plan_prompt_eval_cached_count": 772,
+          "plan_eval_count": 306,
+          "plan_tokensPerSecond": 112.80303373806031,
+          "createdQuestions": 9,
+          "initial_total_duration": 9318915900,
+          "initial_load_duration": 176457600,
+          "initial_prompt_eval_duration": 36350000,
+          "initial_eval_duration": 8953129000,
+          "initial_prompt_eval_count": 1988,
+          "initial_prompt_eval_cached_count": 1985,
+          "initial_eval_count": 977,
+          "initial_tokensPerSecond": 109.1238604961461,
+          "generationMs": 12279,
+          "validationMs": 1,
+          "validationStorageMs": 5,
+          "totalMs": 12349
+        }
+      },
+      "questionSet": {
+        "id": "5d1694f0-a2d6-457f-80cf-347608f740b7",
+        "documentId": "a82d3ade-f149-4cc1-8f6b-4571ab4f1629",
+        "filename": "networking-demo.pdf",
+        "extractedPages": [
+          {
+            "pageNumber": 1,
+            "chunkId": "chunk-1",
+            "text": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination. IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1). IPv6 uses 128 bits, represented in hexadecimal. Each IPv4 decimal number represents an 8-bit octet and ranges from 0 to 255. The four octets together account for the 32 bits in an IPv4 address. A router examines the destination IP address when choosing where to forward a packet. An address tells the network where to deliver data; it does not describe the contents of that data."
+          },
+          {
+            "pageNumber": 2,
+            "chunkId": "chunk-2",
+            "text": "Topic 2: DNS DNS translates human-readable domain names into IP addresses. For example, a fictional lookup for study.example can return 192.0.2.25 to the client. A DNS resolver receives a name lookup from a client and obtains the requested record. An A record contains an IPv4 address. An AAAA record contains an IPv6 address. A DNS cache keeps a previous lookup result for the record's time to live (TTL). Reusing an unexpired cached answer avoids another lookup. Once that lifetime expires, the resolver must obtain a current answer rather than treating the expired entry as fresh."
+          },
+          {
+            "pageNumber": 3,
+            "chunkId": "chunk-3",
+            "text": "Topic 3: HTTP HTTP is an application-layer protocol used to exchange requests and responses. In its client-server model, a client sends a request and a server returns a response. A GET request asks for a representation of a resource. In this synthetic example, GET /notes requests the study notes stored at the /notes path. A POST request submits data to a resource for processing. An HTTP response includes a status code and may include a body. Status code 200 means the request succeeded. Status code 404 means the requested resource was not found. The client can use the status code to distinguish a successful /notes response from a missing resource."
+          }
+        ],
+        "metadata": {
+          "documentHash": "559955e2e5b78308a7d7caadd1fde078decf06f9bd3152ffcd66cff3ce7aae76",
+          "extractorVersion": "pdf-parse@2.4.5/point-nemo-text-v3",
+          "promptVersion": "point-nemo-planned-passages-v6",
+          "schemaVersion": "point-nemo-questions-v2",
+          "tokenizerDigest": "d9011691d2d6b47762206b71f4a78429b5614850725b47ae06bef96674eed416",
+          "modelTag": "qwen2.5:1.5b",
+          "modelDigest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+          "settingsHash": "a24da3956a4dbd5dad5368e9054d72dc7115f75eb3bf59b0e55f787788d47722",
+          "createdAt": "2026-10-09T22:41:12.539Z"
+        },
+        "compatible": true,
+        "topics": [
+          {
+            "id": "2bfc240c-2e2f-4972-a8e5-c5319c0011c6",
+            "name": "IP Addressing"
+          },
+          {
+            "id": "7b7d372f-4111-494b-b8ce-7ef13a8b470a",
+            "name": "DNS"
+          },
+          {
+            "id": "aeff1139-da60-410b-b687-0c13e5b67258",
+            "name": "HTTP"
+          }
+        ],
+        "questions": [
+          {
+            "id": "470c7da5-a306-46c4-a20c-b64128c08c91",
+            "topicId": "2bfc240c-2e2f-4972-a8e5-c5319c0011c6",
+            "difficulty": "easy",
+            "prompt": "What does an IP address identify?",
+            "options": [
+              "A specific device",
+              "A network interface",
+              "A website",
+              "A user's username"
+            ],
+            "answerIndex": 1,
+            "explanation": "An IP address identifies a network interface and helps routers direct packets to a destination.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination."
+              }
+            ]
+          },
+          {
+            "id": "4faff4ca-6c0a-4578-b42e-767df8da5fb2",
+            "topicId": "2bfc240c-2e2f-4972-a8e5-c5319c0011c6",
+            "difficulty": "medium",
+            "prompt": "What is the typical format of an IPv4 address?",
+            "options": [
+              "Three hexadecimal numbers",
+              "Eight binary numbers",
+              "A single letter",
+              "Four decimal numbers"
+            ],
+            "answerIndex": 3,
+            "explanation": "IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1).",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1)."
+              }
+            ]
+          },
+          {
+            "id": "4932bff4-0c03-42d4-af1a-e93abd7fb267",
+            "topicId": "2bfc240c-2e2f-4972-a8e5-c5319c0011c6",
+            "difficulty": "hard",
+            "prompt": "What does an IPv6 address use?",
+            "options": [
+              "256 bits",
+              "16 bits",
+              "128 bits",
+              "64 bits"
+            ],
+            "answerIndex": 2,
+            "explanation": "IPv6 uses 128 bits, represented in hexadecimal.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "IPv6 uses 128 bits, represented in hexadecimal."
+              }
+            ]
+          },
+          {
+            "id": "b762dbd9-eea2-4bb9-9c89-a3b1e50ecee3",
+            "topicId": "7b7d372f-4111-494b-b8ce-7ef13a8b470a",
+            "difficulty": "easy",
+            "prompt": "What does DNS translate from human-readable domain names into?",
+            "options": [
+              "URLs",
+              "MAC addresses",
+              "email addresses",
+              "IP addresses"
+            ],
+            "answerIndex": 3,
+            "explanation": "DNS translates human-readable domain names into IP addresses.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "Topic 2: DNS DNS translates human-readable domain names into IP addresses."
+              }
+            ]
+          },
+          {
+            "id": "3ea5ae99-14ee-454e-a58a-f844c626fad9",
+            "topicId": "7b7d372f-4111-494b-b8ce-7ef13a8b470a",
+            "difficulty": "medium",
+            "prompt": "What does a fictional lookup for 'study.example' return?",
+            "options": [
+              "192.0.2.25",
+              "192.0.2.24",
+              "192.0.2.26",
+              "192.0.2.28"
+            ],
+            "answerIndex": 0,
+            "explanation": "A fictional lookup for 'study.example' returns 192.0.2.25 to the client.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "For example, a fictional lookup for study.example can return 192.0.2.25 to the client."
+              }
+            ]
+          },
+          {
+            "id": "94ac1833-8d7b-4b42-b5f7-bca1af514606",
+            "topicId": "7b7d372f-4111-494b-b8ce-7ef13a8b470a",
+            "difficulty": "hard",
+            "prompt": "What does a DNS resolver do?",
+            "options": [
+              "Obtains the requested record",
+              "Receives a name lookup from a client",
+              "Receives a request from a server",
+              "Receives a request from a user"
+            ],
+            "answerIndex": 0,
+            "explanation": "A DNS resolver receives a name lookup from a client and obtains the requested record.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "A DNS resolver receives a name lookup from a client and obtains the requested record."
+              }
+            ]
+          },
+          {
+            "id": "208e68fd-44ee-4a0d-a03a-dc26b54f8f62",
+            "topicId": "aeff1139-da60-410b-b687-0c13e5b67258",
+            "difficulty": "easy",
+            "prompt": "What is HTTP?",
+            "options": [
+              "HTTP is a transport-layer protocol used to exchange requests and responses.",
+              "HTTP is an application-layer protocol used to exchange requests and responses.",
+              "HTTP is a network-layer protocol used to exchange requests and responses.",
+              "HTTP is a session-layer protocol used to exchange requests and responses."
+            ],
+            "answerIndex": 1,
+            "explanation": "HTTP is an application-layer protocol used to exchange requests and responses.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "Topic 3: HTTP HTTP is an application-layer protocol used to exchange requests and responses."
+              }
+            ]
+          },
+          {
+            "id": "741f3b55-cf2d-4235-8949-85d520d52be7",
+            "topicId": "aeff1139-da60-410b-b687-0c13e5b67258",
+            "difficulty": "medium",
+            "prompt": "In the client-server model, what does a client send and what does a server return?",
+            "options": [
+              "A client sends a request and a server sends a response.",
+              "A client sends a request and a server returns a request.",
+              "A client sends a request and a server returns a response.",
+              "A client sends a request and a server sends a request."
+            ],
+            "answerIndex": 2,
+            "explanation": "In the client-server model, a client sends a request and a server returns a response.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "In its client-server model, a client sends a request and a server returns a response."
+              }
+            ]
+          },
+          {
+            "id": "a672805f-563d-468c-b0bb-820b5883e4c1",
+            "topicId": "aeff1139-da60-410b-b687-0c13e5b67258",
+            "difficulty": "hard",
+            "prompt": "What does a GET request ask for?",
+            "options": [
+              "A GET request asks for a representation of a resource.",
+              "A GET request asks for a request for a resource.",
+              "A GET request asks for a response for a resource.",
+              "A GET request asks for a request for a request."
+            ],
+            "answerIndex": 0,
+            "explanation": "A GET request asks for a representation of a resource.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "A GET request asks for a representation of a resource."
+              }
+            ]
+          }
+        ],
+        "createdAt": "2026-10-09T22:41:12.539Z"
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:11:12.4401418+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:04:53.8465014+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s1",
+              "prompt": "What does an IP address identify?",
+              "correctAnswer": "A network interface",
+              "distractors": [
+                "A specific device",
+                "A website",
+                "A user's username"
+              ],
+              "explanation": "An IP address identifies a network interface and helps routers direct packets to a destination."
+            },
+            "1": {
+              "evidenceId": "p1s2",
+              "prompt": "What is the typical format of an IPv4 address?",
+              "correctAnswer": "Four decimal numbers",
+              "distractors": [
+                "Three hexadecimal numbers",
+                "Eight binary numbers",
+                "A single letter"
+              ],
+              "explanation": "IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1)."
+            },
+            "2": {
+              "evidenceId": "p1s3",
+              "prompt": "What does an IPv6 address use?",
+              "correctAnswer": "128 bits",
+              "distractors": [
+                "256 bits",
+                "16 bits",
+                "64 bits"
+              ],
+              "explanation": "IPv6 uses 128 bits, represented in hexadecimal."
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s1",
+              "prompt": "What does DNS translate from human-readable domain names into?",
+              "correctAnswer": "IP addresses",
+              "distractors": [
+                "URLs",
+                "MAC addresses",
+                "email addresses"
+              ],
+              "explanation": "DNS translates human-readable domain names into IP addresses."
+            },
+            "4": {
+              "evidenceId": "p2s2",
+              "prompt": "What does a fictional lookup for 'study.example' return?",
+              "correctAnswer": "192.0.2.25",
+              "distractors": [
+                "192.0.2.24",
+                "192.0.2.26",
+                "192.0.2.28"
+              ],
+              "explanation": "A fictional lookup for 'study.example' returns 192.0.2.25 to the client."
+            },
+            "5": {
+              "evidenceId": "p2s3",
+              "prompt": "What does a DNS resolver do?",
+              "correctAnswer": "Obtains the requested record",
+              "distractors": [
+                "Receives a name lookup from a client",
+                "Receives a request from a server",
+                "Receives a request from a user"
+              ],
+              "explanation": "A DNS resolver receives a name lookup from a client and obtains the requested record."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s1",
+              "prompt": "What is HTTP?",
+              "correctAnswer": "HTTP is an application-layer protocol used to exchange requests and responses.",
+              "distractors": [
+                "HTTP is a transport-layer protocol used to exchange requests and responses.",
+                "HTTP is a network-layer protocol used to exchange requests and responses.",
+                "HTTP is a session-layer protocol used to exchange requests and responses."
+              ],
+              "explanation": "HTTP is an application-layer protocol used to exchange requests and responses."
+            },
+            "7": {
+              "evidenceId": "p3s2",
+              "prompt": "In the client-server model, what does a client send and what does a server return?",
+              "correctAnswer": "A client sends a request and a server returns a response.",
+              "distractors": [
+                "A client sends a request and a server sends a response.",
+                "A client sends a request and a server returns a request.",
+                "A client sends a request and a server sends a request."
+              ],
+              "explanation": "In the client-server model, a client sends a request and a server returns a response."
+            },
+            "8": {
+              "evidenceId": "p3s3",
+              "prompt": "What does a GET request ask for?",
+              "correctAnswer": "A GET request asks for a representation of a resource.",
+              "distractors": [
+                "A GET request asks for a request for a resource.",
+                "A GET request asks for a response for a resource.",
+                "A GET request asks for a request for a request."
+              ],
+              "explanation": "A GET request asks for a representation of a resource."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "cache",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "elapsedMs": 34.491900000000896,
+      "reused": true
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "0e9d805d-e892-4ea0-9f5e-7ad2cc4fa8b8",
+        "documentId": "77d28a6d-bcb5-45bc-b397-8c172b295b0b",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "INVALID_MODEL_OUTPUT",
+        "errorMessage": "All four answer options must be distinct. Question 9 repeats question 7. Test a different source-supported fact or application, not a rewording.",
+        "errorStage": "validating",
+        "elapsedTimeMs": 24966,
+        "createdAt": "2026-10-09T22:41:12.638Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 18,
+          "sourceReused": 0,
+          "selectionMs": 13,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "seed": 42,
+          "inputTokens": 1196,
+          "plan_total_duration": 7788593300,
+          "plan_load_duration": 3806865600,
+          "plan_prompt_eval_duration": 314321000,
+          "plan_eval_duration": 3622717000,
+          "plan_prompt_eval_count": 943,
+          "plan_prompt_eval_cached_count": 0,
+          "plan_eval_count": 411,
+          "plan_tokensPerSecond": 113.45076085159288,
+          "createdQuestions": 9,
+          "initial_total_duration": 13231041000,
+          "initial_load_duration": 560230300,
+          "initial_prompt_eval_duration": 486402000,
+          "initial_eval_duration": 12053400000,
+          "initial_prompt_eval_count": 2269,
+          "initial_prompt_eval_cached_count": 698,
+          "initial_eval_count": 1287,
+          "initial_tokensPerSecond": 106.77485190900492,
+          "generationMs": 24900,
+          "validationMs": 4,
+          "repairedQuestions": 1,
+          "repairInputTokens": 1563,
+          "repair_total_duration": 2320233100,
+          "repair_load_duration": 44074100,
+          "repair_prompt_eval_duration": 312456000,
+          "repair_eval_duration": 1910593000,
+          "repair_prompt_eval_count": 1563,
+          "repair_prompt_eval_cached_count": 36,
+          "repair_eval_count": 204,
+          "repair_tokensPerSecond": 106.77313273941651,
+          "totalMs": 24965
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:11:37.6000236+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:04:53.8465014+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s1",
+              "prompt": "What does TCP establish and deliver?",
+              "correctAnswer": "A connection and a reliable, ordered byte stream",
+              "distractors": [
+                "A connection and a random byte stream",
+                "A connection and a reliable, unordered byte stream",
+                "A connection and a reliable, ordered byte stream (incorrect)"
+              ],
+              "explanation": "TCP establishes a connection and delivers a reliable, ordered byte stream. This is evident from the passage stating that TCP can retransmit lost data and ensure order in data delivery."
+            },
+            "1": {
+              "evidenceId": "p1s2",
+              "prompt": "What does TCP do that UDP does not?",
+              "correctAnswer": "Retransmit lost data and ensure order in data delivery",
+              "distractors": [
+                "Send individual datagrams",
+                "Reconnect to the sender",
+                "Reorder received messages (incorrect)"
+              ],
+              "explanation": "TCP retransmits lost data and ensures order in data delivery, which UDP does not do. This is supported by the passage mentioning that TCP can retransmit lost data and a receiving application reads bytes in order rather than receiving them. "
+            },
+            "2": {
+              "evidenceId": "p1s3",
+              "prompt": "What is the primary difference between TCP and UDP in terms of connection establishment and data delivery?",
+              "correctAnswer": "TCP establishes a connection and delivers a reliable, ordered byte stream, while UDP sends individual datagrams without ",
+              "distractors": [
+                "TCP does not establish a connection",
+                "UDP guarantees delivery and ordering",
+                "TCP guarantees delivery and ordering (incorrect)"
+              ],
+              "explanation": "The primary difference between TCP and UDP is that TCP establishes a connection and delivers a reliable, ordered byte stream, while UDP sends individual datagrams without establishing a connection. This is supported by the passage stating '"
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s1",
+              "prompt": "What do TCP and UDP port numbers identify?",
+              "correctAnswer": "communication endpoints for applications on a host",
+              "distractors": [
+                "the size of the host",
+                "the type of host operating system",
+                "the color of the host's interface"
+              ],
+              "explanation": "TCP and UDP port numbers are used to identify communication endpoints for applications on a host. This is crucial for applications to communicate with each other over the network."
+            },
+            "4": {
+              "evidenceId": "p2s2",
+              "prompt": "What is the range of port numbers for TCP and UDP?",
+              "correctAnswer": "0 to 65535",
+              "distractors": [
+                "65536 to 131071",
+                "131072 to 262143",
+                "262144 to 524287"
+              ],
+              "explanation": "TCP and UDP port numbers range from 0 to 65535. This range is significant because it allows for a wide variety of applications to be identified and distinguished."
+            },
+            "5": {
+              "evidenceId": "p2s3",
+              "prompt": "What does an IP address select, and what does a port number identify?",
+              "correctAnswer": "a host interface; the application endpoint used for the conversation",
+              "distractors": [
+                "the application protocol; the host interface",
+                "the application protocol; the application endpoint used for the conversation",
+                "the host interface; the application protocol"
+              ],
+              "explanation": "An IP address selects a host interface, while a port number identifies the application endpoint used for the conversation. This is important for applications to communicate with each other over the network."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s1",
+              "prompt": "What does the /24 prefix in an IPv4 address signify?",
+              "correctAnswer": "It indicates that the network is divided into 24 bits for the network portion and 8 bits for the host portion.",
+              "distractors": [
+                "24 bits are used for the network portion, 8 for the subnet mask.",
+                "24 bits are for the network, 8 for the host address.",
+                "24 bits are for the network, 8 for the subnet mask."
+              ],
+              "explanation": "The /24 prefix means the first 24 bits are used for the network address, and the last 8 bits are for the host address. This is a common subnet mask used in IPv4 addressing."
+            },
+            "7": {
+              "evidenceId": "p3s2",
+              "prompt": "What is the subnet mask for an IPv4 /24 prefix?",
+              "correctAnswer": "255.255.255.0",
+              "distractors": [
+                "255.255.255.255",
+                "255.255.255.128",
+                "255.255.255.192"
+              ],
+              "explanation": "The subnet mask for an IPv4 /24 prefix is 255.255.255.0, which allows for 256 possible network addresses."
+            },
+            "8": {
+              "evidenceId": "p3s3",
+              "prompt": "How many total addresses are there in a subnet with the /24 prefix?",
+              "correctAnswer": "256",
+              "distractors": [
+                "128",
+                "256",
+                "512"
+              ],
+              "explanation": "A subnet with the /24 prefix has 256 possible network addresses."
+            }
+          }
+        },
+        {
+          "questions": {
+            "8": {
+              "evidenceId": "p3s1",
+              "prompt": "What does the /24 prefix in an IPv4 address signify?",
+              "correctAnswer": "It indicates that the network is divided into 24 bits for the network portion and 8 bits for the host portion.",
+              "distractors": [
+                "It indicates that the network is divided into 24 bits for the host portion and 8 bits for the network portion.",
+                "It indicates that the network is divided into 24 bits for the network portion and 8 bits for the host portion.",
+                "It indicates that the network is divided into 24 bits for the network portion and 8 bits for the host portion."
+              ],
+              "explanation": "The /24 prefix in an IPv4 address signifies that the network is divided into 24 bits for the network portion and 8 bits for the host portion."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "startup": "warm",
+      "job": {
+        "id": "b4e5582f-b25e-499f-92e2-8b7bb211dfd2",
+        "documentId": "a6a8ca57-d2a4-4508-9b6c-31c505e2d978",
+        "state": "ready",
+        "phase": "ready",
+        "canRetry": false,
+        "questionSetId": "5666ca74-bb8e-4338-b79e-66e6452b9e2b",
+        "elapsedTimeMs": 16048,
+        "createdAt": "2026-10-09T22:41:37.841Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 15,
+          "sourceReused": 0,
+          "selectionMs": 4,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "seed": 42,
+          "inputTokens": 1196,
+          "plan_total_duration": 3822072900,
+          "plan_load_duration": 29226500,
+          "plan_prompt_eval_duration": 39614000,
+          "plan_eval_duration": 3665022000,
+          "plan_prompt_eval_count": 943,
+          "plan_prompt_eval_cached_count": 942,
+          "plan_eval_count": 417,
+          "plan_tokensPerSecond": 113.77830746991424,
+          "createdQuestions": 9,
+          "initial_total_duration": 10961484800,
+          "initial_load_duration": 136239900,
+          "initial_prompt_eval_duration": 79836000,
+          "initial_eval_duration": 10554816000,
+          "initial_prompt_eval_count": 2275,
+          "initial_prompt_eval_cached_count": 2127,
+          "initial_eval_count": 1174,
+          "initial_tokensPerSecond": 111.22884567575598,
+          "generationMs": 15977,
+          "validationMs": 2,
+          "repairedQuestions": 1,
+          "repairInputTokens": 1517,
+          "repair_total_duration": 1171047100,
+          "repair_load_duration": 37633800,
+          "repair_prompt_eval_duration": 93664000,
+          "repair_eval_duration": 989756000,
+          "repair_prompt_eval_count": 1517,
+          "repair_prompt_eval_cached_count": 1187,
+          "repair_eval_count": 106,
+          "repair_tokensPerSecond": 107.0971027202664,
+          "validationStorageMs": 3,
+          "totalMs": 16048
+        }
+      },
+      "questionSet": {
+        "id": "5666ca74-bb8e-4338-b79e-66e6452b9e2b",
+        "documentId": "a6a8ca57-d2a4-4508-9b6c-31c505e2d978",
+        "filename": "networking-unseen.pdf",
+        "extractedPages": [
+          {
+            "pageNumber": 1,
+            "chunkId": "chunk-1",
+            "text": "Topic 1: TCP vs UDP TCP establishes a connection and delivers a reliable, ordered byte stream. TCP can retransmit lost data, and a receiving application reads bytes in order rather than receiving separate message boundaries. UDP sends individual datagrams without establishing a TCP-style connection. UDP does not guarantee delivery or ordering, so an application must handle loss or reordering if that matters. A synthetic file-copy application needs every byte in order, so TCP fits that requirement. A synthetic position-update application can discard an old update and use the newest one, so it can choose UDP when occasional loss is acceptable. These examples describe different requirements; UDP is not a guarantee of faster delivery."
+          },
+          {
+            "pageNumber": 2,
+            "chunkId": "chunk-2",
+            "text": "Topic 2: Ports TCP and UDP port numbers identify communication endpoints for applications on a host. A port number is a 16-bit value and ranges from 0 to 65535. An IP address selects a host interface; the port identifies the application endpoint used for the conversation. In these synthetic service examples, an SSH server listens on TCP port 22, an IMAP server listens on TCP port 143, and a PostgreSQL server listens on TCP port 5432. A client selects the server's listening port to contact that service. A TCP endpoint and a UDP endpoint with the same numeric port are distinct. A connection is distinguished by its protocol and the source and destination addresses and ports. Two clients can contact the same server port using different source ports."
+          },
+          {
+            "pageNumber": 3,
+            "chunkId": "chunk-3",
+            "text": "Topic 3: Subnetting Subnetting divides an address block into smaller networks. An IPv4 /24 prefix uses 24 network bits and leaves 8 host bits. The subnet mask for /24 is 255.255.255.0. The synthetic subnet 198.51.100.0/24 has 256 total addresses. Its network address is 198.51.100.0 and its broadcast address is 198.51.100.255. In a conventional /24 subnet, the host range is 198.51.100.1 through 198.51.100.254. Splitting 198.51.100.0/24 into two /25 subnets yields 198.51.100.0/25 and 198.51.100.128/25. Each /25 uses 25 network bits, leaves 7 host bits, and contains 128 total addresses. Its subnet mask is 255.255.255.128."
+          }
+        ],
+        "metadata": {
+          "documentHash": "c409f3b29b8cc83074eeca781e897bd245e22f6549f0a9238082de87f789768b",
+          "extractorVersion": "pdf-parse@2.4.5/point-nemo-text-v3",
+          "promptVersion": "point-nemo-planned-passages-v6",
+          "schemaVersion": "point-nemo-questions-v2",
+          "tokenizerDigest": "d9011691d2d6b47762206b71f4a78429b5614850725b47ae06bef96674eed416",
+          "modelTag": "qwen2.5:1.5b",
+          "modelDigest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+          "settingsHash": "a24da3956a4dbd5dad5368e9054d72dc7115f75eb3bf59b0e55f787788d47722",
+          "createdAt": "2026-10-09T22:41:53.888Z"
+        },
+        "compatible": true,
+        "topics": [
+          {
+            "id": "1655df7f-51d6-4f05-96da-d20074e59465",
+            "name": "TCP vs. UDP"
+          },
+          {
+            "id": "2fe077c9-ddab-4c79-8ae7-b60634c8a22b",
+            "name": "Ports"
+          },
+          {
+            "id": "3247ff1f-f25a-4134-9d24-7c8c0c552203",
+            "name": "Subnetting"
+          }
+        ],
+        "questions": [
+          {
+            "id": "bc357313-53f5-41b2-821b-648f64349a19",
+            "topicId": "1655df7f-51d6-4f05-96da-d20074e59465",
+            "difficulty": "easy",
+            "prompt": "What does TCP establish and deliver?",
+            "options": [
+              "A connection and a reliable, unordered byte stream",
+              "A connection and a reliable, ordered byte stream",
+              "A connection and a random byte stream",
+              "A connection and a byte stream with missing data"
+            ],
+            "answerIndex": 1,
+            "explanation": "TCP establishes a connection and delivers a reliable, ordered byte stream. This ensures that data is delivered in the correct order and without loss.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "Topic 1: TCP vs UDP TCP establishes a connection and delivers a reliable, ordered byte stream."
+              }
+            ]
+          },
+          {
+            "id": "d8a140a8-a6ec-4198-803c-ae01b0307dcc",
+            "topicId": "1655df7f-51d6-4f05-96da-d20074e59465",
+            "difficulty": "medium",
+            "prompt": "What does TCP do when data is lost?",
+            "options": [
+              "Retransmit lost data and reassemble the data",
+              "Retransmit lost data",
+              "Retransmit lost data and discard the data",
+              "Reassemble the data and send a new request"
+            ],
+            "answerIndex": 1,
+            "explanation": "TCP can retransmit lost data to ensure that the entire data is delivered correctly.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "TCP can retransmit lost data, and a receiving application reads bytes in order rather than receiving separate message boundaries."
+              }
+            ]
+          },
+          {
+            "id": "5b1b9e13-8cfe-4e91-82d6-9e743d1f7f6a",
+            "topicId": "1655df7f-51d6-4f05-96da-d20074e59465",
+            "difficulty": "hard",
+            "prompt": "What is the main difference between TCP and UDP?",
+            "options": [
+              "TCP does not guarantee delivery",
+              "TCP establishes a connection and guarantees delivery, while UDP does not establish a connection and does not guarantee a",
+              "TCP guarantees delivery but UDP does not",
+              "TCP guarantees delivery but UDP does not establish a connection"
+            ],
+            "answerIndex": 1,
+            "explanation": "The main difference between TCP and UDP is that TCP establishes a connection and guarantees delivery, while UDP does not establish a connection and does not guarantee delivery or ordering.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "UDP sends individual datagrams without establishing a TCP-style connection."
+              }
+            ]
+          },
+          {
+            "id": "dfc2d37b-e094-4086-bb97-308574e94f89",
+            "topicId": "2fe077c9-ddab-4c79-8ae7-b60634c8a22b",
+            "difficulty": "easy",
+            "prompt": "What do TCP and UDP port numbers identify?",
+            "options": [
+              "IP addresses",
+              "network protocols",
+              "application protocols",
+              "communication endpoints for applications on a host"
+            ],
+            "answerIndex": 3,
+            "explanation": "TCP and UDP port numbers are used to identify communication endpoints for applications on a host. They are part of the TCP/IP protocol suite and are used to distinguish between different applications and services on the same host.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "Topic 2: Ports TCP and UDP port numbers identify communication endpoints for applications on a host."
+              }
+            ]
+          },
+          {
+            "id": "c249c165-9667-4529-8371-44dcb7fcd306",
+            "topicId": "2fe077c9-ddab-4c79-8ae7-b60634c8a22b",
+            "difficulty": "medium",
+            "prompt": "What is the range of port numbers for TCP and UDP?",
+            "options": [
+              "0 to 65536",
+              "0 to 65533",
+              "0 to 65535",
+              "0 to 65534"
+            ],
+            "answerIndex": 2,
+            "explanation": "TCP and UDP port numbers range from 0 to 65535. This range is significant because it allows for a large number of unique port numbers to be used for different applications and services.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "A port number is a 16-bit value and ranges from 0 to 65535."
+              }
+            ]
+          },
+          {
+            "id": "315bf7f4-71c0-4b18-b206-0ec0402f4efd",
+            "topicId": "2fe077c9-ddab-4c79-8ae7-b60634c8a22b",
+            "difficulty": "hard",
+            "prompt": "What do TCP and UDP ports identify?",
+            "options": [
+              "source address",
+              "destination address",
+              "communication endpoints for applications on a host",
+              "source and destination addresses"
+            ],
+            "answerIndex": 2,
+            "explanation": "TCP and UDP ports identify the communication endpoints for applications on a host, which is distinct from the source and destination addresses.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "Topic 2: Ports TCP and UDP port numbers identify communication endpoints for applications on a host."
+              }
+            ]
+          },
+          {
+            "id": "09631e38-53c8-43c9-88ae-445e9d58323d",
+            "topicId": "3247ff1f-f25a-4134-9d24-7c8c0c552203",
+            "difficulty": "easy",
+            "prompt": "What does the /24 subnet mask represent in an IPv4 address?",
+            "options": [
+              "255.255.255.1",
+              "255.255.255.255",
+              "255.255.255.254",
+              "255.255.255.0"
+            ],
+            "answerIndex": 3,
+            "explanation": "The /24 subnet mask indicates that the first 24 bits of the address are network bits, leaving 8 bits for host addresses. The correct subnet mask for /24 is 255.255.255.0.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "Topic 3: Subnetting Subnetting divides an address block into smaller networks."
+              }
+            ]
+          },
+          {
+            "id": "f0d69d82-103d-4ca8-970e-349fc7abe574",
+            "topicId": "3247ff1f-f25a-4134-9d24-7c8c0c552203",
+            "difficulty": "medium",
+            "prompt": "How many host addresses are available in a /24 subnet?",
+            "options": [
+              "254",
+              "255",
+              "256",
+              "257"
+            ],
+            "answerIndex": 0,
+            "explanation": "In a /24 subnet, there are 256 possible host addresses, ranging from 198.51.100.1 to 198.51.100.254.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "An IPv4 /24 prefix uses 24 network bits and leaves 8 host bits."
+              }
+            ]
+          },
+          {
+            "id": "661d6ba8-5ccd-42c7-a9f5-7bd3d02843ed",
+            "topicId": "3247ff1f-f25a-4134-9d24-7c8c0c552203",
+            "difficulty": "hard",
+            "prompt": "What is the total number of addresses in a /25 subnet?",
+            "options": [
+              "256",
+              "127",
+              "129",
+              "128"
+            ],
+            "answerIndex": 3,
+            "explanation": "A /25 subnet uses 25 network bits, leaving 7 host bits, which results in 128 total addresses.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "The subnet mask for /24 is 255.255.255.0."
+              }
+            ]
+          }
+        ],
+        "createdAt": "2026-10-09T22:41:53.888Z"
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:11:53.8867614+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:04:53.8465014+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s1",
+              "prompt": "What does TCP establish and deliver?",
+              "correctAnswer": "A connection and a reliable, ordered byte stream",
+              "distractors": [
+                "A connection and a reliable, unordered byte stream",
+                "A connection and a random byte stream",
+                "A connection and a byte stream with missing data"
+              ],
+              "explanation": "TCP establishes a connection and delivers a reliable, ordered byte stream. This ensures that data is delivered in the correct order and without loss."
+            },
+            "1": {
+              "evidenceId": "p1s2",
+              "prompt": "What does TCP do when data is lost?",
+              "correctAnswer": "Retransmit lost data",
+              "distractors": [
+                "Retransmit lost data and reassemble the data",
+                "Retransmit lost data and discard the data",
+                "Reassemble the data and send a new request"
+              ],
+              "explanation": "TCP can retransmit lost data to ensure that the entire data is delivered correctly."
+            },
+            "2": {
+              "evidenceId": "p1s3",
+              "prompt": "What is the main difference between TCP and UDP?",
+              "correctAnswer": "TCP establishes a connection and guarantees delivery, while UDP does not establish a connection and does not guarantee a",
+              "distractors": [
+                "TCP does not guarantee delivery",
+                "TCP guarantees delivery but UDP does not",
+                "TCP guarantees delivery but UDP does not establish a connection"
+              ],
+              "explanation": "The main difference between TCP and UDP is that TCP establishes a connection and guarantees delivery, while UDP does not establish a connection and does not guarantee delivery or ordering."
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s1",
+              "prompt": "What do TCP and UDP port numbers identify?",
+              "correctAnswer": "communication endpoints for applications on a host",
+              "distractors": [
+                "IP addresses",
+                "network protocols",
+                "application protocols"
+              ],
+              "explanation": "TCP and UDP port numbers are used to identify communication endpoints for applications on a host. They are part of the TCP/IP protocol suite and are used to distinguish between different applications and services on the same host."
+            },
+            "4": {
+              "evidenceId": "p2s2",
+              "prompt": "What is the range of port numbers for TCP and UDP?",
+              "correctAnswer": "0 to 65535",
+              "distractors": [
+                "0 to 65536",
+                "0 to 65533",
+                "0 to 65534"
+              ],
+              "explanation": "TCP and UDP port numbers range from 0 to 65535. This range is significant because it allows for a large number of unique port numbers to be used for different applications and services."
+            },
+            "5": {
+              "evidenceId": "p2s3",
+              "prompt": "What does an IP address select, and what does a port number identify?",
+              "correctAnswer": "a host interface; the port identifies the application endpoint used for the conversation",
+              "distractors": [
+                "a host interface; the port identifies the application endpoint used for the conversation",
+                "a host interface; the port identifies the application endpoint used for the conversation",
+                "a host interface; the port identifies the application endpoint used for the conversation"
+              ],
+              "explanation": "An IP address selects a host interface, while a port number identifies the application endpoint used for the conversation on that host interface."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s1",
+              "prompt": "What does the /24 subnet mask represent in an IPv4 address?",
+              "correctAnswer": "255.255.255.0",
+              "distractors": [
+                "255.255.255.1",
+                "255.255.255.255",
+                "255.255.255.254"
+              ],
+              "explanation": "The /24 subnet mask indicates that the first 24 bits of the address are network bits, leaving 8 bits for host addresses. The correct subnet mask for /24 is 255.255.255.0."
+            },
+            "7": {
+              "evidenceId": "p3s2",
+              "prompt": "How many host addresses are available in a /24 subnet?",
+              "correctAnswer": "254",
+              "distractors": [
+                "255",
+                "256",
+                "257"
+              ],
+              "explanation": "In a /24 subnet, there are 256 possible host addresses, ranging from 198.51.100.1 to 198.51.100.254."
+            },
+            "8": {
+              "evidenceId": "p3s3",
+              "prompt": "What is the total number of addresses in a /25 subnet?",
+              "correctAnswer": "128",
+              "distractors": [
+                "256",
+                "127",
+                "129"
+              ],
+              "explanation": "A /25 subnet uses 25 network bits, leaving 7 host bits, which results in 128 total addresses."
+            }
+          }
+        },
+        {
+          "questions": {
+            "5": {
+              "evidenceId": "p2s1",
+              "prompt": "What do TCP and UDP ports identify?",
+              "correctAnswer": "communication endpoints for applications on a host",
+              "distractors": [
+                "source address",
+                "destination address",
+                "source and destination addresses"
+              ],
+              "explanation": "TCP and UDP ports identify the communication endpoints for applications on a host, which is distinct from the source and destination addresses."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "cache",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "elapsedMs": 54.624500000005355,
+      "reused": true
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "42360615-e4a5-4152-8741-9961c83dd103",
+        "documentId": "b7910510-26a0-414e-b929-7b0a0fc04ef4",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "SOURCE_EVIDENCE_INVALID",
+        "errorMessage": "The question and correct answer are disconnected from their cited passage. Use a supported fact or application.",
+        "errorStage": "validating",
+        "elapsedTimeMs": 27574,
+        "createdAt": "2026-10-09T22:41:54.449Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 20,
+          "sourceReused": 0,
+          "selectionMs": 4,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "seed": 42,
+          "inputTokens": 1026,
+          "plan_total_duration": 10624430100,
+          "plan_load_duration": 5039714000,
+          "plan_prompt_eval_duration": 400330000,
+          "plan_eval_duration": 5172165000,
+          "plan_prompt_eval_count": 773,
+          "plan_prompt_eval_cached_count": 0,
+          "plan_eval_count": 336,
+          "plan_tokensPerSecond": 64.96312472629934,
+          "createdQuestions": 9,
+          "initial_total_duration": 14378990800,
+          "initial_load_duration": 135481000,
+          "initial_prompt_eval_duration": 510325000,
+          "initial_eval_duration": 13596942000,
+          "initial_prompt_eval_count": 2018,
+          "initial_prompt_eval_cached_count": 698,
+          "initial_eval_count": 904,
+          "initial_tokensPerSecond": 66.48553770399256,
+          "generationMs": 27508,
+          "validationMs": 17,
+          "repairedQuestions": 1,
+          "repairInputTokens": 1341,
+          "repair_total_duration": 2474206000,
+          "repair_load_duration": 42052100,
+          "repair_prompt_eval_duration": 473209000,
+          "repair_eval_duration": 1906512000,
+          "repair_prompt_eval_count": 1341,
+          "repair_prompt_eval_cached_count": 36,
+          "repair_eval_count": 119,
+          "repair_tokensPerSecond": 62.41765066257123,
+          "totalMs": 27573
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:12:22.0225864+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:11:53.8867614+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s1",
+              "prompt": "What does an IP address do?",
+              "correctAnswer": "Identifies a network interface and helps routers direct packets to a destination.",
+              "distractors": [
+                "It encrypts data packets.",
+                "It describes the contents of the data.",
+                "It determines the speed of the network connection."
+              ],
+              "explanation": "An IP address identifies a network interface and assists routers in routing packets to their destination."
+            },
+            "1": {
+              "evidenceId": "p1s2",
+              "prompt": "How many bits does an IPv4 address use?",
+              "correctAnswer": "32",
+              "distractors": [
+                "16",
+                "64",
+                "128"
+              ],
+              "explanation": "IPv4 uses 32 bits to represent an IP address."
+            },
+            "2": {
+              "evidenceId": "p1s7",
+              "prompt": "What is the primary function of an IP address in network communication?",
+              "correctAnswer": "It helps routers choose where to forward a packet.",
+              "distractors": [
+                "It encrypts data packets.",
+                "It describes the contents of the data.",
+                "It determines the speed of the network connection."
+              ],
+              "explanation": "An IP address assists routers in deciding where to forward a packet based on the destination address."
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s1",
+              "prompt": "What does DNS do?",
+              "correctAnswer": "DNS translates human-readable domain names into IP addresses",
+              "distractors": [
+                "DNS encrypts data for privacy",
+                "DNS sends emails automatically",
+                "DNS translates IP addresses into domain names"
+              ],
+              "explanation": "DNS is responsible for converting domain names into IP addresses, as stated in the passage."
+            },
+            "4": {
+              "evidenceId": "p2s4",
+              "prompt": "What type of record contains an IPv4 address?",
+              "correctAnswer": "A record",
+              "distractors": [
+                "AAAA record",
+                "MX record",
+                "NS record"
+              ],
+              "explanation": "The passage explicitly states that an A record contains an IPv4 address."
+            },
+            "5": {
+              "evidenceId": "p2s8",
+              "prompt": "Why is DNS caching important?",
+              "correctAnswer": "To avoid another lookup when a previous lookup result is still valid",
+              "distractors": [
+                "To make DNS lookups faster",
+                "To encrypt DNS queries",
+                "To store DNS records permanently"
+              ],
+              "explanation": "The passage explains that DNS caching helps avoid another lookup by reusing an unexpired cached answer."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s2",
+              "prompt": "In the client-server model, what does a client do?",
+              "correctAnswer": "sends a request",
+              "distractors": [
+                "sends a response",
+                "creates a database",
+                "manages the server"
+              ],
+              "explanation": "A client initiates a request to a server in the client-server model."
+            },
+            "7": {
+              "evidenceId": "p3s3",
+              "prompt": "What does a GET request ask for?",
+              "correctAnswer": "a representation of a resource",
+              "distractors": [
+                "the server's IP address",
+                "the client's email",
+                "the server's version number"
+              ],
+              "explanation": "GET requests ask for a representation of a resource, such as data or files."
+            },
+            "8": {
+              "evidenceId": "p3s9",
+              "prompt": "What does a status code of 404 indicate?",
+              "correctAnswer": "the requested resource was not found",
+              "distractors": [
+                "the request succeeded",
+                "the client's network is down",
+                "the server is overloaded"
+              ],
+              "explanation": "A status code of 404 specifically indicates that the requested resource could not be found."
+            }
+          }
+        },
+        {
+          "questions": {
+            "5": {
+              "evidenceId": "p2s2",
+              "prompt": "What does DNS do in a client-server model?",
+              "correctAnswer": "DNS translates human-readable domain names into IP addresses",
+              "distractors": [
+                "DNS encrypts data packets",
+                "DNS compresses data packets",
+                "DNS translates IP addresses into human-readable domain names"
+              ],
+              "explanation": "DNS translates human-readable domain names into IP addresses, as stated in the passage."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "startup": "warm",
+      "job": {
+        "id": "24feeed5-961b-40ae-b0e3-bfa46c42d8e7",
+        "documentId": "3ff73401-d7e6-4d32-be76-cebb305182af",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "SOURCE_EVIDENCE_INVALID",
+        "errorMessage": "The question and correct answer are disconnected from their cited passage. Use a supported fact or application. Question 8 repeats question 6. Test a different source-supported fact or application, not a rewording.",
+        "errorStage": "validating",
+        "elapsedTimeMs": 21688,
+        "createdAt": "2026-10-09T22:42:22.075Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 10,
+          "sourceReused": 0,
+          "selectionMs": 2,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "seed": 42,
+          "inputTokens": 1026,
+          "plan_total_duration": 5231544300,
+          "plan_load_duration": 39816300,
+          "plan_prompt_eval_duration": 19702000,
+          "plan_eval_duration": 5102707000,
+          "plan_prompt_eval_count": 773,
+          "plan_prompt_eval_cached_count": 772,
+          "plan_eval_count": 336,
+          "plan_tokensPerSecond": 65.84740217300347,
+          "createdQuestions": 9,
+          "initial_total_duration": 14184690200,
+          "initial_load_duration": 107924200,
+          "initial_prompt_eval_duration": 57980000,
+          "initial_eval_duration": 13830397000,
+          "initial_prompt_eval_count": 2018,
+          "initial_prompt_eval_cached_count": 2015,
+          "initial_eval_count": 920,
+          "initial_tokensPerSecond": 66.52014399875868,
+          "generationMs": 21619,
+          "validationMs": 1,
+          "repairedQuestions": 2,
+          "repairInputTokens": 1350,
+          "repair_total_duration": 2180401800,
+          "repair_load_duration": 47366900,
+          "repair_prompt_eval_duration": 133066000,
+          "repair_eval_duration": 1935779000,
+          "repair_prompt_eval_count": 1350,
+          "repair_prompt_eval_cached_count": 1032,
+          "repair_eval_count": 122,
+          "repair_tokensPerSecond": 63.02372326593067,
+          "totalMs": 21688
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:12:43.7621998+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:11:53.8867614+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s1",
+              "prompt": "What does an IP address do?",
+              "correctAnswer": "Identifies a network interface and helps routers direct packets to a destination.",
+              "distractors": [
+                "It encrypts data packets.",
+                "It describes the contents of the data.",
+                "It determines the speed of the network connection."
+              ],
+              "explanation": "An IP address identifies a network interface and assists routers in routing packets to the correct destination."
+            },
+            "1": {
+              "evidenceId": "p1s2",
+              "prompt": "How many bits does an IPv4 address use?",
+              "correctAnswer": "32 bits",
+              "distractors": [
+                "16 bits",
+                "64 bits",
+                "128 bits"
+              ],
+              "explanation": "IPv4 uses 32 bits to represent an IP address."
+            },
+            "2": {
+              "evidenceId": "p1s7",
+              "prompt": "What is the role of an IP address in network communication?",
+              "correctAnswer": "It tells the network where to deliver data.",
+              "distractors": [
+                "It encrypts data packets.",
+                "It determines the speed of the network connection.",
+                "It describes the contents of the data."
+              ],
+              "explanation": "An IP address specifies the destination for data packets, guiding routers in their routing decisions."
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s1",
+              "prompt": "What does DNS do?",
+              "correctAnswer": "DNS translates human-readable domain names into IP addresses",
+              "distractors": [
+                "DNS encrypts data for privacy",
+                "DNS compresses data for faster transmission",
+                "DNS translates IP addresses into human-readable domain names"
+              ],
+              "explanation": "DNS translates domain names into IP addresses to facilitate web browsing."
+            },
+            "4": {
+              "evidenceId": "p2s4",
+              "prompt": "Which record type contains an IPv4 address?",
+              "correctAnswer": "A record",
+              "distractors": [
+                "AAAA record",
+                "CNAME record",
+                "MX record"
+              ],
+              "explanation": "A record is used for IPv4 addresses, while AAAA record is for IPv6 addresses."
+            },
+            "5": {
+              "evidenceId": "p2s8",
+              "prompt": "Why is DNS caching important?",
+              "correctAnswer": "To avoid unnecessary DNS lookups",
+              "distractors": [
+                "To increase the speed of web browsing",
+                "To reduce the load on DNS servers",
+                "To ensure data privacy"
+              ],
+              "explanation": "DNS caching helps in reducing the load on DNS servers by reusing previously obtained IP addresses for a short period."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s2",
+              "prompt": "How does the client-server model work in HTTP?",
+              "correctAnswer": "A client sends a request and a server returns a response.",
+              "distractors": [
+                "A client sends a request and a server sends a response.",
+                "A client requests and a server responds.",
+                "A client sends a request and a server accepts the request."
+              ],
+              "explanation": "The client-server model is a fundamental concept in HTTP, where the client initiates a request and the server responds."
+            },
+            "7": {
+              "evidenceId": "p3s3",
+              "prompt": "What does a GET request do in HTTP?",
+              "correctAnswer": "It asks for a representation of a resource.",
+              "distractors": [
+                "It sends data to a resource for processing.",
+                "It asks for a resource's metadata.",
+                "It deletes a resource from the server."
+              ],
+              "explanation": "GET requests are used to retrieve data from a server, not to send data or delete resources."
+            },
+            "8": {
+              "evidenceId": "p3s9",
+              "prompt": "What does a status code of 404 mean in HTTP?",
+              "correctAnswer": "The requested resource was not found.",
+              "distractors": [
+                "The request was successful.",
+                "The server is overloaded.",
+                "The client's IP address is invalid."
+              ],
+              "explanation": "A 404 status code indicates that the server cannot find the requested resource."
+            }
+          }
+        },
+        {
+          "questions": {
+            "5": {
+              "evidenceId": "p2s3",
+              "prompt": "What does a GET request do in HTTP?",
+              "correctAnswer": "It asks for a representation of a resource.",
+              "distractors": [
+                "It sends a request to the server.",
+                "It updates the server with new data.",
+                "It deletes the requested resource from the server."
+              ],
+              "explanation": "A GET request asks for a representation of a resource, not for updates or deletions."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "08086f8f-4abb-4174-9a26-005ef550418b",
+        "documentId": "81206af3-55ed-46b0-92ce-46165a133f23",
+        "state": "ready",
+        "phase": "ready",
+        "canRetry": false,
+        "questionSetId": "85ef5769-8037-479c-9338-6cbbabcd042c",
+        "elapsedTimeMs": 28110,
+        "createdAt": "2026-10-09T22:42:43.929Z",
+        "retryCount": 0,
+        "timings": {
+          "extractionMs": 18,
+          "sourceReused": 0,
+          "selectionMs": 4,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "seed": 42,
+          "inputTokens": 1196,
+          "plan_total_duration": 11027429100,
+          "plan_load_duration": 5038664800,
+          "plan_prompt_eval_duration": 466789000,
+          "plan_eval_duration": 5505008000,
+          "plan_prompt_eval_count": 943,
+          "plan_prompt_eval_cached_count": 0,
+          "plan_eval_count": 359,
+          "plan_tokensPerSecond": 65.21334755553488,
+          "createdQuestions": 9,
+          "initial_total_duration": 16977446000,
+          "initial_load_duration": 231844300,
+          "initial_prompt_eval_duration": 571296000,
+          "initial_eval_duration": 16023111000,
+          "initial_prompt_eval_count": 2215,
+          "initial_prompt_eval_cached_count": 698,
+          "initial_eval_count": 1049,
+          "initial_tokensPerSecond": 65.46793565868701,
+          "generationMs": 28035,
+          "validationMs": 2,
+          "validationStorageMs": 9,
+          "totalMs": 28110
+        }
+      },
+      "questionSet": {
+        "id": "85ef5769-8037-479c-9338-6cbbabcd042c",
+        "documentId": "81206af3-55ed-46b0-92ce-46165a133f23",
+        "filename": "networking-unseen.pdf",
+        "extractedPages": [
+          {
+            "pageNumber": 1,
+            "chunkId": "chunk-1",
+            "text": "Topic 1: TCP vs UDP TCP establishes a connection and delivers a reliable, ordered byte stream. TCP can retransmit lost data, and a receiving application reads bytes in order rather than receiving separate message boundaries. UDP sends individual datagrams without establishing a TCP-style connection. UDP does not guarantee delivery or ordering, so an application must handle loss or reordering if that matters. A synthetic file-copy application needs every byte in order, so TCP fits that requirement. A synthetic position-update application can discard an old update and use the newest one, so it can choose UDP when occasional loss is acceptable. These examples describe different requirements; UDP is not a guarantee of faster delivery."
+          },
+          {
+            "pageNumber": 2,
+            "chunkId": "chunk-2",
+            "text": "Topic 2: Ports TCP and UDP port numbers identify communication endpoints for applications on a host. A port number is a 16-bit value and ranges from 0 to 65535. An IP address selects a host interface; the port identifies the application endpoint used for the conversation. In these synthetic service examples, an SSH server listens on TCP port 22, an IMAP server listens on TCP port 143, and a PostgreSQL server listens on TCP port 5432. A client selects the server's listening port to contact that service. A TCP endpoint and a UDP endpoint with the same numeric port are distinct. A connection is distinguished by its protocol and the source and destination addresses and ports. Two clients can contact the same server port using different source ports."
+          },
+          {
+            "pageNumber": 3,
+            "chunkId": "chunk-3",
+            "text": "Topic 3: Subnetting Subnetting divides an address block into smaller networks. An IPv4 /24 prefix uses 24 network bits and leaves 8 host bits. The subnet mask for /24 is 255.255.255.0. The synthetic subnet 198.51.100.0/24 has 256 total addresses. Its network address is 198.51.100.0 and its broadcast address is 198.51.100.255. In a conventional /24 subnet, the host range is 198.51.100.1 through 198.51.100.254. Splitting 198.51.100.0/24 into two /25 subnets yields 198.51.100.0/25 and 198.51.100.128/25. Each /25 uses 25 network bits, leaves 7 host bits, and contains 128 total addresses. Its subnet mask is 255.255.255.128."
+          }
+        ],
+        "metadata": {
+          "documentHash": "c409f3b29b8cc83074eeca781e897bd245e22f6549f0a9238082de87f789768b",
+          "extractorVersion": "pdf-parse@2.4.5/point-nemo-text-v3",
+          "promptVersion": "point-nemo-planned-passages-v6",
+          "schemaVersion": "point-nemo-questions-v2",
+          "tokenizerDigest": "d9011691d2d6b47762206b71f4a78429b5614850725b47ae06bef96674eed416",
+          "modelTag": "qwen2.5:3b",
+          "modelDigest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+          "settingsHash": "57d50f77eea50e1228720c71688a8cfd5a797163fbb7e5d7b9b6ba8a556614ae",
+          "createdAt": "2026-10-09T22:43:12.036Z"
+        },
+        "compatible": true,
+        "topics": [
+          {
+            "id": "505afa28-5bec-4a9c-9a92-07d37ea40010",
+            "name": "TCP vs UDP"
+          },
+          {
+            "id": "92c39206-d111-46fc-a625-d6efb5fcc74f",
+            "name": "Ports"
+          },
+          {
+            "id": "8637f7b1-ca23-4b5e-b7ed-737c0ef46981",
+            "name": "Subnetting"
+          }
+        ],
+        "questions": [
+          {
+            "id": "e98b4202-6ad5-4534-b8a8-2ce2806d6792",
+            "topicId": "505afa28-5bec-4a9c-9a92-07d37ea40010",
+            "difficulty": "easy",
+            "prompt": "What does TCP do?",
+            "options": [
+              "Transmits data without a connection",
+              "Guarantees delivery of every byte",
+              "Ensures data is sent in order",
+              "Establishes a connection and delivers a reliable, ordered byte stream"
+            ],
+            "answerIndex": 3,
+            "explanation": "TCP ensures a reliable and ordered delivery of data, which is its primary function.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "Topic 1: TCP vs UDP TCP establishes a connection and delivers a reliable, ordered byte stream."
+              }
+            ]
+          },
+          {
+            "id": "337308f2-4c65-455c-921a-42306822d934",
+            "topicId": "505afa28-5bec-4a9c-9a92-07d37ea40010",
+            "difficulty": "medium",
+            "prompt": "What does TCP do for lost data?",
+            "options": [
+              "Guarantees delivery of every byte",
+              "Retransmits lost data",
+              "Ensures data is sent in order",
+              "Transmits data without a connection"
+            ],
+            "answerIndex": 1,
+            "explanation": "TCP's retransmission feature is a mechanism to handle lost data.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "TCP can retransmit lost data, and a receiving application reads bytes in order rather than receiving separate message boundaries."
+              }
+            ]
+          },
+          {
+            "id": "7baea26d-7c41-4872-96cb-b69774f00230",
+            "topicId": "505afa28-5bec-4a9c-9a92-07d37ea40010",
+            "difficulty": "hard",
+            "prompt": "Which application would use TCP?",
+            "options": [
+              "A synthetic position-update application",
+              "A synthetic file-copy application",
+              "A web browser",
+              "A video streaming service"
+            ],
+            "answerIndex": 1,
+            "explanation": "TCP is suitable for applications that require the delivery of every byte in order, such as file-copy applications.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "A synthetic file-copy application needs every byte in order, so TCP fits that requirement."
+              }
+            ]
+          },
+          {
+            "id": "a42ff5a0-1ccb-4365-9983-b022d2455ef0",
+            "topicId": "92c39206-d111-46fc-a625-d6efb5fcc74f",
+            "difficulty": "easy",
+            "prompt": "What is the range of port numbers for TCP and UDP?",
+            "options": [
+              "1 to 1024",
+              "1025 to 49151",
+              "0 to 65535",
+              "1024 to 65535"
+            ],
+            "answerIndex": 2,
+            "explanation": "Port numbers are 16-bit values, ranging from 0 to 65535.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "Topic 2: Ports TCP and UDP port numbers identify communication endpoints for applications on a host."
+              }
+            ]
+          },
+          {
+            "id": "af6669c7-1d44-427e-bc19-d0eb9b0a36ae",
+            "topicId": "92c39206-d111-46fc-a625-d6efb5fcc74f",
+            "difficulty": "medium",
+            "prompt": "Which TCP ports do SSH, IMAP, and PostgreSQL servers use?",
+            "options": [
+              "22, 443, 5432",
+              "22, 143, 5432",
+              "22, 143, 8080",
+              "22, 110, 5432"
+            ],
+            "answerIndex": 1,
+            "explanation": "The passage provides these port numbers for the respective services.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "In these synthetic service examples, an SSH server listens on TCP port 22, an IMAP server listens on TCP port 143, and a PostgreSQL server listens on TCP port 5432."
+              }
+            ]
+          },
+          {
+            "id": "8301e9bf-a785-44fd-828b-6820480a7602",
+            "topicId": "92c39206-d111-46fc-a625-d6efb5fcc74f",
+            "difficulty": "hard",
+            "prompt": "What distinguishes a TCP endpoint from a UDP endpoint with the same port number?",
+            "options": [
+              "The IP address",
+              "The protocol",
+              "The source port number",
+              "The destination port number"
+            ],
+            "answerIndex": 1,
+            "explanation": "TCP and UDP endpoints with the same port number are distinguished by their protocols.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "A TCP endpoint and a UDP endpoint with the same numeric port are distinct."
+              }
+            ]
+          },
+          {
+            "id": "74757436-39d3-49c7-ad43-50105d3543f1",
+            "topicId": "8637f7b1-ca23-4b5e-b7ed-737c0ef46981",
+            "difficulty": "easy",
+            "prompt": "How many host bits are left in an IPv4 /24 prefix?",
+            "options": [
+              "8",
+              "16",
+              "10",
+              "14"
+            ],
+            "answerIndex": 0,
+            "explanation": "An IPv4 /24 prefix uses 24 network bits, leaving 8 host bits.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "An IPv4 /24 prefix uses 24 network bits and leaves 8 host bits."
+              }
+            ]
+          },
+          {
+            "id": "8398e8ab-81a2-4612-a915-61298cb5791d",
+            "topicId": "8637f7b1-ca23-4b5e-b7ed-737c0ef46981",
+            "difficulty": "medium",
+            "prompt": "How many addresses are in a /25 subnet?",
+            "options": [
+              "128",
+              "256",
+              "64",
+              "32"
+            ],
+            "answerIndex": 0,
+            "explanation": "A /25 subnet has 25 network bits, leaving 7 host bits, resulting in 128 total addresses.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "Each /25 uses 25 network bits, leaves 7 host bits, and contains 128 total addresses."
+              }
+            ]
+          },
+          {
+            "id": "009a2868-acdf-4427-b3ac-aa43be84042f",
+            "topicId": "8637f7b1-ca23-4b5e-b7ed-737c0ef46981",
+            "difficulty": "hard",
+            "prompt": "What is the subnet mask for a /25 subnet?",
+            "options": [
+              "255.255.255.0",
+              "255.255.255.255",
+              "255.255.255.128",
+              "255.255.255.254"
+            ],
+            "answerIndex": 2,
+            "explanation": "The subnet mask for a /25 subnet is 255.255.255.128.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "Its subnet mask is 255.255.255.128."
+              }
+            ]
+          }
+        ],
+        "createdAt": "2026-10-09T22:43:12.036Z"
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:13:12.0286086+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:11:53.8867614+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s1",
+              "prompt": "What does TCP do?",
+              "correctAnswer": "Establishes a connection and delivers a reliable, ordered byte stream",
+              "distractors": [
+                "Transmits data without a connection",
+                "Guarantees delivery of every byte",
+                "Ensures data is sent in order"
+              ],
+              "explanation": "TCP ensures a reliable and ordered delivery of data, which is its primary function."
+            },
+            "1": {
+              "evidenceId": "p1s2",
+              "prompt": "What does TCP do for lost data?",
+              "correctAnswer": "Retransmits lost data",
+              "distractors": [
+                "Guarantees delivery of every byte",
+                "Ensures data is sent in order",
+                "Transmits data without a connection"
+              ],
+              "explanation": "TCP's retransmission feature is a mechanism to handle lost data."
+            },
+            "2": {
+              "evidenceId": "p1s5",
+              "prompt": "Which application would use TCP?",
+              "correctAnswer": "A synthetic file-copy application",
+              "distractors": [
+                "A synthetic position-update application",
+                "A web browser",
+                "A video streaming service"
+              ],
+              "explanation": "TCP is suitable for applications that require the delivery of every byte in order, such as file-copy applications."
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s1",
+              "prompt": "What is the range of port numbers for TCP and UDP?",
+              "correctAnswer": "0 to 65535",
+              "distractors": [
+                "1 to 1024",
+                "1025 to 49151",
+                "1024 to 65535"
+              ],
+              "explanation": "Port numbers are 16-bit values, ranging from 0 to 65535."
+            },
+            "4": {
+              "evidenceId": "p2s4",
+              "prompt": "Which TCP ports do SSH, IMAP, and PostgreSQL servers use?",
+              "correctAnswer": "22, 143, 5432",
+              "distractors": [
+                "22, 443, 5432",
+                "22, 143, 8080",
+                "22, 110, 5432"
+              ],
+              "explanation": "The passage provides these port numbers for the respective services."
+            },
+            "5": {
+              "evidenceId": "p2s6",
+              "prompt": "What distinguishes a TCP endpoint from a UDP endpoint with the same port number?",
+              "correctAnswer": "The protocol",
+              "distractors": [
+                "The IP address",
+                "The source port number",
+                "The destination port number"
+              ],
+              "explanation": "TCP and UDP endpoints with the same port number are distinguished by their protocols."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s2",
+              "prompt": "How many host bits are left in an IPv4 /24 prefix?",
+              "correctAnswer": "8",
+              "distractors": [
+                "16",
+                "10",
+                "14"
+              ],
+              "explanation": "An IPv4 /24 prefix uses 24 network bits, leaving 8 host bits."
+            },
+            "7": {
+              "evidenceId": "p3s8",
+              "prompt": "How many addresses are in a /25 subnet?",
+              "correctAnswer": "128",
+              "distractors": [
+                "256",
+                "64",
+                "32"
+              ],
+              "explanation": "A /25 subnet has 25 network bits, leaving 7 host bits, resulting in 128 total addresses."
+            },
+            "8": {
+              "evidenceId": "p3s9",
+              "prompt": "What is the subnet mask for a /25 subnet?",
+              "correctAnswer": "255.255.255.128",
+              "distractors": [
+                "255.255.255.0",
+                "255.255.255.255",
+                "255.255.255.254"
+              ],
+              "explanation": "The subnet mask for a /25 subnet is 255.255.255.128."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "cache",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "elapsedMs": 59.609800000005635,
+      "reused": true
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "startup": "warm",
+      "job": {
+        "id": "857dafea-b9f0-410a-8eaf-9fe13dfb596c",
+        "documentId": "22c1a395-ab14-4e41-b817-06f5e3d6f2a7",
+        "state": "ready",
+        "phase": "ready",
+        "canRetry": false,
+        "questionSetId": "c31fd26b-c17d-4830-93ab-a341d9ebcb22",
+        "elapsedTimeMs": 24781,
+        "createdAt": "2026-10-09T22:43:12.143Z",
+        "retryCount": 0,
+        "timings": {
+          "extractionMs": 22,
+          "sourceReused": 0,
+          "selectionMs": 9,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "seed": 42,
+          "inputTokens": 1196,
+          "plan_total_duration": 5509620800,
+          "plan_load_duration": 37456300,
+          "plan_prompt_eval_duration": 23735000,
+          "plan_eval_duration": 5369820000,
+          "plan_prompt_eval_count": 943,
+          "plan_prompt_eval_cached_count": 942,
+          "plan_eval_count": 354,
+          "plan_tokensPerSecond": 65.92399745242858,
+          "createdQuestions": 9,
+          "initial_total_duration": 19161082300,
+          "initial_load_duration": 128132100,
+          "initial_prompt_eval_duration": 123390000,
+          "initial_eval_duration": 18741693000,
+          "initial_prompt_eval_count": 2210,
+          "initial_prompt_eval_cached_count": 2011,
+          "initial_eval_count": 1240,
+          "initial_tokensPerSecond": 66.16264603203136,
+          "generationMs": 24698,
+          "validationMs": 1,
+          "validationStorageMs": 6,
+          "totalMs": 24781
+        }
+      },
+      "questionSet": {
+        "id": "c31fd26b-c17d-4830-93ab-a341d9ebcb22",
+        "documentId": "22c1a395-ab14-4e41-b817-06f5e3d6f2a7",
+        "filename": "networking-unseen.pdf",
+        "extractedPages": [
+          {
+            "pageNumber": 1,
+            "chunkId": "chunk-1",
+            "text": "Topic 1: TCP vs UDP TCP establishes a connection and delivers a reliable, ordered byte stream. TCP can retransmit lost data, and a receiving application reads bytes in order rather than receiving separate message boundaries. UDP sends individual datagrams without establishing a TCP-style connection. UDP does not guarantee delivery or ordering, so an application must handle loss or reordering if that matters. A synthetic file-copy application needs every byte in order, so TCP fits that requirement. A synthetic position-update application can discard an old update and use the newest one, so it can choose UDP when occasional loss is acceptable. These examples describe different requirements; UDP is not a guarantee of faster delivery."
+          },
+          {
+            "pageNumber": 2,
+            "chunkId": "chunk-2",
+            "text": "Topic 2: Ports TCP and UDP port numbers identify communication endpoints for applications on a host. A port number is a 16-bit value and ranges from 0 to 65535. An IP address selects a host interface; the port identifies the application endpoint used for the conversation. In these synthetic service examples, an SSH server listens on TCP port 22, an IMAP server listens on TCP port 143, and a PostgreSQL server listens on TCP port 5432. A client selects the server's listening port to contact that service. A TCP endpoint and a UDP endpoint with the same numeric port are distinct. A connection is distinguished by its protocol and the source and destination addresses and ports. Two clients can contact the same server port using different source ports."
+          },
+          {
+            "pageNumber": 3,
+            "chunkId": "chunk-3",
+            "text": "Topic 3: Subnetting Subnetting divides an address block into smaller networks. An IPv4 /24 prefix uses 24 network bits and leaves 8 host bits. The subnet mask for /24 is 255.255.255.0. The synthetic subnet 198.51.100.0/24 has 256 total addresses. Its network address is 198.51.100.0 and its broadcast address is 198.51.100.255. In a conventional /24 subnet, the host range is 198.51.100.1 through 198.51.100.254. Splitting 198.51.100.0/24 into two /25 subnets yields 198.51.100.0/25 and 198.51.100.128/25. Each /25 uses 25 network bits, leaves 7 host bits, and contains 128 total addresses. Its subnet mask is 255.255.255.128."
+          }
+        ],
+        "metadata": {
+          "documentHash": "c409f3b29b8cc83074eeca781e897bd245e22f6549f0a9238082de87f789768b",
+          "extractorVersion": "pdf-parse@2.4.5/point-nemo-text-v3",
+          "promptVersion": "point-nemo-planned-passages-v6",
+          "schemaVersion": "point-nemo-questions-v2",
+          "tokenizerDigest": "d9011691d2d6b47762206b71f4a78429b5614850725b47ae06bef96674eed416",
+          "modelTag": "qwen2.5:3b",
+          "modelDigest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+          "settingsHash": "57d50f77eea50e1228720c71688a8cfd5a797163fbb7e5d7b9b6ba8a556614ae",
+          "createdAt": "2026-10-09T22:43:36.924Z"
+        },
+        "compatible": true,
+        "topics": [
+          {
+            "id": "4e207bae-601b-498a-9b56-68fe454f02c0",
+            "name": "TCP vs UDP"
+          },
+          {
+            "id": "8b6e0c41-e989-47bb-ab7e-00224662f5c9",
+            "name": "Ports"
+          },
+          {
+            "id": "64e46493-9734-4f78-8ba2-dfa365baafdb",
+            "name": "Subnetting"
+          }
+        ],
+        "questions": [
+          {
+            "id": "92339110-e048-4b9d-b505-3e30cfc40c69",
+            "topicId": "4e207bae-601b-498a-9b56-68fe454f02c0",
+            "difficulty": "easy",
+            "prompt": "What does TCP do?",
+            "options": [
+              "Transmits data without a connection",
+              "Guarantees delivery of every byte",
+              "Ensures data is sent in order",
+              "Establishes a connection and delivers a reliable, ordered byte stream"
+            ],
+            "answerIndex": 3,
+            "explanation": "TCP ensures a reliable and ordered delivery of data, which is its primary function.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "Topic 1: TCP vs UDP TCP establishes a connection and delivers a reliable, ordered byte stream."
+              }
+            ]
+          },
+          {
+            "id": "83d113a4-0ca8-4516-886a-943914dd3c2a",
+            "topicId": "4e207bae-601b-498a-9b56-68fe454f02c0",
+            "difficulty": "medium",
+            "prompt": "What does TCP do for lost data?",
+            "options": [
+              "Guarantees delivery of every byte",
+              "Retransmits lost data",
+              "Ensures data is sent in order",
+              "Transmits data without a connection"
+            ],
+            "answerIndex": 1,
+            "explanation": "TCP's retransmission of lost data is a key feature for reliability.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "TCP can retransmit lost data, and a receiving application reads bytes in order rather than receiving separate message boundaries."
+              }
+            ]
+          },
+          {
+            "id": "abf9aaef-538a-4aa1-aa25-b6a2fc80097a",
+            "topicId": "4e207bae-601b-498a-9b56-68fe454f02c0",
+            "difficulty": "hard",
+            "prompt": "Which application requires TCP for file-copying?",
+            "options": [
+              "A synthetic position-update application",
+              "A web browser",
+              "A synthetic file-copy application",
+              "An email client"
+            ],
+            "answerIndex": 2,
+            "explanation": "A synthetic file-copy application needs every byte in order, which is why TCP is suitable.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "A synthetic file-copy application needs every byte in order, so TCP fits that requirement."
+              }
+            ]
+          },
+          {
+            "id": "063cafa4-e168-4c21-a4f3-473ce7f18df3",
+            "topicId": "8b6e0c41-e989-47bb-ab7e-00224662f5c9",
+            "difficulty": "easy",
+            "prompt": "What is the range of port numbers for TCP and UDP?",
+            "options": [
+              "1 to 1024",
+              "1 to 65536",
+              "0 to 65535",
+              "1 to 4096"
+            ],
+            "answerIndex": 2,
+            "explanation": "Port numbers are 16-bit values, allowing for a range from 0 to 65535.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "Topic 2: Ports TCP and UDP port numbers identify communication endpoints for applications on a host."
+              }
+            ]
+          },
+          {
+            "id": "f68badbc-1d1b-45a0-9850-a41739391862",
+            "topicId": "8b6e0c41-e989-47bb-ab7e-00224662f5c9",
+            "difficulty": "medium",
+            "prompt": "Which ports are used by SSH, IMAP, and PostgreSQL servers?",
+            "options": [
+              "22, 443, 5432",
+              "22, 143, 8080",
+              "22, 143, 5432",
+              "22, 143, 3306"
+            ],
+            "answerIndex": 2,
+            "explanation": "These are the standard ports used by the specified services.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "In these synthetic service examples, an SSH server listens on TCP port 22, an IMAP server listens on TCP port 143, and a PostgreSQL server listens on TCP port 5432."
+              }
+            ]
+          },
+          {
+            "id": "abc30102-da85-48cb-a085-b2731d3f6f76",
+            "topicId": "8b6e0c41-e989-47bb-ab7e-00224662f5c9",
+            "difficulty": "hard",
+            "prompt": "What is the difference between TCP and UDP ports?",
+            "options": [
+              "They are the same for the same service.",
+              "They are distinct endpoints for the same service.",
+              "TCP is faster than UDP.",
+              "UDP uses more port numbers."
+            ],
+            "answerIndex": 1,
+            "explanation": "TCP and UDP ports are used for different protocols, even if they use the same port number.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "A TCP endpoint and a UDP endpoint with the same numeric port are distinct."
+              }
+            ]
+          },
+          {
+            "id": "e8463664-79b0-48a9-a4ad-196bb2f65e4a",
+            "topicId": "64e46493-9734-4f78-8ba2-dfa365baafdb",
+            "difficulty": "easy",
+            "prompt": "What does a /24 prefix in IPv4 address use for its network bits?",
+            "options": [
+              "16",
+              "24",
+              "20",
+              "32"
+            ],
+            "answerIndex": 1,
+            "explanation": "A /24 prefix in IPv4 uses 24 network bits, leaving 8 host bits.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "An IPv4 /24 prefix uses 24 network bits and leaves 8 host bits."
+              }
+            ]
+          },
+          {
+            "id": "028616ba-df47-48ce-ba72-3a89f1ffc699",
+            "topicId": "64e46493-9734-4f78-8ba2-dfa365baafdb",
+            "difficulty": "medium",
+            "prompt": "How is the /24 network 198.51.100.0 split into two /25 subnets?",
+            "options": [
+              "198.51.100.0/24 and 198.51.100.128/24",
+              "198.51.100.0/26 and 198.51.100.128/26",
+              "198.51.100.0/25 and 198.51.100.128/25",
+              "198.51.100.0/25 and 198.51.100.126/25"
+            ],
+            "answerIndex": 2,
+            "explanation": "Splitting a /24 network into two /25 subnets results in the addresses 198.51.100.0/25 and 198.51.100.128/25.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "Splitting 198.51.100.0/24 into two /25 subnets yields 198.51.100.0/25 and 198.51.100.128/25."
+              }
+            ]
+          },
+          {
+            "id": "4ceea6a2-0ff7-4216-85b2-da724b2d7869",
+            "topicId": "64e46493-9734-4f78-8ba2-dfa365baafdb",
+            "difficulty": "hard",
+            "prompt": "What is the subnet mask for a /25 subnet?",
+            "options": [
+              "255.255.255.0",
+              "255.255.255.255",
+              "255.255.255.128",
+              "255.255.255.129"
+            ],
+            "answerIndex": 2,
+            "explanation": "The subnet mask for a /25 subnet is 255.255.255.128, which corresponds to 25 network bits.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "Its subnet mask is 255.255.255.128."
+              }
+            ]
+          }
+        ],
+        "createdAt": "2026-10-09T22:43:36.924Z"
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:13:36.918089+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:11:53.8867614+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s1",
+              "prompt": "What does TCP do?",
+              "correctAnswer": "Establishes a connection and delivers a reliable, ordered byte stream",
+              "distractors": [
+                "Transmits data without a connection",
+                "Guarantees delivery of every byte",
+                "Ensures data is sent in order"
+              ],
+              "explanation": "TCP ensures a reliable and ordered delivery of data, which is its primary function."
+            },
+            "1": {
+              "evidenceId": "p1s2",
+              "prompt": "What does TCP do for lost data?",
+              "correctAnswer": "Retransmits lost data",
+              "distractors": [
+                "Guarantees delivery of every byte",
+                "Ensures data is sent in order",
+                "Transmits data without a connection"
+              ],
+              "explanation": "TCP's retransmission of lost data is a key feature for reliability."
+            },
+            "2": {
+              "evidenceId": "p1s5",
+              "prompt": "Which application requires TCP for file-copying?",
+              "correctAnswer": "A synthetic file-copy application",
+              "distractors": [
+                "A synthetic position-update application",
+                "A web browser",
+                "An email client"
+              ],
+              "explanation": "A synthetic file-copy application needs every byte in order, which is why TCP is suitable."
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s1",
+              "prompt": "What is the range of port numbers for TCP and UDP?",
+              "correctAnswer": "0 to 65535",
+              "distractors": [
+                "1 to 1024",
+                "1 to 65536",
+                "1 to 4096"
+              ],
+              "explanation": "Port numbers are 16-bit values, allowing for a range from 0 to 65535."
+            },
+            "4": {
+              "evidenceId": "p2s4",
+              "prompt": "Which ports are used by SSH, IMAP, and PostgreSQL servers?",
+              "correctAnswer": "22, 143, 5432",
+              "distractors": [
+                "22, 443, 5432",
+                "22, 143, 8080",
+                "22, 143, 3306"
+              ],
+              "explanation": "These are the standard ports used by the specified services."
+            },
+            "5": {
+              "evidenceId": "p2s6",
+              "prompt": "What is the difference between TCP and UDP ports?",
+              "correctAnswer": "They are distinct endpoints for the same service.",
+              "distractors": [
+                "They are the same for the same service.",
+                "TCP is faster than UDP.",
+                "UDP uses more port numbers."
+              ],
+              "explanation": "TCP and UDP ports are used for different protocols, even if they use the same port number."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s2",
+              "prompt": "What does a /24 prefix in IPv4 address use for its network bits?",
+              "correctAnswer": "24",
+              "distractors": [
+                "16",
+                "20",
+                "32"
+              ],
+              "explanation": "A /24 prefix in IPv4 uses 24 network bits, leaving 8 host bits."
+            },
+            "7": {
+              "evidenceId": "p3s7",
+              "prompt": "How is the /24 network 198.51.100.0 split into two /25 subnets?",
+              "correctAnswer": "198.51.100.0/25 and 198.51.100.128/25",
+              "distractors": [
+                "198.51.100.0/24 and 198.51.100.128/24",
+                "198.51.100.0/26 and 198.51.100.128/26",
+                "198.51.100.0/25 and 198.51.100.126/25"
+              ],
+              "explanation": "Splitting a /24 network into two /25 subnets results in the addresses 198.51.100.0/25 and 198.51.100.128/25."
+            },
+            "8": {
+              "evidenceId": "p3s9",
+              "prompt": "What is the subnet mask for a /25 subnet?",
+              "correctAnswer": "255.255.255.128",
+              "distractors": [
+                "255.255.255.0",
+                "255.255.255.255",
+                "255.255.255.129"
+              ],
+              "explanation": "The subnet mask for a /25 subnet is 255.255.255.128, which corresponds to 25 network bits."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "cache",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "elapsedMs": 47.164400000008754,
+      "reused": true
+    }
+  ]
+}

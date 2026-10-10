@@ -276,35 +276,52 @@ export class GenerationJobService {
               if (!repairSourcePassages.length || !fitsRepairContext(repairSourcePassages)) {
                 throw new BadRequestError("TOKEN_OVERFLOW", "The saved source passages and passing questions do not fit together for a safe repair. Select a shorter PDF excerpt.");
               }
-              for (const passage of topicPassages) {
-                if (distractorsOnly || !needsDifferentFact) break;
+              const supplementalPassages = distractorsOnly
+                ? [...topicPassages, ...passages.filter((passage)=>!topicPassages.some((topicPassage)=>topicPassage.id===passage.id))]
+                : needsDifferentFact ? topicPassages : [];
+              for (const passage of supplementalPassages) {
                 if (requiredPassages.has(passage.id)) continue;
                 const expanded = [...repairSourcePassages, passage];
                 if (fitsRepairContext(expanded)) repairSourcePassages = expanded;
               }
-              const repairSource = formatPassages(repairSourcePassages);
-              const repairMessages = generationMessages(repairSource, slotFeedback, slotPlan);
-              timings.repairInputTokens += checkTokenBudget(repairMessages, this.config.ollamaMaxInputTokens, counter);
               const slotSignal = attemptSignal;
-              for (let candidateAttempt = 0; candidateAttempt < (distractorsOnly ? 2 : 1); candidateAttempt++) {
-              const replacement = await abortable(this.ollama.generateQuestions(repairSource, {
-                signal: slotSignal, repairFeedback: candidateAttempt ? `${slotFeedback} Your previous choices still duplicated or contained the correct answer. Write three different WRONG answers.` : slotFeedback, repair: slotPlan,
-                seed: (generationSeed + 100 + slot.index + candidateAttempt*1000) % 2_000_000_000,
-                onMetrics: (metrics) => recordMetrics("repair", metrics),
-              }), slotSignal).catch((error: unknown) => {
-                if (signal.aborted) throw signal.reason;
-                if (slotSignal.aborted) throw new ServiceUnavailableError("INFERENCE_TIMEOUT", "Local inference timed out while improving a question.");
-                throw error;
-              });
-              const proposedQuestions = (resolveEvidence(mergeRepair(slotPlan, replacement), passages) as { questions: unknown[] }).questions;
-              const choiceIssues = distractorsOnly ? inspectQuestions({status:"ready",topics:repair.topics,questions:proposedQuestions},extracted.pagesJson).issues
-                .filter((issue)=>issue.index===slot.index && (issue.message==="All four answer options must be distinct." || issue.message.includes("[answer_choices]"))) : [];
-              if (choiceIssues.length) {
-                if (candidateAttempt === 0) continue;
-                throw new BadRequestError("INVALID_MODEL_OUTPUT","The model repeated or overlapped answer options after the bounded distractor repair.");
-              }
-              currentQuestions = proposedQuestions;
-              break;
+              const beforeIssues = new Set(inspectQuestions({status:"ready",topics:repair.topics,questions:currentQuestions},extracted.pagesJson).issues
+                .map((issue)=>`${issue.index}:${issue.code}:${issue.message}`));
+              let candidateFeedback = slotFeedback;
+              // Two cheap choice repairs can fall back to one complete question
+              // rewrite. Full repairs get two candidates, checked immediately.
+              const candidateLimit = distractorsOnly ? 3 : 2;
+              for (let candidateAttempt = 0; candidateAttempt < candidateLimit; candidateAttempt++) {
+                this.checkActive(jobId, signal, deadline);
+                const candidatePlan: RepairPlan = {...slotPlan,slots:[{...focusedSlot,distractorsOnly:distractorsOnly && candidateAttempt < 2}]};
+                let candidatePassages = [...repairSourcePassages];
+                const fitsCandidate = () => counter.count(generationMessages(formatPassages(candidatePassages),candidateFeedback,candidatePlan)
+                  .map((message)=>message.content).join("\n")) + 256 <= this.config.ollamaMaxInputTokens;
+                while (!fitsCandidate() && candidatePassages.length > 1) candidatePassages.pop();
+                const candidateSource = formatPassages(candidatePassages);
+                if (!fitsCandidate()) throw new BadRequestError("TOKEN_OVERFLOW", "The question and its source do not fit the repair budget. Choose a shorter excerpt.");
+                timings.repairInputTokens += checkTokenBudget(generationMessages(candidateSource,candidateFeedback,candidatePlan),this.config.ollamaMaxInputTokens,counter);
+                try {
+                  const replacement = await abortable(this.ollama.generateQuestions(candidateSource, {
+                    signal: slotSignal, repairFeedback: candidateFeedback, repair: candidatePlan,
+                    seed: (generationSeed + 100 + slot.index + candidateAttempt*1000) % 2_000_000_000,
+                    onMetrics: (metrics) => recordMetrics("repair", metrics),
+                  }), slotSignal);
+                  const proposedQuestions = (resolveEvidence(mergeRepair(candidatePlan, replacement), passages) as { questions: unknown[] }).questions;
+                  const remaining = inspectQuestions({status:"ready",topics:repair.topics,questions:proposedQuestions},extracted.pagesJson).issues
+                    .filter((issue)=>issue.index === slot.index || issue.index < 0 ||
+                      (!pendingSlots.has(issue.index) && !beforeIssues.has(`${issue.index}:${issue.code}:${issue.message}`)));
+                  if (remaining.length) throw new BadRequestError(remaining[0]!.code, remaining.map((issue)=>issue.message).join(" ").slice(0,1000));
+                  currentQuestions = proposedQuestions;
+                  break;
+                } catch (error) {
+                  if (signal.aborted) throw signal.reason;
+                  if (slotSignal.aborted) throw new ServiceUnavailableError("INFERENCE_TIMEOUT", "Local inference timed out while improving a question.");
+                  const failure = safeError(error);
+                  if (!repairable.has(failure.code)) throw error;
+                  if (candidateAttempt === candidateLimit - 1) throw new BadRequestError(failure.code,`Question ${slot.index + 1} could not be repaired: ${failure.message}`);
+                  candidateFeedback = `${slotFeedback} Previous candidate failed: ${failure.message}`.slice(0,1200);
+                }
               }
               timings.repairedQuestionsCompleted = repairIndex + 1;
               phase("repairing");
@@ -327,12 +344,22 @@ export class GenerationJobService {
               const topicPassages = passages.filter((p)=>ids.has(p.id));
               const topicSource = formatPassages(topicPassages);
               checkTokenBudget(generationMessages(topicSource,feedback,undefined,plan,slots),this.config.ollamaMaxInputTokens,counter);
-              const batch = await abortable(this.ollama.generateQuestions(topicSource,{signal:attemptSignal,plan,slots,maxOutputTokens:768,seed:generationSeed+plannedSlot.index+attempt,
-                onMetrics:(metrics)=>recordMetrics(attempt?"repair":"initial",metrics)}),attemptSignal) as any;
-              if (!batch?.questions || Array.isArray(batch.questions) || Object.keys(batch.questions).length!==1 || !slots.every((slot)=>Object.hasOwn(batch.questions,String(slot)))) {
-                throw new BadRequestError("INVALID_MODEL_OUTPUT","The model did not return the requested question slot.");
+              try {
+                const batch = await abortable(this.ollama.generateQuestions(topicSource,{signal:attemptSignal,plan,slots,maxOutputTokens:768,seed:generationSeed+plannedSlot.index+attempt,
+                  onMetrics:(metrics)=>recordMetrics(attempt?"repair":"initial",metrics)}),attemptSignal) as any;
+                if (!batch?.questions || Array.isArray(batch.questions) || Object.keys(batch.questions).length!==1 || !slots.every((slot)=>Object.hasOwn(batch.questions,String(slot)))) {
+                  throw new BadRequestError("INVALID_MODEL_OUTPUT","The model did not return the requested question slot.");
+                }
+                Object.assign(questions,batch.questions);
+                timings.createdQuestions = (timings.createdQuestions ?? 0) + 1;
+              } catch (error) {
+                if (signal.aborted || attemptSignal.aborted || !repairable.has(safeError(error).code)) throw error;
+                // Preserve the other eight questions. The final report schedules
+                // this missing slot for repair against its original source.
+                questions[String(plannedSlot.index)] = null;
+                timings.invalidQuestionDrafts = (timings.invalidQuestionDrafts ?? 0) + 1;
               }
-              Object.assign(questions,batch.questions); timings.createdQuestions++; phase("creating");
+              phase("creating");
             }
             output = {status:"ready",topics:plan.topics,questions};
           } else {

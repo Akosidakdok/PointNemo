@@ -1,0 +1,56 @@
+[
+  {
+    "start": 0.3,
+    "duration": 4.122083333333333,
+    "speed": 1,
+    "text": "Point Nemo turns your lesson PDF into a local underwater study adventure."
+  },
+  {
+    "start": 6.25,
+    "duration": 5.76325,
+    "speed": 1,
+    "text": "Start with your own notes. Choose one English, text-based PDF from your local library."
+  },
+  {
+    "start": 13.25,
+    "duration": 4.035041666666666,
+    "speed": 1,
+    "text": "The safety gate checks the file and its signature before local processing begins."
+  },
+  {
+    "start": 19.25,
+    "duration": 7.066895833333334,
+    "speed": 1,
+    "text": "Sonar reads your lesson. Local Ollama creates nine questions, then validation checks answers against source evidence."
+  },
+  {
+    "start": 27.25,
+    "duration": 5.1714166666666666,
+    "speed": 1,
+    "text": "Explore three topics on your ocean map. Clear each encounter to unlock the next."
+  },
+  {
+    "start": 34.25,
+    "duration": 8.214270833333334,
+    "speed": 1,
+    "text": "Every correction has a source. Miss a question, and see the correct answer, an explanation, and the exact supporting quote with its PDF page."
+  },
+  {
+    "start": 45.25,
+    "duration": 5.9300625,
+    "speed": 1,
+    "text": "Then face the final review: the same nine questions, shuffled. Get eight right to complete the run."
+  },
+  {
+    "start": 53.25,
+    "duration": 2.3825,
+    "speed": 1,
+    "text": "See your result, and try the lesson again."
+  },
+  {
+    "start": 57.15,
+    "duration": 2.632041666666667,
+    "speed": 1.0373257287705957,
+    "text": "One lesson. One descent."
+  }
+]

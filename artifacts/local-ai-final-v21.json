@@ -1,0 +1,1831 @@
+{
+  "createdAt": "2026-10-09T23:20:03.474Z",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 3050 6GB Laptop GPU, 6144 MiB",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12450HX",
+    "ramGiB": 7.714714050292969
+  },
+  "pipelineVersion": "point-nemo-extractive-question-v21",
+  "reviewEnabled": false,
+  "baseline": null,
+  "databasePath": "C:\\Users\\redd\\AppData\\Local\\Temp\\point-nemo-benchmark-8AIsTf\\benchmark.sqlite",
+  "note": "Small synthetic-fixture benchmark. Automated validation is not a proof of answer correctness; review exported questions and evidence.",
+  "summary": [
+    {
+      "model": "qwen2.5:3b",
+      "samples": 4,
+      "medianMs": 29655.5,
+      "p95Ms": 38334,
+      "startup": [
+        {
+          "startup": "cold",
+          "samples": 2,
+          "medianMs": 35217.5
+        },
+        {
+          "startup": "warm",
+          "samples": 2,
+          "medianMs": 27077
+        }
+      ],
+      "firstPassRate": 0,
+      "completionRate": 0.5
+    }
+  ],
+  "skipped": [],
+  "records": [
+    {
+      "kind": "generation",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "c476a108-d230-4309-a607-ef783adf81d0",
+        "documentId": "99788a13-f078-4815-b7ac-e8720b61d0ca",
+        "state": "ready",
+        "phase": "ready",
+        "canRetry": false,
+        "questionSetId": "d2ea829b-610e-4f32-86f2-f5dceb2945e5",
+        "elapsedTimeMs": 32103,
+        "createdAt": "2026-10-09T23:17:58.128Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 1007,
+          "sourceReused": 0,
+          "selectionMs": 14,
+          "totalPassages": 22,
+          "selectedPassages": 22,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "seed": 42,
+          "inputTokens": 1725,
+          "plan_total_duration": 10352472500,
+          "plan_load_duration": 4527676600,
+          "plan_prompt_eval_duration": 597736000,
+          "plan_eval_duration": 5202247000,
+          "plan_prompt_eval_count": 1373,
+          "plan_prompt_eval_cached_count": 0,
+          "plan_eval_count": 342,
+          "plan_tokensPerSecond": 65.74082314815118,
+          "createdQuestions": 9,
+          "initial_total_duration": 17467995200,
+          "initial_load_duration": 315129400,
+          "initial_prompt_eval_duration": 581315000,
+          "initial_eval_duration": 16385909000,
+          "initial_prompt_eval_count": 3129,
+          "initial_prompt_eval_cached_count": 1896,
+          "initial_eval_count": 1000,
+          "initial_tokensPerSecond": 61.02804549933726,
+          "generationMs": 31035,
+          "validationMs": 3,
+          "repairedQuestions": 2,
+          "repairInputTokens": 710,
+          "repair_total_duration": 3168447400,
+          "repair_load_duration": 62463400,
+          "repair_prompt_eval_duration": 320387000,
+          "repair_eval_duration": 2728621000,
+          "repair_prompt_eval_count": 841,
+          "repair_prompt_eval_cached_count": 6,
+          "repair_eval_count": 169,
+          "repair_tokensPerSecond": 61.936047549293214,
+          "repairedQuestionsCompleted": 2,
+          "validationStorageMs": 4,
+          "totalMs": 32101
+        }
+      },
+      "questionSet": {
+        "id": "d2ea829b-610e-4f32-86f2-f5dceb2945e5",
+        "documentId": "99788a13-f078-4815-b7ac-e8720b61d0ca",
+        "filename": "networking-demo.pdf",
+        "extractedPages": [
+          {
+            "pageNumber": 1,
+            "chunkId": "chunk-1",
+            "text": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination. IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1). IPv6 uses 128 bits, represented in hexadecimal. Each IPv4 decimal number represents an 8-bit octet and ranges from 0 to 255. The four octets together account for the 32 bits in an IPv4 address. A router examines the destination IP address when choosing where to forward a packet. An address tells the network where to deliver data; it does not describe the contents of that data."
+          },
+          {
+            "pageNumber": 2,
+            "chunkId": "chunk-2",
+            "text": "Topic 2: DNS DNS translates human-readable domain names into IP addresses. For example, a fictional lookup for study.example can return 192.0.2.25 to the client. A DNS resolver receives a name lookup from a client and obtains the requested record. An A record contains an IPv4 address. An AAAA record contains an IPv6 address. A DNS cache keeps a previous lookup result for the record's time to live (TTL). Reusing an unexpired cached answer avoids another lookup. Once that lifetime expires, the resolver must obtain a current answer rather than treating the expired entry as fresh."
+          },
+          {
+            "pageNumber": 3,
+            "chunkId": "chunk-3",
+            "text": "Topic 3: HTTP HTTP is an application-layer protocol used to exchange requests and responses. In its client-server model, a client sends a request and a server returns a response. A GET request asks for a representation of a resource. In this synthetic example, GET /notes requests the study notes stored at the /notes path. A POST request submits data to a resource for processing. An HTTP response includes a status code and may include a body. Status code 200 means the request succeeded. Status code 404 means the requested resource was not found. The client can use the status code to distinguish a successful /notes response from a missing resource."
+          }
+        ],
+        "metadata": {
+          "documentHash": "559955e2e5b78308a7d7caadd1fde078decf06f9bd3152ffcd66cff3ce7aae76",
+          "extractorVersion": "pdf-parse@2.4.5/point-nemo-text-v3",
+          "promptVersion": "point-nemo-extractive-question-v21",
+          "schemaVersion": "point-nemo-questions-v2",
+          "tokenizerDigest": "d9011691d2d6b47762206b71f4a78429b5614850725b47ae06bef96674eed416",
+          "modelTag": "qwen2.5:3b",
+          "modelDigest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+          "settingsHash": "636b3072e49d0b92cb5c663513a22c91a00e9f0e7ef261937fcd0ddd92c6e8d8",
+          "createdAt": "2026-10-09T23:18:30.230Z"
+        },
+        "compatible": true,
+        "topics": [
+          {
+            "id": "c8537b9e-8520-4a1c-99c3-5d0c1c119a40",
+            "name": "IP Addressing"
+          },
+          {
+            "id": "153d3a90-84d2-4cfc-82c9-73ea8362a8dd",
+            "name": "DNS"
+          },
+          {
+            "id": "64cae1d8-44c9-4aa6-8aee-173e08d40918",
+            "name": "HTTP"
+          }
+        ],
+        "questions": [
+          {
+            "id": "6c515ee1-0dde-4d25-8e85-3df017a78f84",
+            "topicId": "c8537b9e-8520-4a1c-99c3-5d0c1c119a40",
+            "difficulty": "easy",
+            "prompt": "What does an IP address do?",
+            "options": [
+              "ensures data security",
+              "enables file sharing",
+              "identifies a network interface and helps routers direct packets to a destination",
+              "provides internet speed"
+            ],
+            "answerIndex": 2,
+            "explanation": "The passage states that an IP address identifies a network interface and helps routers direct packets to a destination.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination."
+              }
+            ]
+          },
+          {
+            "id": "86454baa-0aab-4cfa-9162-249c5493e30e",
+            "topicId": "c8537b9e-8520-4a1c-99c3-5d0c1c119a40",
+            "difficulty": "medium",
+            "prompt": "What does an IP address do in network interfaces?",
+            "options": [
+              "ensures data security",
+              "identifies a network interface and helps routers direct packets to a destination",
+              "creates network connections",
+              "filters incoming traffic"
+            ],
+            "answerIndex": 1,
+            "explanation": "An IP address helps routers direct packets to a destination, as stated in the passage.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination. IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1)."
+              }
+            ]
+          },
+          {
+            "id": "4d597575-f42b-46cd-9544-ed1afa98a557",
+            "topicId": "c8537b9e-8520-4a1c-99c3-5d0c1c119a40",
+            "difficulty": "hard",
+            "prompt": "Which of the following best describes how IPv4 addresses are structured?",
+            "options": [
+              "a 128-bit hexadecimal number",
+              "a 32-bit binary number",
+              "four decimal numbers (e.g., 192.168.1.1)",
+              "a 64-bit octet number"
+            ],
+            "answerIndex": 2,
+            "explanation": "IPv4 addresses are typically formatted as four decimal numbers, such as 192.168.1.1.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination. IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1). IPv6 uses 128 bits, represented in hexadecimal. Each IPv4 decimal number represents an 8-bit octet and ranges from 0 to 255."
+              }
+            ]
+          },
+          {
+            "id": "b9aefd63-82aa-49d6-b56e-e52242557154",
+            "topicId": "153d3a90-84d2-4cfc-82c9-73ea8362a8dd",
+            "difficulty": "easy",
+            "prompt": "Which service translates human-readable domain names into IP addresses?",
+            "options": [
+              "HTTP",
+              "HTTPS",
+              "DNS",
+              "FTP"
+            ],
+            "answerIndex": 2,
+            "explanation": "DNS is the service responsible for translating domain names into IP addresses.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "Topic 2: DNS DNS translates human-readable domain names into IP addresses."
+              }
+            ]
+          },
+          {
+            "id": "21269a51-5f6b-4cb8-b3c6-dd282595bc74",
+            "topicId": "153d3a90-84d2-4cfc-82c9-73ea8362a8dd",
+            "difficulty": "medium",
+            "prompt": "Which fictional lookup for study.example can return 192.0.2.25 to the client?",
+            "options": [
+              "192.0.2.24",
+              "192.0.2.25",
+              "192.0.2.26",
+              "192.0.2.27"
+            ],
+            "answerIndex": 1,
+            "explanation": "DNS translates human-readable domain names into IP addresses, as stated in the passage.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "Topic 2: DNS DNS translates human-readable domain names into IP addresses. For example, a fictional lookup for study.example can return 192.0.2.25 to the client."
+              }
+            ]
+          },
+          {
+            "id": "d35d7297-0957-4057-9ba5-49af2466dcec",
+            "topicId": "153d3a90-84d2-4cfc-82c9-73ea8362a8dd",
+            "difficulty": "hard",
+            "prompt": "A DNS resolver receives a name lookup from a client and obtains the requested record. Which concept or rule applies to this situation?",
+            "options": [
+              "DNS translates human-readable domain names into IP addresses.",
+              "DNS resolves IP addresses to human-readable domain names.",
+              "DNS encrypts domain names for security.",
+              "DNS updates domain names automatically."
+            ],
+            "answerIndex": 0,
+            "explanation": "A DNS resolver translates human-readable domain names into IP addresses as stated in the passage.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "Topic 2: DNS DNS translates human-readable domain names into IP addresses. For example, a fictional lookup for study.example can return 192.0.2.25 to the client. A DNS resolver receives a name lookup from a client and obtains the requested record."
+              }
+            ]
+          },
+          {
+            "id": "f9720616-a03b-4faa-a43d-601ccf85c5dc",
+            "topicId": "64cae1d8-44c9-4aa6-8aee-173e08d40918",
+            "difficulty": "easy",
+            "prompt": "What does HTTP stand for in the context of exchanging requests and responses?",
+            "options": [
+              "Hypertext Presentation",
+              "HTTP",
+              "Hyperlink Transmission Protocol",
+              "Hypermedia Access Protocol"
+            ],
+            "answerIndex": 1,
+            "explanation": "HTTP stands for Hypertext Transfer Protocol, which is used for exchanging requests and responses in the client-server model.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "Topic 3: HTTP HTTP is an application-layer protocol used to exchange requests and responses. In its client-server model, a client sends a request and a server returns a response."
+              }
+            ]
+          },
+          {
+            "id": "3343dd0b-3a58-4195-9972-666242da6160",
+            "topicId": "64cae1d8-44c9-4aa6-8aee-173e08d40918",
+            "difficulty": "medium",
+            "prompt": "Which HTTP request asks for a representation of a resource?",
+            "options": [
+              "POST",
+              "GET",
+              "PUT",
+              "DELETE"
+            ],
+            "answerIndex": 1,
+            "explanation": "The passage states that a GET request asks for a representation of a resource.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "Topic 3: HTTP HTTP is an application-layer protocol used to exchange requests and responses. In its client-server model, a client sends a request and a server returns a response. A GET request asks for a representation of a resource."
+              }
+            ]
+          },
+          {
+            "id": "dbd5c931-dbb6-403f-aea3-38ab5f3ec558",
+            "topicId": "64cae1d8-44c9-4aa6-8aee-173e08d40918",
+            "difficulty": "hard",
+            "prompt": "Which HTTP method would be used to request the study notes stored at the /notes path?",
+            "options": [
+              "GET",
+              "POST",
+              "PUT",
+              "DELETE"
+            ],
+            "answerIndex": 0,
+            "explanation": "The passage states that a GET request asks for a representation of a resource, which aligns with the /notes path request for study notes.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "In its client-server model, a client sends a request and a server returns a response. A GET request asks for a representation of a resource. In this synthetic example, GET /notes requests the study notes stored at the /notes path."
+              }
+            ]
+          }
+        ],
+        "createdAt": "2026-10-09T23:18:30.230Z"
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:48:30.2257492+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:36:14.7113021+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "kind": "plan",
+          "output": {
+            "topics": [
+              {
+                "name": "IP Addressing",
+                "objectives": [
+                  {
+                    "evidenceId": "p1s1",
+                    "goal": "Define what an IP address is."
+                  },
+                  {
+                    "evidenceId": "p1s2",
+                    "goal": "Understand the structure of IPv4 addresses."
+                  },
+                  {
+                    "evidenceId": "p1s3",
+                    "goal": "Understand the structure of IPv6 addresses."
+                  }
+                ]
+              },
+              {
+                "name": "DNS",
+                "objectives": [
+                  {
+                    "evidenceId": "p2s1",
+                    "goal": "Understand how DNS translates domain names to IP addresses."
+                  },
+                  {
+                    "evidenceId": "p2s2",
+                    "goal": "Understand the role of DNS resolvers in name lookups."
+                  },
+                  {
+                    "evidenceId": "p2s3",
+                    "goal": "Understand the types of DNS records."
+                  }
+                ]
+              },
+              {
+                "name": "HTTP",
+                "objectives": [
+                  {
+                    "evidenceId": "p3s2",
+                    "goal": "Understand the client-server model of HTTP."
+                  },
+                  {
+                    "evidenceId": "p3s3",
+                    "goal": "Understand the difference between GET and POST requests."
+                  },
+                  {
+                    "evidenceId": "p3s4",
+                    "goal": "Understand how HTTP responses are structured."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s1",
+              "prompt": "What does an IP address do?",
+              "correctAnswer": "identifies a network interface and helps routers direct packets to a destination",
+              "distractors": [
+                "ensures data security",
+                "enables file sharing",
+                "provides internet speed"
+              ],
+              "explanation": "The passage states that an IP address identifies a network interface and helps routers direct packets to a destination."
+            }
+          }
+        },
+        {
+          "questions": {
+            "1": {
+              "evidenceId": "p1s2",
+              "prompt": "What does an IP address do in network interfaces?",
+              "correctAnswer": "identifies a network interface and helps routers direct packets to a destination",
+              "distractors": [
+                "ensures data security",
+                "creates network connections",
+                "filters incoming traffic"
+              ],
+              "explanation": "An IP address helps routers direct packets to a destination, as stated in the passage."
+            }
+          }
+        },
+        {
+          "questions": {
+            "2": {
+              "evidenceId": "p1s3",
+              "prompt": "Which of the following best describes how IPv4 addresses are structured?",
+              "correctAnswer": "four decimal numbers (e.g., 192.168.1.1)",
+              "distractors": [
+                "a 128-bit hexadecimal number",
+                "a 32-bit binary number",
+                "a 64-bit octet number"
+              ],
+              "explanation": "IPv4 addresses are typically formatted as four decimal numbers, such as 192.168.1.1."
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s1",
+              "prompt": "Which service translates human-readable domain names into IP addresses?",
+              "correctAnswer": "DNS",
+              "distractors": [
+                "HTTP",
+                "HTTPS",
+                "FTP"
+              ],
+              "explanation": "DNS is the service responsible for translating domain names into IP addresses."
+            }
+          }
+        },
+        {
+          "questions": {
+            "4": {
+              "evidenceId": "p2s2",
+              "prompt": "Which fictional lookup for study.example can return 192.0.2.25 to the client?",
+              "correctAnswer": "192.0.2.25",
+              "distractors": [
+                "192.0.2.24",
+                "192.0.2.26",
+                "192.0.2.27"
+              ],
+              "explanation": "DNS translates human-readable domain names into IP addresses, as stated in the passage."
+            }
+          }
+        },
+        {
+          "questions": {
+            "5": {
+              "evidenceId": "p2s3",
+              "prompt": "Which action can a DNS resolver perform to obtain the requested record for a domain name lookup?",
+              "correctAnswer": "resolve the domain name into an IP address",
+              "distractors": [
+                "authenticate the client's identity",
+                "update the domain name server",
+                "translate the IP address to a domain name"
+              ],
+              "explanation": "A DNS resolver processes domain name lookups and converts them to IP addresses, not authenticate identities or translate IP addresses to domain names."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s2",
+              "prompt": "What does HTTP stand for in the context of exchanging requests and responses?",
+              "correctAnswer": "HTTP",
+              "distractors": [
+                "HTTPS",
+                "HTTPs",
+                "HTTPR"
+              ],
+              "explanation": "HTTP stands for Hypertext Transfer Protocol, which is used for exchanging requests and responses in the client-server model."
+            }
+          }
+        },
+        {
+          "questions": {
+            "7": {
+              "evidenceId": "p3s3",
+              "prompt": "Which HTTP request asks for a representation of a resource?",
+              "correctAnswer": "GET",
+              "distractors": [
+                "POST",
+                "PUT",
+                "DELETE"
+              ],
+              "explanation": "The passage states that a GET request asks for a representation of a resource."
+            }
+          }
+        },
+        {
+          "questions": {
+            "8": {
+              "evidenceId": "p3s4",
+              "prompt": "Which HTTP method would be used to request the study notes stored at the /notes path?",
+              "correctAnswer": "GET",
+              "distractors": [
+                "POST",
+                "PUT",
+                "DELETE"
+              ],
+              "explanation": "The passage states that a GET request asks for a representation of a resource, which aligns with the /notes path request for study notes."
+            }
+          }
+        },
+        {
+          "questions": {
+            "5": {
+              "evidenceId": "p2s3",
+              "prompt": "A DNS resolver receives a name lookup from a client and obtains the requested record. Which concept or rule applies to this situation?",
+              "correctAnswer": "DNS translates human-readable domain names into IP addresses.",
+              "distractors": [
+                "DNS resolves IP addresses to human-readable domain names.",
+                "DNS encrypts domain names for security.",
+                "DNS updates domain names automatically."
+              ],
+              "explanation": "A DNS resolver translates human-readable domain names into IP addresses as stated in the passage."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "distractors": [
+                "Hypertext Presentation",
+                "Hyperlink Transmission Protocol",
+                "Hypermedia Access Protocol"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "cache",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "elapsedMs": 56.54970000000321,
+      "reused": true
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "startup": "warm",
+      "job": {
+        "id": "29f261bd-6bab-4052-8721-6d6299786c6c",
+        "documentId": "18347096-b91d-4a0d-a525-b6fe1a89bf6f",
+        "state": "ready",
+        "phase": "ready",
+        "canRetry": false,
+        "questionSetId": "8a6a9847-f915-4f7e-8ba2-c10251d6d114",
+        "elapsedTimeMs": 27211,
+        "createdAt": "2026-10-09T23:18:30.453Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 19,
+          "sourceReused": 0,
+          "selectionMs": 7,
+          "totalPassages": 22,
+          "selectedPassages": 22,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "seed": 42,
+          "inputTokens": 1725,
+          "plan_total_duration": 5240000800,
+          "plan_load_duration": 41249000,
+          "plan_prompt_eval_duration": 24067000,
+          "plan_eval_duration": 5125436000,
+          "plan_prompt_eval_count": 1373,
+          "plan_prompt_eval_cached_count": 1372,
+          "plan_eval_count": 339,
+          "plan_tokensPerSecond": 66.1407146631038,
+          "createdQuestions": 9,
+          "initial_total_duration": 17915133700,
+          "initial_load_duration": 296555100,
+          "initial_prompt_eval_duration": 518171000,
+          "initial_eval_duration": 16895024998,
+          "initial_prompt_eval_count": 3129,
+          "initial_prompt_eval_cached_count": 2116,
+          "initial_eval_count": 1029,
+          "initial_tokensPerSecond": 60.905503254467575,
+          "generationMs": 27126,
+          "validationMs": 4,
+          "repairedQuestions": 2,
+          "repairInputTokens": 956,
+          "repair_total_duration": 3937222700,
+          "repair_load_duration": 44772300,
+          "repair_prompt_eval_duration": 139901000,
+          "repair_eval_duration": 3702321000,
+          "repair_prompt_eval_count": 1160,
+          "repair_prompt_eval_cached_count": 861,
+          "repair_eval_count": 229,
+          "repair_tokensPerSecond": 61.85309161469252,
+          "repairedQuestionsCompleted": 2,
+          "validationStorageMs": 4,
+          "totalMs": 27210
+        }
+      },
+      "questionSet": {
+        "id": "8a6a9847-f915-4f7e-8ba2-c10251d6d114",
+        "documentId": "18347096-b91d-4a0d-a525-b6fe1a89bf6f",
+        "filename": "networking-demo.pdf",
+        "extractedPages": [
+          {
+            "pageNumber": 1,
+            "chunkId": "chunk-1",
+            "text": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination. IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1). IPv6 uses 128 bits, represented in hexadecimal. Each IPv4 decimal number represents an 8-bit octet and ranges from 0 to 255. The four octets together account for the 32 bits in an IPv4 address. A router examines the destination IP address when choosing where to forward a packet. An address tells the network where to deliver data; it does not describe the contents of that data."
+          },
+          {
+            "pageNumber": 2,
+            "chunkId": "chunk-2",
+            "text": "Topic 2: DNS DNS translates human-readable domain names into IP addresses. For example, a fictional lookup for study.example can return 192.0.2.25 to the client. A DNS resolver receives a name lookup from a client and obtains the requested record. An A record contains an IPv4 address. An AAAA record contains an IPv6 address. A DNS cache keeps a previous lookup result for the record's time to live (TTL). Reusing an unexpired cached answer avoids another lookup. Once that lifetime expires, the resolver must obtain a current answer rather than treating the expired entry as fresh."
+          },
+          {
+            "pageNumber": 3,
+            "chunkId": "chunk-3",
+            "text": "Topic 3: HTTP HTTP is an application-layer protocol used to exchange requests and responses. In its client-server model, a client sends a request and a server returns a response. A GET request asks for a representation of a resource. In this synthetic example, GET /notes requests the study notes stored at the /notes path. A POST request submits data to a resource for processing. An HTTP response includes a status code and may include a body. Status code 200 means the request succeeded. Status code 404 means the requested resource was not found. The client can use the status code to distinguish a successful /notes response from a missing resource."
+          }
+        ],
+        "metadata": {
+          "documentHash": "559955e2e5b78308a7d7caadd1fde078decf06f9bd3152ffcd66cff3ce7aae76",
+          "extractorVersion": "pdf-parse@2.4.5/point-nemo-text-v3",
+          "promptVersion": "point-nemo-extractive-question-v21",
+          "schemaVersion": "point-nemo-questions-v2",
+          "tokenizerDigest": "d9011691d2d6b47762206b71f4a78429b5614850725b47ae06bef96674eed416",
+          "modelTag": "qwen2.5:3b",
+          "modelDigest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+          "settingsHash": "636b3072e49d0b92cb5c663513a22c91a00e9f0e7ef261937fcd0ddd92c6e8d8",
+          "createdAt": "2026-10-09T23:18:57.663Z"
+        },
+        "compatible": true,
+        "topics": [
+          {
+            "id": "e6a3ddf3-3c54-414f-bdd3-46b4cc11491e",
+            "name": "IP Addressing"
+          },
+          {
+            "id": "c267e25d-c77b-48b4-b292-b0af8a6c5571",
+            "name": "DNS"
+          },
+          {
+            "id": "9e68e386-a97f-44d1-aab7-269da6ab5023",
+            "name": "HTTP"
+          }
+        ],
+        "questions": [
+          {
+            "id": "8a51b9a4-ec2f-4eae-8dbf-9728cfbf0f21",
+            "topicId": "e6a3ddf3-3c54-414f-bdd3-46b4cc11491e",
+            "difficulty": "easy",
+            "prompt": "What does an IP address do?",
+            "options": [
+              "enables users to connect to the internet",
+              "ensures data security",
+              "identifies a network interface and helps routers direct packets to a destination",
+              "controls the speed of internet connections"
+            ],
+            "answerIndex": 2,
+            "explanation": "The passage states that an IP address identifies a network interface and helps routers direct packets to a destination.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination."
+              }
+            ]
+          },
+          {
+            "id": "3e6949e5-9d20-4a28-b590-8ed7334bc7f0",
+            "topicId": "e6a3ddf3-3c54-414f-bdd3-46b4cc11491e",
+            "difficulty": "medium",
+            "prompt": "What does an IP address do in network interfaces?",
+            "options": [
+              "ensures data security",
+              "identifies a network interface and helps routers direct packets to a destination",
+              "creates network connections",
+              "manages network traffic"
+            ],
+            "answerIndex": 1,
+            "explanation": "The passage states that an IP address identifies a network interface and helps routers direct packets to a destination.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination. IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1)."
+              }
+            ]
+          },
+          {
+            "id": "be2651a6-b4c4-4403-8b5c-dc4dfb16f7c7",
+            "topicId": "e6a3ddf3-3c54-414f-bdd3-46b4cc11491e",
+            "difficulty": "hard",
+            "prompt": "Which of the following best describes the range of an IPv4 decimal number?",
+            "options": [
+              "0 to 127",
+              "0 to 255",
+              "0 to 1023",
+              "0 to 65535"
+            ],
+            "answerIndex": 1,
+            "explanation": "IPv4 decimal numbers range from 0 to 255, as stated in the passage.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination. IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1). IPv6 uses 128 bits, represented in hexadecimal. Each IPv4 decimal number represents an 8-bit octet and ranges from 0 to 255."
+              }
+            ]
+          },
+          {
+            "id": "95995f8d-7d50-4aa4-b69d-35c0421acb2f",
+            "topicId": "c267e25d-c77b-48b4-b292-b0af8a6c5571",
+            "difficulty": "easy",
+            "prompt": "What does DNS translate into IP addresses?",
+            "options": [
+              "users",
+              "domain names",
+              "servers",
+              "computers"
+            ],
+            "answerIndex": 1,
+            "explanation": "DNS translates human-readable domain names into IP addresses.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "Topic 2: DNS DNS translates human-readable domain names into IP addresses."
+              }
+            ]
+          },
+          {
+            "id": "0172c18c-14a5-48f1-aed5-7c2dce620c10",
+            "topicId": "c267e25d-c77b-48b4-b292-b0af8a6c5571",
+            "difficulty": "medium",
+            "prompt": "Which of the following best describes DNS in the context of the example provided in the passage?",
+            "options": [
+              "DNS assigns IP addresses to devices",
+              "DNS encrypts data sent over the internet",
+              "DNS manages the internet's routing protocols",
+              "DNS translates human-readable domain names into IP addresses"
+            ],
+            "answerIndex": 3,
+            "explanation": "The passage mentions DNS translating domain names into IP addresses, which is the correct definition provided in the distractors.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "Topic 2: DNS DNS translates human-readable domain names into IP addresses. For example, a fictional lookup for study.example can return 192.0.2.25 to the client."
+              }
+            ]
+          },
+          {
+            "id": "a9662cd1-90ba-4d0b-965d-d474f33b4ef1",
+            "topicId": "c267e25d-c77b-48b4-b292-b0af8a6c5571",
+            "difficulty": "hard",
+            "prompt": "A DNS resolver receives a name lookup from a client and obtains the requested record. Which concept or rule applies to this situation?",
+            "options": [
+              "DNS translates human-readable domain names into IP addresses.",
+              "DNS resolves IP addresses to human-readable domain names.",
+              "DNS encrypts domain names for security.",
+              "DNS updates domain names automatically."
+            ],
+            "answerIndex": 0,
+            "explanation": "A DNS resolver translates human-readable domain names into IP addresses as stated in the source passage.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "Topic 2: DNS DNS translates human-readable domain names into IP addresses. For example, a fictional lookup for study.example can return 192.0.2.25 to the client. A DNS resolver receives a name lookup from a client and obtains the requested record."
+              }
+            ]
+          },
+          {
+            "id": "a4929242-1cb7-4866-8569-6404ef6a5882",
+            "topicId": "9e68e386-a97f-44d1-aab7-269da6ab5023",
+            "difficulty": "easy",
+            "prompt": "What does a client do in an HTTP client-server model?",
+            "options": [
+              "sends a request",
+              "sends a response",
+              "creates a protocol",
+              "manages the server"
+            ],
+            "answerIndex": 0,
+            "explanation": "HTTP is an application-layer protocol used to exchange requests and responses. In its client-server model, a client sends a request and a server returns a response.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "Topic 3: HTTP HTTP is an application-layer protocol used to exchange requests and responses. In its client-server model, a client sends a request and a server returns a response."
+              }
+            ]
+          },
+          {
+            "id": "ffd1d24b-582f-4fec-a577-ffb8986743e1",
+            "topicId": "9e68e386-a97f-44d1-aab7-269da6ab5023",
+            "difficulty": "medium",
+            "prompt": "Which HTTP request asks for a representation of a resource?",
+            "options": [
+              "POST",
+              "GET",
+              "PUT",
+              "DELETE"
+            ],
+            "answerIndex": 1,
+            "explanation": "The passage states that a GET request asks for a representation of a resource.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "Topic 3: HTTP HTTP is an application-layer protocol used to exchange requests and responses. In its client-server model, a client sends a request and a server returns a response. A GET request asks for a representation of a resource."
+              }
+            ]
+          },
+          {
+            "id": "2929574c-525e-4e56-9326-7694c582cfec",
+            "topicId": "9e68e386-a97f-44d1-aab7-269da6ab5023",
+            "difficulty": "hard",
+            "prompt": "Which HTTP method would be used to request the study notes stored at the /notes path?",
+            "options": [
+              "GET",
+              "POST",
+              "PUT",
+              "DELETE"
+            ],
+            "answerIndex": 0,
+            "explanation": "The passage states that a GET request asks for a representation of a resource, which aligns with the /notes path request for study notes.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "In its client-server model, a client sends a request and a server returns a response. A GET request asks for a representation of a resource. In this synthetic example, GET /notes requests the study notes stored at the /notes path."
+              }
+            ]
+          }
+        ],
+        "createdAt": "2026-10-09T23:18:57.663Z"
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:48:57.6593461+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:36:14.7113021+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "kind": "plan",
+          "output": {
+            "topics": [
+              {
+                "name": "IP Addressing",
+                "objectives": [
+                  {
+                    "evidenceId": "p1s1",
+                    "goal": "Define what an IP address is."
+                  },
+                  {
+                    "evidenceId": "p1s2",
+                    "goal": "Understand the structure of IPv4 addresses."
+                  },
+                  {
+                    "evidenceId": "p1s3",
+                    "goal": "Understand the structure of IPv6 addresses."
+                  }
+                ]
+              },
+              {
+                "name": "DNS",
+                "objectives": [
+                  {
+                    "evidenceId": "p2s1",
+                    "goal": "Understand how DNS translates domain names to IP addresses."
+                  },
+                  {
+                    "evidenceId": "p2s2",
+                    "goal": "Understand the role of DNS resolvers in name lookups."
+                  },
+                  {
+                    "evidenceId": "p2s3",
+                    "goal": "Understand the types of DNS records."
+                  }
+                ]
+              },
+              {
+                "name": "HTTP",
+                "objectives": [
+                  {
+                    "evidenceId": "p3s2",
+                    "goal": "Understand the client-server model of HTTP."
+                  },
+                  {
+                    "evidenceId": "p3s3",
+                    "goal": "Understand the HTTP request types."
+                  },
+                  {
+                    "evidenceId": "p3s4",
+                    "goal": "Understand the structure of HTTP responses."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s1",
+              "prompt": "What does an IP address do?",
+              "correctAnswer": "identifies a network interface and helps routers direct packets to a destination",
+              "distractors": [
+                "enables users to connect to the internet",
+                "ensures data security",
+                "controls the speed of internet connections"
+              ],
+              "explanation": "The passage states that an IP address identifies a network interface and helps routers direct packets to a destination."
+            }
+          }
+        },
+        {
+          "questions": {
+            "1": {
+              "evidenceId": "p1s2",
+              "prompt": "What does an IP address do in network interfaces?",
+              "correctAnswer": "identifies a network interface and helps routers direct packets to a destination",
+              "distractors": [
+                "ensures data security",
+                "creates network connections",
+                "manages network traffic"
+              ],
+              "explanation": "The passage states that an IP address identifies a network interface and helps routers direct packets to a destination."
+            }
+          }
+        },
+        {
+          "questions": {
+            "2": {
+              "evidenceId": "p1s3",
+              "prompt": "Which of the following best describes the range of an IPv4 decimal number?",
+              "correctAnswer": "0 to 255",
+              "distractors": [
+                "0 to 127",
+                "0 to 1023",
+                "0 to 65535"
+              ],
+              "explanation": "IPv4 decimal numbers range from 0 to 255, as stated in the passage."
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s1",
+              "prompt": "What does DNS translate into IP addresses?",
+              "correctAnswer": "domain names",
+              "distractors": [
+                "users",
+                "servers",
+                "computers"
+              ],
+              "explanation": "DNS translates human-readable domain names into IP addresses."
+            }
+          }
+        },
+        {
+          "questions": {
+            "4": {
+              "evidenceId": "p2s2",
+              "prompt": "Which of the following best describes DNS in the context of the example provided in the passage?",
+              "correctAnswer": "DNS translates human-readable domain names into IP addresses",
+              "distractors": [
+                "DNS assigns IP addresses to devices",
+                "DNS encrypts data sent over the internet",
+                "DNS manages the internet's routing protocols"
+              ],
+              "explanation": "The passage mentions DNS translating domain names into IP addresses, which is the correct definition provided in the distractors."
+            }
+          }
+        },
+        {
+          "questions": {
+            "5": {
+              "evidenceId": "p2s3",
+              "prompt": "Which action would a DNS resolver take after receiving a client's name lookup request for study.example?",
+              "correctAnswer": "Obtain the requested record from the DNS server",
+              "distractors": [
+                "Forward the request to the client",
+                "Generate a new IP address for study.example",
+                "Inform the client that the domain is invalid"
+              ],
+              "explanation": "A DNS resolver processes client requests and retrieves the appropriate IP address for the domain name."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s2",
+              "prompt": "What does HTTP stand for and what is its primary model?",
+              "correctAnswer": "HTTP stands for HyperText Transfer Protocol and its primary model is client-server.",
+              "distractors": [
+                "HTTP stands for Hypertext Transfer Protocol and its primary model is peer-to-peer.",
+                "HTTP stands for HyperText Transfer Protocol and its primary model is client-client.",
+                "HTTP stands for HyperText Transfer Protocol and its primary model is server-server."
+              ],
+              "explanation": "HTTP is an application-layer protocol used to exchange requests and responses in a client-server model."
+            }
+          }
+        },
+        {
+          "questions": {
+            "7": {
+              "evidenceId": "p3s3",
+              "prompt": "Which HTTP request asks for a representation of a resource?",
+              "correctAnswer": "GET",
+              "distractors": [
+                "POST",
+                "PUT",
+                "DELETE"
+              ],
+              "explanation": "The passage states that a GET request asks for a representation of a resource."
+            }
+          }
+        },
+        {
+          "questions": {
+            "8": {
+              "evidenceId": "p3s4",
+              "prompt": "Which HTTP method would be used to request the study notes stored at the /notes path?",
+              "correctAnswer": "GET",
+              "distractors": [
+                "POST",
+                "PUT",
+                "DELETE"
+              ],
+              "explanation": "The passage states that a GET request asks for a representation of a resource, which aligns with the /notes path request for study notes."
+            }
+          }
+        },
+        {
+          "questions": {
+            "5": {
+              "evidenceId": "p2s3",
+              "prompt": "A DNS resolver receives a name lookup from a client and obtains the requested record. Which concept or rule applies to this situation?",
+              "correctAnswer": "DNS translates human-readable domain names into IP addresses.",
+              "distractors": [
+                "DNS resolves IP addresses to human-readable domain names.",
+                "DNS encrypts domain names for security.",
+                "DNS updates domain names automatically."
+              ],
+              "explanation": "A DNS resolver translates human-readable domain names into IP addresses as stated in the source passage."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s2",
+              "prompt": "What does a client do in an HTTP client-server model?",
+              "correctAnswer": "sends a request",
+              "distractors": [
+                "sends a response",
+                "creates a protocol",
+                "manages the server"
+              ],
+              "explanation": "HTTP is an application-layer protocol used to exchange requests and responses. In its client-server model, a client sends a request and a server returns a response."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "cache",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "elapsedMs": 54.26740000000427,
+      "reused": true
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "46dd6d04-4de6-49ca-aef2-62637fd6b4a0",
+        "documentId": "436a494d-f245-41c3-b087-a3bc0585e0cc",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "INVALID_MODEL_OUTPUT",
+        "errorMessage": "Write a complete question ending in a question mark; do not return a statement that reveals the answer.",
+        "errorStage": "validating",
+        "elapsedTimeMs": 38334,
+        "createdAt": "2026-10-09T23:18:57.959Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 19,
+          "sourceReused": 0,
+          "selectionMs": 5,
+          "totalPassages": 20,
+          "selectedPassages": 20,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "seed": 42,
+          "inputTokens": 1918,
+          "plan_total_duration": 10622199500,
+          "plan_load_duration": 4544868500,
+          "plan_prompt_eval_duration": 657868000,
+          "plan_eval_duration": 5388125000,
+          "plan_prompt_eval_count": 1566,
+          "plan_prompt_eval_cached_count": 0,
+          "plan_eval_count": 353,
+          "plan_tokensPerSecond": 65.51444148010673,
+          "createdQuestions": 9,
+          "initial_total_duration": 22412223800,
+          "initial_load_duration": 326218200,
+          "initial_prompt_eval_duration": 588095000,
+          "initial_eval_duration": 21272123000,
+          "initial_prompt_eval_count": 3219,
+          "initial_prompt_eval_cached_count": 1963,
+          "initial_eval_count": 1354,
+          "initial_tokensPerSecond": 63.6513807296056,
+          "generationMs": 38262,
+          "validationMs": 4,
+          "repairedQuestions": 1,
+          "repairInputTokens": 1168,
+          "repair_total_duration": 5192783900,
+          "repair_load_duration": 76713300,
+          "repair_prompt_eval_duration": 419861000,
+          "repair_eval_duration": 4646907000,
+          "repair_prompt_eval_count": 1430,
+          "repair_prompt_eval_cached_count": 307,
+          "repair_eval_count": 280,
+          "repair_tokensPerSecond": 60.25513314555252,
+          "repairedQuestionsCompleted": 2,
+          "totalMs": 38334
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:49:36.2906118+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:36:14.7113021+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "kind": "plan",
+          "output": {
+            "topics": [
+              {
+                "name": "TCP vs UDP",
+                "objectives": [
+                  {
+                    "evidenceId": "p1s1",
+                    "goal": "Define the main difference between TCP and UDP."
+                  },
+                  {
+                    "evidenceId": "p1s2",
+                    "goal": "Explain how TCP ensures data delivery and ordering."
+                  },
+                  {
+                    "evidenceId": "p1s6",
+                    "goal": "Describe a scenario where UDP is preferred over TCP."
+                  }
+                ]
+              },
+              {
+                "name": "Ports",
+                "objectives": [
+                  {
+                    "evidenceId": "p2s1",
+                    "goal": "List the range of port numbers for TCP and UDP."
+                  },
+                  {
+                    "evidenceId": "p2s3",
+                    "goal": "Explain how a port number identifies an application endpoint."
+                  },
+                  {
+                    "evidenceId": "p2s4",
+                    "goal": "Identify the port numbers for common services."
+                  }
+                ]
+              },
+              {
+                "name": "Subnetting",
+                "objectives": [
+                  {
+                    "evidenceId": "p3s2",
+                    "goal": "Define subnetting in the context of IP addressing."
+                  },
+                  {
+                    "evidenceId": "p3s3",
+                    "goal": "Explain the subnet mask for a /24 prefix."
+                  },
+                  {
+                    "evidenceId": "p3s4",
+                    "goal": "Identify the network and broadcast addresses for a subnet."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s1",
+              "prompt": "Which protocol ensures a reliable and ordered byte stream delivery?",
+              "correctAnswer": "TCP",
+              "distractors": [
+                "UDP",
+                "HTTP",
+                "HTTPS"
+              ],
+              "explanation": "TCP is mentioned in the passage as the protocol that establishes a connection and delivers a reliable, ordered byte stream."
+            }
+          }
+        },
+        {
+          "questions": {
+            "1": {
+              "evidenceId": "p1s2",
+              "prompt": "Which of the following best describes TCP's approach to data delivery?",
+              "correctAnswer": "reliable, ordered byte stream",
+              "distractors": [
+                "unreliable, unordered byte stream",
+                "randomly delivered byte stream",
+                "retransmits lost messages"
+              ],
+              "explanation": "TCP establishes a connection and delivers a reliable, ordered byte stream."
+            }
+          }
+        },
+        {
+          "questions": {
+            "2": {
+              "evidenceId": "p1s6",
+              "prompt": "A synthetic file-copy application needs every byte in order, so which protocol fits that requirement? A) TCP B) UDP C) Both D) Neither",
+              "correctAnswer": "TCP",
+              "distractors": [
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "explanation": "TCP ensures that every byte is delivered in the correct order, making it suitable for applications that require this."
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s1",
+              "prompt": "Which of the following best describes TCP and UDP port numbers?",
+              "correctAnswer": "identify communication endpoints for applications on a host",
+              "distractors": [
+                "determine the speed of data transfer",
+                "measure the security of data transmission",
+                "control the type of data being sent"
+              ],
+              "explanation": "The passage discusses TCP and UDP port numbers in the context of identifying communication endpoints for applications on a host."
+            }
+          }
+        },
+        {
+          "questions": {
+            "4": {
+              "evidenceId": "p2s3",
+              "prompt": "Which of the following best describes the range of a port number in TCP and UDP protocols?",
+              "correctAnswer": "0 to 65535",
+              "distractors": [
+                "0 to 1024",
+                "1 to 65535",
+                "1 to 1024"
+              ],
+              "explanation": "A port number is a 16-bit value and ranges from 0 to 65535."
+            }
+          }
+        },
+        {
+          "questions": {
+            "5": {
+              "evidenceId": "p2s4",
+              "prompt": "Which port number does a PostgreSQL server use for TCP communication?",
+              "correctAnswer": "5432",
+              "distractors": [
+                "143",
+                "22",
+                "80"
+              ],
+              "explanation": "A PostgreSQL server listens on TCP port 5432, as stated in the passage."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s2",
+              "prompt": "Which prefix uses 24 network bits and leaves 8 host bits for an IPv4 address block?",
+              "correctAnswer": "/24",
+              "distractors": [
+                "IPv4",
+                "Subnetting",
+                "Subnet mask"
+              ],
+              "explanation": "The passage states that an IPv4 /24 prefix uses 24 network bits and leaves 8 host bits."
+            }
+          }
+        },
+        {
+          "questions": {
+            "7": {
+              "evidenceId": "p3s3",
+              "prompt": "What does the subnet mask for an IPv4 /24 prefix represent?",
+              "correctAnswer": "255.255.255.0",
+              "distractors": [
+                "255.255.255.255",
+                "255.0.0.0",
+                "255.255.0.0"
+              ],
+              "explanation": "The subnet mask for /24 is 255.255.255.0, as stated in the passage."
+            }
+          }
+        },
+        {
+          "questions": {
+            "8": {
+              "evidenceId": "p3s4",
+              "prompt": "For the subnet 198.51.100.0/24, which of the following is the correct network address and broadcast address? 198.51.100.0 and 198.51.100.255, 198.51.100.0 and 198.51.100.127, 198.51.100.0 and 198.51.100.128, 198.51.100.128 and 198.51.100.25",
+              "correctAnswer": "198.51.100.0 and 198.51.100.255",
+              "distractors": [
+                "198.51.100.0 and 198.51.100.127",
+                "198.51.100.0 and 198.51.100.128",
+                "198.51.100.128 and 198.51.100.25"
+              ],
+              "explanation": "The subnet 198.51.100.0/24 has a network address of 198.51.100.0 and a broadcast address of 198.51.100.255, as stated in the passage."
+            }
+          }
+        },
+        {
+          "questions": {
+            "2": {
+              "evidenceId": "p1s6",
+              "prompt": "A synthetic file-copy application needs every byte in order, so TCP fits that requirement. A synthetic position-update application can discard an old update and use the newest one, so it can choose UDP when occasional loss is acceptable. If",
+              "correctAnswer": "UDP is not a guarantee of faster delivery",
+              "distractors": [
+                "TCP is not a guarantee of faster delivery",
+                "UDP is a guarantee of faster delivery",
+                "TCP is a guarantee of faster delivery"
+              ],
+              "explanation": "A synthetic file-copy application needs every byte in order, so TCP fits that requirement. A synthetic position-update application can discard an old update and use the newest one, so it can choose UDP when occasional loss is acceptable. "
+            }
+          }
+        },
+        {
+          "questions": {
+            "8": {
+              "evidenceId": "p3s4",
+              "prompt": "What is the total number of addresses in the synthetic subnet 198.51.100.0/24?",
+              "correctAnswer": "256",
+              "distractors": [
+                "128",
+                "192",
+                "254"
+              ],
+              "explanation": "The synthetic subnet 198.51.100.0/24 has 256 total addresses based on the given information."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "startup": "warm",
+      "job": {
+        "id": "7564e3ed-0ec2-4082-9ae5-66e5a708fcc4",
+        "documentId": "feacbf5a-7c09-4faa-a2af-6fc18c6a121d",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "INVALID_MODEL_OUTPUT",
+        "errorMessage": "Write a complete question ending in a question mark; do not return a statement that reveals the answer.",
+        "errorStage": "validating",
+        "elapsedTimeMs": 26944,
+        "createdAt": "2026-10-09T23:19:36.365Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 11,
+          "sourceReused": 0,
+          "selectionMs": 5,
+          "totalPassages": 20,
+          "selectedPassages": 20,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "seed": 42,
+          "inputTokens": 1918,
+          "plan_total_duration": 5523475600,
+          "plan_load_duration": 43433100,
+          "plan_prompt_eval_duration": 19294000,
+          "plan_eval_duration": 5402675000,
+          "plan_prompt_eval_count": 1566,
+          "plan_prompt_eval_cached_count": 1565,
+          "plan_eval_count": 353,
+          "plan_tokensPerSecond": 65.33800385919938,
+          "createdQuestions": 9,
+          "initial_total_duration": 18417727400,
+          "initial_load_duration": 302618000,
+          "initial_prompt_eval_duration": 451369000,
+          "initial_eval_duration": 17448222000,
+          "initial_prompt_eval_count": 3219,
+          "initial_prompt_eval_cached_count": 2351,
+          "initial_eval_count": 1106,
+          "initial_tokensPerSecond": 63.38754745325913,
+          "generationMs": 26876,
+          "validationMs": 2,
+          "repairedQuestions": 1,
+          "repairInputTokens": 530,
+          "repair_total_duration": 2906970400,
+          "repair_load_duration": 43141900,
+          "repair_prompt_eval_duration": 88707000,
+          "repair_eval_duration": 2742269000,
+          "repair_prompt_eval_count": 661,
+          "repair_prompt_eval_cached_count": 450,
+          "repair_eval_count": 168,
+          "repair_tokensPerSecond": 61.263136475670336,
+          "repairedQuestionsCompleted": 1,
+          "totalMs": 26944
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:50:03.30784+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:36:14.7113021+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "kind": "plan",
+          "output": {
+            "topics": [
+              {
+                "name": "TCP vs UDP",
+                "objectives": [
+                  {
+                    "evidenceId": "p1s1",
+                    "goal": "Define the main difference between TCP and UDP."
+                  },
+                  {
+                    "evidenceId": "p1s2",
+                    "goal": "Explain how TCP ensures data delivery and ordering."
+                  },
+                  {
+                    "evidenceId": "p1s6",
+                    "goal": "Describe a scenario where UDP is preferred over TCP."
+                  }
+                ]
+              },
+              {
+                "name": "Ports",
+                "objectives": [
+                  {
+                    "evidenceId": "p2s1",
+                    "goal": "List the range of port numbers for TCP and UDP."
+                  },
+                  {
+                    "evidenceId": "p2s3",
+                    "goal": "Explain how a port number identifies an application endpoint."
+                  },
+                  {
+                    "evidenceId": "p2s4",
+                    "goal": "Identify the port numbers for common services."
+                  }
+                ]
+              },
+              {
+                "name": "Subnetting",
+                "objectives": [
+                  {
+                    "evidenceId": "p3s2",
+                    "goal": "Define subnetting in the context of IP addressing."
+                  },
+                  {
+                    "evidenceId": "p3s3",
+                    "goal": "Explain the subnet mask for a /24 prefix."
+                  },
+                  {
+                    "evidenceId": "p3s4",
+                    "goal": "Identify the network and broadcast addresses for a subnet."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s1",
+              "prompt": "Which protocol ensures a reliable, ordered byte stream?",
+              "correctAnswer": "TCP",
+              "distractors": [
+                "UDP",
+                "HTTP",
+                "HTTPS"
+              ],
+              "explanation": "TCP is mentioned in the passage as establishing a connection and delivering a reliable, ordered byte stream."
+            }
+          }
+        },
+        {
+          "questions": {
+            "1": {
+              "evidenceId": "p1s2",
+              "prompt": "Which feature of TCP allows it to deliver a reliable, ordered byte stream?",
+              "correctAnswer": "establishes a connection",
+              "distractors": [
+                "transmits data in chunks",
+                "guarantees data integrity",
+                "sends data in random order"
+              ],
+              "explanation": "TCP establishes a connection and delivers a reliable, ordered byte stream."
+            }
+          }
+        },
+        {
+          "questions": {
+            "2": {
+              "evidenceId": "p1s6",
+              "prompt": "A synthetic file-copy application needs every byte in order, so which protocol fits that requirement? A) TCP B) UDP C) Both D) Neither",
+              "correctAnswer": "TCP",
+              "distractors": [
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "explanation": "TCP ensures that every byte is delivered in the correct order, making it suitable for applications that require this."
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s1",
+              "prompt": "Which of the following best describes TCP and UDP port numbers?",
+              "correctAnswer": "identify communication endpoints for applications on a host",
+              "distractors": [
+                "determine the speed of data transfer",
+                "measure the security of data transmission",
+                "control the type of data being sent"
+              ],
+              "explanation": "The passage discusses TCP and UDP port numbers in the context of identifying communication endpoints for applications on a host."
+            }
+          }
+        },
+        {
+          "questions": {
+            "4": {
+              "evidenceId": "p2s3",
+              "prompt": "Which of the following best describes the range of a port number in TCP and UDP protocols?",
+              "correctAnswer": "0 to 65535",
+              "distractors": [
+                "0 to 1024",
+                "1 to 65535",
+                "1 to 1024"
+              ],
+              "explanation": "A port number is a 16-bit value and ranges from 0 to 65535."
+            }
+          }
+        },
+        {
+          "questions": {
+            "5": {
+              "evidenceId": "p2s4",
+              "prompt": "Which port number does a PostgreSQL server use for TCP communication?",
+              "correctAnswer": "5432",
+              "distractors": [
+                "143",
+                "22",
+                "80"
+              ],
+              "explanation": "A PostgreSQL server listens on TCP port 5432, as stated in the passage."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s2",
+              "prompt": "Which prefix uses 24 network bits and leaves 8 host bits for an IPv4 address block?",
+              "correctAnswer": "/24",
+              "distractors": [
+                "IPv4",
+                "Subnetting",
+                "Subnet mask"
+              ],
+              "explanation": "The passage states that an IPv4 /24 prefix uses 24 network bits and leaves 8 host bits."
+            }
+          }
+        },
+        {
+          "questions": {
+            "7": {
+              "evidenceId": "p3s3",
+              "prompt": "What does the subnet mask for an IPv4 /24 prefix represent?",
+              "correctAnswer": "255.255.255.0",
+              "distractors": [
+                "255.255.255.255",
+                "255.0.0.0",
+                "255.255.0.0"
+              ],
+              "explanation": "The subnet mask for /24 is 255.255.255.0, as stated in the passage."
+            }
+          }
+        },
+        {
+          "questions": {
+            "8": {
+              "evidenceId": "p3s4",
+              "prompt": "For the subnet 198.51.100.0/24, what is the total number of addresses available in the subnet?",
+              "correctAnswer": "256",
+              "distractors": [
+                "128",
+                "512",
+                "1024"
+              ],
+              "explanation": "The subnet mask for /24 has 256 total addresses, matching the total number of addresses in the subnet 198.51.100.0/24."
+            }
+          }
+        },
+        {
+          "questions": {
+            "2": {
+              "evidenceId": "p1s6",
+              "prompt": "A synthetic file-copy application needs every byte in order, so TCP fits that requirement. A synthetic position-update application can discard an old update and use the newest, so it can choose UDP when occasional loss is acceptable. These ",
+              "correctAnswer": "UDP is not a guarantee of faster delivery",
+              "distractors": [
+                "TCP is not a guarantee of faster delivery",
+                "UDP is a guarantee of faster delivery",
+                "TCP is a guarantee of faster delivery"
+              ],
+              "explanation": "A synthetic file-copy application needs every byte in order, so TCP fits that requirement. A synthetic position-update application can discard an old update and use the newest, so it can choose UDP when occasional loss is acceptable. These "
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

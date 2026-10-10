@@ -1,0 +1,312 @@
+{
+  "createdAt": "2026-10-09T22:34:10.574Z",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 3050 6GB Laptop GPU, 6144 MiB",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12450HX",
+    "ramGiB": 7.714714050292969
+  },
+  "baseline": null,
+  "databasePath": "C:\\Users\\redd\\AppData\\Local\\Temp\\point-nemo-benchmark-Wn6erI\\benchmark.sqlite",
+  "note": "Small synthetic-fixture benchmark. Automated validation is not a proof of answer correctness; review exported questions and evidence.",
+  "summary": [
+    {
+      "model": "qwen2.5:1.5b",
+      "samples": 1,
+      "medianMs": 37704,
+      "p95Ms": 37704,
+      "firstPassRate": 0,
+      "completionRate": 0
+    }
+  ],
+  "skipped": [],
+  "records": [
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "28671af6-b73f-4921-b66f-4998253f2071",
+        "documentId": "68be0d09-cbe1-4fa1-a0b7-d844f7300eea",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "DUPLICATE_QUESTION",
+        "errorMessage": "Question 3 repeats question 1. Test a different source-supported fact or application, not a rewording. Question 4 repeats question 2. Test a different source-supported fact or application, not a rewording. Question 5 repeats question 2. Test a different source-supported fact or application, not a rewording. Question 5 repeats question 4. Test a different source-supported fact or application, not a rewording. Question 6 repeats question 2. Test a different source-supported fact or application, not a rewording. Question 6 repeats question 4. Test a different source-supported fact or application, not a rewording. Question 6 repeats question 5. Test a different source-supported fact or application, not a rewording. Question 7 repeats question 2. Test a different source-supported fact or application, not a rewording. Question 7 repeats question 4. Test a different source-supported fact or application, not a rewording. Question 7 repeats question 5. Test a different source-supported fact or application, not a rewording. Question 7 repeats question 6. Test a different source-supported fact or application, not a rewording. Question 8 repeats question 2. Test a different source-supported fa",
+        "errorStage": "validating",
+        "elapsedTimeMs": 37706,
+        "createdAt": "2026-10-09T22:33:32.547Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 4595,
+          "sourceReused": 0,
+          "selectionMs": 28,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "inputTokens": 1106,
+          "initial_total_duration": 25415182800,
+          "initial_load_duration": 13367738500,
+          "initial_prompt_eval_duration": 394834000,
+          "initial_eval_duration": 11615330000,
+          "initial_prompt_eval_count": 1106,
+          "initial_prompt_eval_cached_count": 0,
+          "initial_eval_count": 1182,
+          "initial_tokensPerSecond": 101.76206788786888,
+          "generationMs": 33010,
+          "validationMs": 9,
+          "repairedQuestions": 7,
+          "repairInputTokens": 1752,
+          "repair_total_duration": 7474620100,
+          "repair_load_duration": 13998000,
+          "repair_prompt_eval_duration": 380092000,
+          "repair_eval_duration": 7031515000,
+          "repair_prompt_eval_count": 1752,
+          "repair_prompt_eval_cached_count": 36,
+          "repair_eval_count": 689,
+          "repair_tokensPerSecond": 97.98741807419881,
+          "totalMs": 37704
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:04:10.2462054+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "status": "ready",
+          "topics": [
+            {
+              "name": "TCP vs UDP"
+            },
+            {
+              "name": "Ports"
+            },
+            {
+              "name": "Subnetting"
+            }
+          ],
+          "questions": {
+            "0": {
+              "prompt": "A client is connecting to a server using the IP address 192.168.1.100 and the port 8080. What protocol is the client using?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 0,
+              "explanation": "The client is using TCP because the port number is 8080, which is a common port number for web servers.",
+              "evidenceId": "p1s1"
+            },
+            "1": {
+              "prompt": "An application needs to send a large file in order to ensure every byte is received. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "IP",
+                "ARP"
+              ],
+              "answerIndex": 0,
+              "explanation": "The application should use TCP to ensure every byte is received in order.",
+              "evidenceId": "p1s5"
+            },
+            "2": {
+              "prompt": "A client is connecting to a server using the IP address 192.168.1.100 and the port 53. What protocol is the client using?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 1,
+              "explanation": "The client is using UDP because the port number is 53, which is a common port number for DNS servers.",
+              "evidenceId": "p1s2"
+            },
+            "3": {
+              "prompt": "A client is connecting to a server using the IP address 192.168.1.100 and the port 22. What protocol is the client using?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 2,
+              "explanation": "The client is using TCP because the port number is 22, which is a common port number for SSH servers.",
+              "evidenceId": "p1s4"
+            },
+            "4": {
+              "prompt": "A client is connecting to a server using the IP address 192.168.1.100 and the port 143. What protocol is the client using?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 1,
+              "explanation": "The client is using TCP because the port number is 143, which is a common port number for IMAP servers.",
+              "evidenceId": "p1s6"
+            },
+            "5": {
+              "prompt": "A client is connecting to a server using the IP address 192.168.1.100 and the port 5432. What protocol is the client using?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 2,
+              "explanation": "The client is using TCP because the port number is 5432, which is a common port number for PostgreSQL servers.",
+              "evidenceId": "p1s7"
+            },
+            "6": {
+              "prompt": "A client is connecting to a server using the IP address 192.168.1.100 and the port 80. What protocol is the client using?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 0,
+              "explanation": "The client is using TCP because the port number is 80, which is a common port number for web servers.",
+              "evidenceId": "p1s1"
+            },
+            "7": {
+              "prompt": "A client is connecting to a server using the IP address 192.168.1.100 and the port 5060. What protocol is the client using?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 1,
+              "explanation": "The client is using UDP because the port number is 5060, which is a common port number for DNS servers.",
+              "evidenceId": "p1s2"
+            },
+            "8": {
+              "prompt": "A client is connecting to a server using the IP address 192.168.1.100 and the port 25. What protocol is the client using?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 2,
+              "explanation": "The client is using TCP because the port number is 25, which is a common port number for email servers.",
+              "evidenceId": "p1s4"
+            }
+          }
+        },
+        {
+          "questions": {
+            "2": {
+              "prompt": "A client is connecting to a server using the IP address 192.168.1.100 and the port 8080. What protocol is the client using?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 0,
+              "explanation": "The client is connecting to a server using the IP address 192.168.1.100 and the port 8080, which indicates that the client is using the TCP protocol.",
+              "evidenceId": "p1s1"
+            },
+            "3": {
+              "prompt": "An application needs to send a large file in order to ensure every byte is received. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 2,
+              "explanation": "The application needs to ensure every byte is received, which means it should use the TCP protocol.",
+              "evidenceId": "p1s1"
+            },
+            "4": {
+              "prompt": "An application needs to send a large file in order to ensure every byte is received. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 2,
+              "explanation": "The application needs to ensure every byte is received, which means it should use the TCP protocol.",
+              "evidenceId": "p1s1"
+            },
+            "5": {
+              "prompt": "An application needs to send a large file in order to ensure every byte is received. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 2,
+              "explanation": "The application needs to ensure every byte is received, which means it should use the TCP protocol.",
+              "evidenceId": "p1s1"
+            },
+            "6": {
+              "prompt": "An application needs to send a large file in order to ensure every byte is received. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 2,
+              "explanation": "The application needs to ensure every byte is received, which means it should use the TCP protocol.",
+              "evidenceId": "p1s1"
+            },
+            "7": {
+              "prompt": "An application needs to send a large file in order to ensure every byte is received. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 2,
+              "explanation": "The application needs to ensure every byte is received, which means it should use the TCP protocol.",
+              "evidenceId": "p1s1"
+            },
+            "8": {
+              "prompt": "An application needs to send a large file in order to ensure every byte is received. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 2,
+              "explanation": "The application needs to ensure every byte is received, which means it should use the TCP protocol.",
+              "evidenceId": "p1s1"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+Fix quiz progression, boss scoring, and in-session navigation

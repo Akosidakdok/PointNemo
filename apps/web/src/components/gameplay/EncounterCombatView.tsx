@@ -211,7 +211,7 @@ export function EncounterCombatView({
 
           <div className="question-footer">
             <span>
-              Answer correctly to clear this challenge · +10 XP
+              {totalQuestions === 3 ? "Complete all 3 questions · 2 correct to pass · +10 XP per correct answer" : "Sample question · answer correctly to clear this topic"}
             </span>
             <button
               type="button"

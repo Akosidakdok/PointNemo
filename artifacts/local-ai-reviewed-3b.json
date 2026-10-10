@@ -1,0 +1,694 @@
+{
+  "createdAt": "2026-10-09T22:46:20.795Z",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 3050 6GB Laptop GPU, 6144 MiB",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12450HX",
+    "ramGiB": 7.714714050292969
+  },
+  "baseline": null,
+  "databasePath": "C:\\Users\\redd\\AppData\\Local\\Temp\\point-nemo-benchmark-YYK6hd\\benchmark.sqlite",
+  "note": "Small synthetic-fixture benchmark. Automated validation is not a proof of answer correctness; review exported questions and evidence.",
+  "summary": [
+    {
+      "model": "qwen2.5:3b",
+      "samples": 2,
+      "medianMs": 48179.5,
+      "p95Ms": 50958,
+      "startup": [
+        {
+          "startup": "cold",
+          "samples": 2,
+          "medianMs": 48179.5
+        },
+        {
+          "startup": "warm",
+          "samples": 0,
+          "medianMs": null
+        }
+      ],
+      "firstPassRate": 0,
+      "completionRate": 0
+    }
+  ],
+  "skipped": [],
+  "records": [
+    {
+      "kind": "generation",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "4bea3a99-8c76-490d-92f9-66678fd21544",
+        "documentId": "a347d1c4-8f6c-4ae1-9562-5022896b1e90",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "INVALID_MODEL_OUTPUT",
+        "errorMessage": "All four answer options must be distinct. Question 9 repeats question 7. Test a different source-supported fact or application, not a rewording.",
+        "errorStage": "validating",
+        "elapsedTimeMs": 50959,
+        "createdAt": "2026-10-09T22:44:43.947Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 1238,
+          "sourceReused": 0,
+          "selectionMs": 14,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "seed": 42,
+          "inputTokens": 1125,
+          "plan_total_duration": 11520214800,
+          "plan_load_duration": 5552769900,
+          "plan_prompt_eval_duration": 416839000,
+          "plan_eval_duration": 5540539000,
+          "plan_prompt_eval_count": 773,
+          "plan_prompt_eval_cached_count": 0,
+          "plan_eval_count": 336,
+          "plan_tokensPerSecond": 60.643919300992195,
+          "createdQuestions": 9,
+          "initial_total_duration": 19509080200,
+          "initial_load_duration": 122496100,
+          "initial_prompt_eval_duration": 464386000,
+          "initial_eval_duration": 18808433000,
+          "initial_prompt_eval_count": 1406,
+          "initial_prompt_eval_cached_count": 289,
+          "initial_eval_count": 1117,
+          "initial_tokensPerSecond": 59.38825419427551,
+          "generationMs": 45018,
+          "review_total_duration": 4604125000,
+          "review_load_duration": 44357900,
+          "review_prompt_eval_duration": 515460000,
+          "review_eval_duration": 3994521000,
+          "review_prompt_eval_count": 1165,
+          "review_prompt_eval_cached_count": 3,
+          "review_eval_count": 233,
+          "review_tokensPerSecond": 58.32989737693205,
+          "validationMs": 4619,
+          "repairedQuestions": 2,
+          "repairInputTokens": 7677,
+          "repair_total_duration": 13903844900,
+          "repair_load_duration": 238847800,
+          "repair_prompt_eval_duration": 1965369000,
+          "repair_eval_duration": 11453788999,
+          "repair_prompt_eval_count": 7677,
+          "repair_prompt_eval_cached_count": 2935,
+          "repair_eval_count": 661,
+          "repair_tokensPerSecond": 57.71016037205768,
+          "repairedQuestionsCompleted": 5,
+          "totalMs": 50958
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:15:34.9042394+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:14:38.9847474+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "kind": "plan",
+          "output": {
+            "topics": [
+              {
+                "name": "IP Addressing",
+                "objectives": [
+                  {
+                    "evidenceId": "p1s1",
+                    "goal": "Define what an IP address is."
+                  },
+                  {
+                    "evidenceId": "p1s2",
+                    "goal": "Understand the structure of an IPv4 address."
+                  },
+                  {
+                    "evidenceId": "p1s7",
+                    "goal": "Explain the role of an IP address in network communication."
+                  }
+                ]
+              },
+              {
+                "name": "DNS",
+                "objectives": [
+                  {
+                    "evidenceId": "p2s1",
+                    "goal": "Describe the purpose of DNS."
+                  },
+                  {
+                    "evidenceId": "p2s4",
+                    "goal": "Identify the type of record that contains an IPv4 address."
+                  },
+                  {
+                    "evidenceId": "p2s8",
+                    "goal": "Explain the importance of DNS caching."
+                  }
+                ]
+              },
+              {
+                "name": "HTTP",
+                "objectives": [
+                  {
+                    "evidenceId": "p3s2",
+                    "goal": "Outline the client-server model of HTTP."
+                  },
+                  {
+                    "evidenceId": "p3s3",
+                    "goal": "Distinguish between GET and POST requests."
+                  },
+                  {
+                    "evidenceId": "p3s9",
+                    "goal": "Interpret HTTP status codes."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s1",
+              "prompt": "What does an IP address identify in a network?",
+              "correctAnswer": "A network interface",
+              "distractors": [
+                "The network's bandwidth",
+                "The network's security protocols",
+                "The network's color in the network map"
+              ],
+              "explanation": "An IP address identifies a network interface, as stated in the passage."
+            },
+            "1": {
+              "evidenceId": "p1s2",
+              "prompt": "How many bits does an IPv4 address use?",
+              "correctAnswer": "32",
+              "distractors": [
+                "16",
+                "64",
+                "128"
+              ],
+              "explanation": "IPv4 uses 32 bits, as mentioned in the passage."
+            },
+            "2": {
+              "evidenceId": "p1s7",
+              "prompt": "What is the primary role of an IP address in network communication?",
+              "correctAnswer": "It tells the network where to deliver data",
+              "distractors": [
+                "It encrypts data for privacy",
+                "It determines the data's content",
+                "It routes data to the correct destination"
+              ],
+              "explanation": "An IP address tells the network where to deliver data, as stated in the passage."
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s1",
+              "prompt": "What does DNS do? Which of the following best describes its function?\na) Converts human-readable domain names into binary codes\nb) Converts human-readable domain names into IP addresses\nc) Converts IP addresses into human-readable domain\n",
+              "correctAnswer": "b) Converts human-readable domain names into IP addresses",
+              "distractors": [
+                "a) Converts human-readable domain names into binary codes",
+                "c) Converts IP addresses into human-readable domain",
+                "d) Converts binary codes into human-readable domain names"
+              ],
+              "explanation": "DNS translates human-readable domain names into IP addresses."
+            },
+            "4": {
+              "evidenceId": "p2s4",
+              "prompt": "Which type of record contains an IPv4 address?\na) A record\nb) AAAA record\nc) CNAME record\nd) MX record",
+              "correctAnswer": "a) A record",
+              "distractors": [
+                "b) AAAA record",
+                "c) CNAME record",
+                "d) MX record"
+              ],
+              "explanation": "An A record contains an IPv4 address."
+            },
+            "5": {
+              "evidenceId": "p2s8",
+              "prompt": "Why is DNS caching important? Which of the following best explains its significance?\na) To ensure that all DNS lookups are performed in real-time\nb) To reduce the load on DNS servers by reusing previously resolved records\nc) To increase the",
+              "correctAnswer": "b) To reduce the load on DNS servers by reusing previously resolved records",
+              "distractors": [
+                "a) To ensure that all DNS lookups are performed in real-time",
+                "c) To increase the",
+                "d) To decrease the load on DNS servers by reusing previously resolved records"
+              ],
+              "explanation": "Reusing an unexpired cached answer avoids another lookup."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s2",
+              "prompt": "In the client-server model of HTTP, what does a client do?",
+              "correctAnswer": "sends a request and a server returns a response",
+              "distractors": [
+                "sends a request and a server sends a response",
+                "sends a request and a server sends a notification",
+                "sends a notification and a server sends a response"
+              ],
+              "explanation": "In the client-server model, a client initiates a request to a server, which then responds with the requested data."
+            },
+            "7": {
+              "evidenceId": "p3s3",
+              "prompt": "What does a GET request ask for?",
+              "correctAnswer": "a representation of a resource",
+              "distractors": [
+                "the creation of a new resource",
+                "the deletion of a resource",
+                "the modification of a resource"
+              ],
+              "explanation": "A GET request is used to retrieve a resource's representation, such as a document or file."
+            },
+            "8": {
+              "evidenceId": "p3s9",
+              "prompt": "When a client receives a 404 status code, what does it mean?",
+              "correctAnswer": "the requested resource was not found",
+              "distractors": [
+                "the requested resource was found",
+                "the client needs to resend the request",
+                "the server is overloaded and cannot process the request"
+              ],
+              "explanation": "A 404 status code indicates that the server cannot find the requested resource."
+            }
+          }
+        },
+        {
+          "questions": {
+            "2": {
+              "evidenceId": "p1s7",
+              "prompt": "What does an IP address tell the network?",
+              "correctAnswer": "It tells the network where to deliver data",
+              "distractors": [
+                "It describes the contents of the data",
+                "It encrypts the data for privacy",
+                "It generates the data packets"
+              ],
+              "explanation": "The correct answer is 'It tells the network where to deliver data', and the distractors are plausible but incorrect alternatives."
+            }
+          }
+        },
+        {
+          "questions": {
+            "5": {
+              "evidenceId": "p2s7",
+              "prompt": "What does DNS do in the client-server model to avoid another lookup?",
+              "correctAnswer": "b) To reduce the load on DNS servers by reusing previously resolved records",
+              "distractors": [
+                "a) To convert human-readable domain names into binary codes",
+                "c) To convert IP addresses into human-readable domain names",
+                "d) To reduce the load on DNS servers by reusing previously resolved records"
+              ],
+              "explanation": "DNS caching keeps a previous lookup result for the record's time to live (TTL), allowing it to reuse the answer without another lookup."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s9",
+              "prompt": "When a client receives a 404 status code, what does it mean?",
+              "correctAnswer": "the requested resource was not found",
+              "distractors": [
+                "the client-server model is established",
+                "the requested resource was found",
+                "the client must resend the request"
+              ],
+              "explanation": "Status code 404 means the requested resource was not found."
+            }
+          }
+        },
+        {
+          "questions": {
+            "7": {
+              "evidenceId": "p3s4",
+              "prompt": "What does a GET request ask for in the client-server model?",
+              "correctAnswer": "a representation of a resource",
+              "distractors": [
+                "a representation of a server",
+                "a representation of a client",
+                "a representation of a resource"
+              ],
+              "explanation": "The correct answer is 'a representation of a resource', which is the definition of a GET request in the client-server model."
+            }
+          }
+        },
+        {
+          "questions": {
+            "8": {
+              "evidenceId": "p3s9",
+              "prompt": "When a client receives a 404 status code, what does it mean?",
+              "correctAnswer": "the requested resource was not found",
+              "distractors": [
+                "the requested resource was found",
+                "the requested resource was found but the client does not have permission to access it",
+                "the requested resource was found but the server is currently unavailable"
+              ],
+              "explanation": "Status code 404 indicates that the server cannot find the requested resource."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "09b3b51c-cd95-4c33-bed4-3ad789fb2b1e",
+        "documentId": "c4bd3468-e61d-4b44-a61d-10f015c74fa9",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "SOURCE_EVIDENCE_INVALID",
+        "errorMessage": "Question 2: The correct answer is A) TCP establishes a connection and delivers a reliable, ordered byte stream. However, the prompt repeats the same statement as the correct answer, which is a repetition of the '",
+        "errorStage": "validating",
+        "elapsedTimeMs": 45403,
+        "createdAt": "2026-10-09T22:45:35.137Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 37,
+          "sourceReused": 0,
+          "selectionMs": 7,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "seed": 42,
+          "inputTokens": 1295,
+          "plan_total_duration": 11372421000,
+          "plan_load_duration": 4816455800,
+          "plan_prompt_eval_duration": 508408000,
+          "plan_eval_duration": 6028188000,
+          "plan_prompt_eval_count": 943,
+          "plan_prompt_eval_cached_count": 0,
+          "plan_eval_count": 359,
+          "plan_tokensPerSecond": 59.5535507519009,
+          "createdQuestions": 9,
+          "initial_total_duration": 25917586800,
+          "initial_load_duration": 117597500,
+          "initial_prompt_eval_duration": 555533000,
+          "initial_eval_duration": 25101729000,
+          "initial_prompt_eval_count": 1603,
+          "initial_prompt_eval_cached_count": 289,
+          "initial_eval_count": 1481,
+          "initial_tokensPerSecond": 58.999919885996704,
+          "generationMs": 41560,
+          "review_total_duration": 3691186300,
+          "review_load_duration": 79526300,
+          "review_prompt_eval_duration": 1160083000,
+          "review_eval_duration": 2315653000,
+          "review_prompt_eval_count": 2913,
+          "review_prompt_eval_cached_count": 6,
+          "review_eval_count": 124,
+          "review_tokensPerSecond": 53.548610262418414,
+          "validationMs": 3703,
+          "repairedQuestions": 1,
+          "repairInputTokens": 1837,
+          "repair_total_duration": 4241996900,
+          "repair_load_duration": 37714000,
+          "repair_prompt_eval_duration": 748320000,
+          "repair_eval_duration": 3404801000,
+          "repair_prompt_eval_count": 1837,
+          "repair_prompt_eval_cached_count": 3,
+          "repair_eval_count": 203,
+          "repair_tokensPerSecond": 59.621693015245235,
+          "repairedQuestionsCompleted": 1,
+          "totalMs": 45401
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:16:20.5391668+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:14:38.9847474+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "kind": "plan",
+          "output": {
+            "topics": [
+              {
+                "name": "TCP vs UDP",
+                "objectives": [
+                  {
+                    "evidenceId": "p1s1",
+                    "goal": "Define TCP and UDP."
+                  },
+                  {
+                    "evidenceId": "p1s2",
+                    "goal": "Understand the reliability and ordering features of TCP."
+                  },
+                  {
+                    "evidenceId": "p1s5",
+                    "goal": "Identify when TCP is suitable for a file-copy application."
+                  }
+                ]
+              },
+              {
+                "name": "Ports",
+                "objectives": [
+                  {
+                    "evidenceId": "p2s1",
+                    "goal": "List the range of port numbers."
+                  },
+                  {
+                    "evidenceId": "p2s4",
+                    "goal": "Identify the ports used by SSH, IMAP, and PostgreSQL servers."
+                  },
+                  {
+                    "evidenceId": "p2s6",
+                    "goal": "Distinguish between a TCP and UDP endpoint with the same port number."
+                  }
+                ]
+              },
+              {
+                "name": "Subnetting",
+                "objectives": [
+                  {
+                    "evidenceId": "p3s2",
+                    "goal": "Describe the structure of an IPv4 /24 prefix."
+                  },
+                  {
+                    "evidenceId": "p3s8",
+                    "goal": "Calculate the number of addresses in a /25 subnet."
+                  },
+                  {
+                    "evidenceId": "p3s9",
+                    "goal": "Determine the subnet mask for a /25 subnet."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s1",
+              "prompt": "TCP is a protocol that ensures a reliable, ordered byte stream. Which of the following statements best describes TCP's primary function?\nA) TCP establishes a connection and delivers a reliable, ordered byte stream.\nB) TCP can retransmit any",
+              "correctAnswer": "A) TCP establishes a connection and delivers a reliable, ordered byte stream.",
+              "distractors": [
+                "B) TCP can retransmit any lost data and a receiving application reads bytes in order.",
+                "C) TCP sends individual datagrams without establishing a connection.",
+                "D) TCP is not suitable for applications that require a reliable, ordered byte stream."
+              ],
+              "explanation": "TCP establishes a connection and delivers a reliable, ordered byte stream, as stated in p1s1."
+            },
+            "1": {
+              "evidenceId": "p1s2",
+              "prompt": "TCP delivers a reliable, ordered byte stream. Which of the following scenarios best illustrates the reliability and ordering features of TCP?\nA) TCP can retransmit lost data, and a receiving application reads bytes in order rather than",
+              "correctAnswer": "A) TCP can retransmit lost data, and a receiving application reads bytes in order rather than",
+              "distractors": [
+                "B) UDP can retransmit lost data, and a receiving application reads bytes in order rather than",
+                "C) TCP sends individual datagrams without establishing a connection and a receiving application reads bytes in order",
+                "D) UDP sends individual datagrams without establishing a connection and a receiving application reads bytes in order"
+              ],
+              "explanation": "TCP can retransmit lost data, and a receiving application reads bytes in order rather than receiving separate message boundaries, as stated in p1s2."
+            },
+            "2": {
+              "evidenceId": "p1s5",
+              "prompt": "A synthetic file-copy application needs every byte in order. Which of the following protocols is most suitable for this application?\nA) TCP, because it ensures a reliable, ordered byte stream.\nB) UDP, because it is faster and does not care",
+              "correctAnswer": "A) TCP, because it ensures a reliable, ordered byte stream.",
+              "distractors": [
+                "B) UDP, because it is faster and does not care",
+                "C) TCP, because it can retransmit lost data and a receiving application reads bytes in order",
+                "D) UDP, because it sends individual datagrams without establishing a connection"
+              ],
+              "explanation": "A synthetic file-copy application needs every byte in order, so TCP fits that requirement, as stated in p1s5."
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s1",
+              "prompt": "What is the range of port numbers for TCP and UDP?",
+              "correctAnswer": "0 to 65535",
+              "distractors": [
+                "1 to 1024",
+                "1025 to 49151",
+                "1024 to 65535"
+              ],
+              "explanation": "Port numbers are a 16-bit value and range from 0 to 65535."
+            },
+            "4": {
+              "evidenceId": "p2s4",
+              "prompt": "Which TCP ports are used by SSH, IMAP, and PostgreSQL servers respectively?",
+              "correctAnswer": "22, 143, 5432",
+              "distractors": [
+                "22, 143, 80",
+                "21, 143, 5432",
+                "22, 133, 5432"
+              ],
+              "explanation": "An SSH server listens on TCP port 22, an IMAP server listens on TCP port 143, and a PostgreSQL server listens on TCP port 5432."
+            },
+            "5": {
+              "evidenceId": "p2s6",
+              "prompt": "How are a TCP and UDP endpoint with the same port number different?",
+              "correctAnswer": "They are distinguished by their protocol and source and destination addresses and ports.",
+              "distractors": [
+                "They are the same because they use the same port number.",
+                "They are the same because they are both TCP endpoints.",
+                "They are the same because they are both UDP endpoints."
+              ],
+              "explanation": "Two clients can contact the same server port using different source ports, indicating they are different endpoints."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s2",
+              "prompt": "An IPv4 /24 prefix uses 24 network bits and leaves 8 host bits. What is the total number of addresses in an /24 prefix?",
+              "correctAnswer": "256",
+              "distractors": [
+                "128",
+                "512",
+                "1024"
+              ],
+              "explanation": "An /24 prefix uses 24 network bits, leaving 8 host bits, which can be combined to form 2^8 = 256 total addresses."
+            },
+            "7": {
+              "evidenceId": "p3s8",
+              "prompt": "In a /25 subnet, the subnet mask is 255.255.255.128. How many addresses are in a /25 subnet?",
+              "correctAnswer": "128",
+              "distractors": [
+                "64",
+                "256",
+                "512"
+              ],
+              "explanation": "A /25 subnet uses 25 network bits, leaving 7 host bits, which can be combined to form 2^7 = 128 total addresses."
+            },
+            "8": {
+              "evidenceId": "p3s9",
+              "prompt": "What is the subnet mask for a /25 subnet?",
+              "correctAnswer": "255.255.255.128",
+              "distractors": [
+                "255.255.255.0",
+                "255.255.128.0",
+                "255.128.128.128"
+              ],
+              "explanation": "The subnet mask for a /25 subnet is 255.255.255.128, indicating 25 network bits and 7 host bits."
+            }
+          }
+        },
+        {
+          "questions": {
+            "1": {
+              "evidenceId": "p1s1",
+              "prompt": "Which of the following statements best describes TCP's primary function?\nA) TCP establishes a connection and delivers a reliable, ordered byte stream.\nB) TCP can retransmit any",
+              "correctAnswer": "A) TCP establishes a connection and delivers a reliable, ordered byte stream.",
+              "distractors": [
+                "B) TCP can retransmit any",
+                "C) TCP can retransmit lost data, and a receiving application reads bytes in order rather than",
+                "D) TCP can retransmit lost data, and a receiving application reads bytes in order rather than"
+              ],
+              "explanation": "The correct answer should be 'A) TCP establishes a connection and delivers a reliable, ordered byte stream.' but the option includes additional text that is not part of the correct 'A'."
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

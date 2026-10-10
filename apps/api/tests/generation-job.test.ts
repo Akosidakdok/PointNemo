@@ -106,6 +106,48 @@ test("planner allows repeated generic goal wording when each slot has a differen
   assert.equal(plan.slots.length,9);
 });
 
+test("answer-choice repair receives other PDF facts while preserving the cited answer", async () => {
+  await withDatabase(async (databasePath) => {
+    const database = initializeDatabase(databasePath);
+    let repairSource = "";
+    const base = validOutput();
+    const factIds = [1,3,2,4,5,6,7,8,9];
+    const objectives = base.questions.map((_,index)=>({evidenceId:`p1s${factIds[index]}`,goal:`Test source fact ${index+1}.`}));
+    const planTopics = base.topics.map((topic,topicIndex)=>({name:topic.name,objectives:objectives.slice(topicIndex*3,topicIndex*3+3)}));
+    const ollama = {
+      getStatus: async () => ({ available:true,model:config.ollamaModel,message:"ready",digest:"test-model-digest",tokenizerReady:true,tokenizerDigest:TOKENIZER_DIGEST }),
+      planQuestions: async () => ({topics:planTopics}),
+      generateQuestions: async (_source:string,options:any={}) => {
+        if (options.repair) {
+          repairSource = _source;
+          const index=options.repair.slots[0]!.index;
+          const question=options.repair.questions[index];
+          const distractors=index===0 ? ["128 bits","16 bits","64 bits"] : question.options.filter((_option:string,optionIndex:number)=>optionIndex!==question.answerIndex);
+          return {questions:{[index]:{distractors}}};
+        }
+        const index=options.slots[0]!;
+        const question=base.questions[index]!;
+        const distractors=question.options.filter((_option,optionIndex)=>optionIndex!==question.answerIndex);
+        if (index===0) distractors[0]="uses 32 bits";
+        return {questions:{[index]:{evidenceId:`p1s${factIds[index]}`,prompt:question.prompt,
+          correctAnswer:question.options[question.answerIndex],distractors,explanation:question.explanation}}};
+      },
+    } as unknown as OllamaService;
+    try {
+      const service = new GenerationJobService(database,config,mockExtractor(source),ollama);
+      const result = await service.enqueue({originalName:"notes.pdf",mimeType:"application/pdf",buffer:Buffer.from("%PDF-1.7\n%%EOF")});
+      const job = await waitForTerminal(service,result.jobId);
+      assert.equal(job.state,"ready",job.errorMessage);
+      assert.ok(repairSource.includes("[p1s2 | page 1]"),"repair includes another passage from the same PDF");
+      const saved = service.getQuestionSet(job.questionSetId!);
+      assert.equal(saved.questions[0]!.options[saved.questions[0]!.answerIndex],"32 bits");
+      assert.equal(database.prepare("SELECT COUNT(*) AS count FROM question_sets").get().count,1);
+    } finally {
+      database.close();
+    }
+  });
+});
+
 function mockExtractor(result: ExtractedDocument): DocumentExtractor {
   return { extractText: async (_file: UploadedDocument) => result };
 }

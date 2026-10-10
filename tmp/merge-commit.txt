@@ -1,0 +1,9 @@
+Merge main and reconcile local AI and quiz progression
+
+Preserve main's PDF safety gate, light theme, responsive styles and staged
+navigation while retaining source-grounded generation, saved lesson reuse,
+three-question topic progression and parent-owned final review scoring.
+
+Update stale route fixtures and smoke answers to match supported source facts.
+Verification: 97 regression tests, API route smoke, typecheck, production build,
+and browser checks for PDF admission, marker confirmation and question resume.

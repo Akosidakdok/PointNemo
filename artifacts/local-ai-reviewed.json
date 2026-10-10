@@ -1,0 +1,460 @@
+{
+  "createdAt": "2026-10-09T22:44:28.443Z",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 3050 6GB Laptop GPU, 6144 MiB",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12450HX",
+    "ramGiB": 7.714714050292969
+  },
+  "baseline": null,
+  "databasePath": "C:\\Users\\redd\\AppData\\Local\\Temp\\point-nemo-benchmark-jwYJe9\\benchmark.sqlite",
+  "note": "Small synthetic-fixture benchmark. Automated validation is not a proof of answer correctness; review exported questions and evidence.",
+  "summary": [
+    {
+      "model": "qwen2.5:1.5b",
+      "samples": 1,
+      "medianMs": 32765,
+      "p95Ms": 32765,
+      "startup": [
+        {
+          "startup": "cold",
+          "samples": 1,
+          "medianMs": 32765
+        },
+        {
+          "startup": "warm",
+          "samples": 0,
+          "medianMs": null
+        }
+      ],
+      "firstPassRate": 0,
+      "completionRate": 0
+    },
+    {
+      "model": "qwen2.5:3b",
+      "samples": 0,
+      "medianMs": null,
+      "p95Ms": null,
+      "startup": [
+        {
+          "startup": "cold",
+          "samples": 0,
+          "medianMs": null
+        },
+        {
+          "startup": "warm",
+          "samples": 0,
+          "medianMs": null
+        }
+      ],
+      "firstPassRate": null,
+      "completionRate": null
+    }
+  ],
+  "skipped": [],
+  "records": [
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "8322192e-1504-4733-9201-14ef86870855",
+        "documentId": "6d6feaa4-2438-4fd7-9d57-3c1af0131a74",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "DUPLICATE_QUESTION",
+        "errorMessage": "Question 2 repeats question 1. Test a different source-supported fact or application, not a rewording. Question 3 repeats question 1. Test a different source-supported fact or application, not a rewording. Question 3 repeats question 2. Test a different source-supported fact or application, not a rewording. All four answer options must be distinct. Question 5 repeats question 4. Test a different source-supported fact or application, not a rewording. The question and correct answer are disconnected from their cited passage. Use a supported fact or application. Question 7 repeats question 6. Test a different source-supported fact or application, not a rewording. The question and correct answer are disconnected from their cited passage. Use a supported fact or application.",
+        "errorStage": "validating",
+        "elapsedTimeMs": 32767,
+        "createdAt": "2026-10-09T22:43:55.523Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 1510,
+          "sourceReused": 0,
+          "selectionMs": 14,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "seed": 42,
+          "inputTokens": 1125,
+          "plan_total_duration": 6332900600,
+          "plan_load_duration": 3305060100,
+          "plan_prompt_eval_duration": 281887000,
+          "plan_eval_duration": 2732737000,
+          "plan_prompt_eval_count": 773,
+          "plan_prompt_eval_cached_count": 0,
+          "plan_eval_count": 306,
+          "plan_tokensPerSecond": 111.975649321541,
+          "createdQuestions": 9,
+          "initial_total_duration": 9785507800,
+          "initial_load_duration": 136004200,
+          "initial_prompt_eval_duration": 287441000,
+          "initial_eval_duration": 9247208000,
+          "initial_prompt_eval_count": 2285,
+          "initial_prompt_eval_cached_count": 896,
+          "initial_eval_count": 977,
+          "initial_tokensPerSecond": 105.65351184919815,
+          "generationMs": 27177,
+          "review_total_duration": 4007910000,
+          "review_load_duration": 30042800,
+          "review_prompt_eval_duration": 226145000,
+          "review_eval_duration": 3708735000,
+          "review_prompt_eval_count": 1056,
+          "review_prompt_eval_cached_count": 3,
+          "review_eval_count": 395,
+          "review_tokensPerSecond": 106.50531785096535,
+          "validationMs": 4028,
+          "repairedQuestions": 6,
+          "repairInputTokens": 11742,
+          "repair_total_duration": 10953462100,
+          "repair_load_duration": 295328500,
+          "repair_prompt_eval_duration": 1500395000,
+          "repair_eval_duration": 8758261000,
+          "repair_prompt_eval_count": 11742,
+          "repair_prompt_eval_cached_count": 4869,
+          "repair_eval_count": 817,
+          "repair_tokensPerSecond": 93.28335842012473,
+          "repairedQuestionsCompleted": 8,
+          "totalMs": 32765
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:14:28.2873386+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:13:36.918089+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "kind": "plan",
+          "output": {
+            "topics": [
+              {
+                "name": "IP Addressing",
+                "objectives": [
+                  {
+                    "evidenceId": "p1s1",
+                    "goal": "Define IP Addressing"
+                  },
+                  {
+                    "evidenceId": "p1s2",
+                    "goal": "Explain IPv4 Addressing"
+                  },
+                  {
+                    "evidenceId": "p1s3",
+                    "goal": "Describe IPv6 Addressing"
+                  }
+                ]
+              },
+              {
+                "name": "DNS",
+                "objectives": [
+                  {
+                    "evidenceId": "p2s1",
+                    "goal": "Define DNS"
+                  },
+                  {
+                    "evidenceId": "p2s2",
+                    "goal": "Explain DNS Lookup Process"
+                  },
+                  {
+                    "evidenceId": "p2s3",
+                    "goal": "Describe DNS Record Types"
+                  }
+                ]
+              },
+              {
+                "name": "HTTP",
+                "objectives": [
+                  {
+                    "evidenceId": "p3s1",
+                    "goal": "Define HTTP"
+                  },
+                  {
+                    "evidenceId": "p3s2",
+                    "goal": "Explain HTTP Client-Server Model"
+                  },
+                  {
+                    "evidenceId": "p3s3",
+                    "goal": "Describe HTTP Request Methods"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s1",
+              "prompt": "What does an IP address identify?",
+              "correctAnswer": "A network interface",
+              "distractors": [
+                "A router",
+                "A computer",
+                "A website"
+              ],
+              "explanation": "An IP address identifies a network interface and helps routers direct packets to a destination."
+            },
+            "1": {
+              "evidenceId": "p1s2",
+              "prompt": "What is the typical format of an IPv4 address?",
+              "correctAnswer": "Four decimal numbers",
+              "distractors": [
+                "Three decimal numbers",
+                "Sixteen hexadecimal numbers",
+                "Eight octet numbers"
+              ],
+              "explanation": "IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1)."
+            },
+            "2": {
+              "evidenceId": "p1s3",
+              "prompt": "What does an IPv6 address use?",
+              "correctAnswer": "128 bits",
+              "distractors": [
+                "256 bits",
+                "160 bits",
+                "252 bits"
+              ],
+              "explanation": "IPv6 uses 128 bits, represented in hexadecimal."
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s1",
+              "prompt": "What does DNS translate into IP addresses?",
+              "correctAnswer": "IPv4 addresses",
+              "distractors": [
+                "IPv6 addresses",
+                "URLs",
+                "MAC addresses"
+              ],
+              "explanation": "DNS translates human-readable domain names into IP addresses."
+            },
+            "4": {
+              "evidenceId": "p2s2",
+              "prompt": "What does a fictional lookup for 'study.example' return?",
+              "correctAnswer": "192.0.2.25",
+              "distractors": [
+                "192.0.2.26",
+                "192.0.2.27",
+                "192.0.2.28"
+              ],
+              "explanation": "A fictional lookup for 'study.example' returns 192.0.2.25 to the client."
+            },
+            "5": {
+              "evidenceId": "p2s3",
+              "prompt": "What does a DNS resolver do?",
+              "correctAnswer": "Obtains the requested record",
+              "distractors": [
+                "Receives a name lookup from a client",
+                "Receives a request from a server",
+                "Receives a request from a user"
+              ],
+              "explanation": "A DNS resolver receives a name lookup from a client and obtains the requested record."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s1",
+              "prompt": "What is HTTP?",
+              "correctAnswer": "HTTP is an application-layer protocol used to exchange requests and responses.",
+              "distractors": [
+                "HTTP is a transport-layer protocol used to exchange requests and responses.",
+                "HTTP is a network-layer protocol used to exchange requests and responses.",
+                "HTTP is a session-layer protocol used to exchange requests and responses."
+              ],
+              "explanation": "HTTP is an application-layer protocol used to exchange requests and responses."
+            },
+            "7": {
+              "evidenceId": "p3s2",
+              "prompt": "In the client-server model, what does a client send and what does a server return?",
+              "correctAnswer": "A client sends a request and a server returns a response.",
+              "distractors": [
+                "A client sends a response and a server returns a request.",
+                "A client sends a request and a server sends a response.",
+                "A client sends a request and a server sends a request."
+              ],
+              "explanation": "In the client-server model, a client sends a request and a server returns a response."
+            },
+            "8": {
+              "evidenceId": "p3s3",
+              "prompt": "What does a GET request ask for?",
+              "correctAnswer": "A GET request asks for a representation of a resource.",
+              "distractors": [
+                "A GET request asks for a request for a resource.",
+                "A GET request asks for a response for a resource.",
+                "A GET request asks for a request for a request."
+              ],
+              "explanation": "A GET request asks for a representation of a resource."
+            }
+          }
+        },
+        {
+          "questions": {
+            "0": {
+              "evidenceId": "p1s2",
+              "prompt": "What does an IPv6 address use?",
+              "correctAnswer": "128 bits",
+              "distractors": [
+                "32 bits",
+                "16 bits",
+                "256 bits"
+              ],
+              "explanation": "An IPv6 address uses 128 bits, which is represented in hexadecimal."
+            }
+          }
+        },
+        {
+          "questions": {
+            "1": {
+              "evidenceId": "p1s1",
+              "prompt": "What does an IPv6 address use?",
+              "correctAnswer": "128 bits",
+              "distractors": [
+                "32 bits",
+                "64 bits",
+                "256 bits"
+              ],
+              "explanation": "IPv6 uses 128 bits, which is represented in hexadecimal."
+            }
+          }
+        },
+        {
+          "questions": {
+            "2": {
+              "evidenceId": "p1s2",
+              "prompt": "What does an IPv6 address use?",
+              "correctAnswer": "128 bits",
+              "distractors": [
+                "32 bits",
+                "64 bits",
+                "16 bits"
+              ],
+              "explanation": "IPv6 addresses use 128 bits, which is why the evidence supports the correct answer '128 bits', but it does not explain why IPv6 addresses use 128 bits."
+            }
+          }
+        },
+        {
+          "questions": {
+            "3": {
+              "evidenceId": "p2s2",
+              "prompt": "What does a fictional lookup for 'study.example' return?",
+              "correctAnswer": "192.0.2.25",
+              "distractors": [
+                "192.168.1.1",
+                "192.0.2.25",
+                "192.0.2.254"
+              ],
+              "explanation": "A fictional lookup for study.example can return 192.0.2.25 to the client."
+            }
+          }
+        },
+        {
+          "questions": {
+            "4": {
+              "evidenceId": "p2s2",
+              "prompt": "What does a fictional lookup for 'study.example' return?",
+              "correctAnswer": "192.0.2.25",
+              "distractors": [
+                "192.168.1.1",
+                "192.0.2.24",
+                "192.0.2.26"
+              ],
+              "explanation": "A fictional lookup for 'study.example' returns 192.0.2.25 to the client, which is the IP address for the fictional example."
+            }
+          }
+        },
+        {
+          "questions": {
+            "5": {
+              "evidenceId": "p2s4",
+              "prompt": "What does an A record contain?",
+              "correctAnswer": "an IPv4 address",
+              "distractors": [
+                "an IPv6 address",
+                "a domain name",
+                "a website URL"
+              ],
+              "explanation": "An A record contains an IPv4 address."
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "evidenceId": "p3s2",
+              "prompt": "What does an A record contain?",
+              "correctAnswer": "an IPv4 address",
+              "distractors": [
+                "an IPv6 address",
+                "a domain name",
+                "a hostname"
+              ],
+              "explanation": "An A record contains an IPv4 address, which is used to identify a network interface and help routers direct packets to a destination."
+            }
+          }
+        },
+        {
+          "questions": {
+            "7": {
+              "evidenceId": "p3s4",
+              "prompt": "What does a POST request submit? ",
+              "correctAnswer": "data",
+              "distractors": [
+                "a request",
+                "an answer",
+                "a response"
+              ],
+              "explanation": "A POST request submits data to a resource for processing."
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

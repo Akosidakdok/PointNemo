@@ -1,0 +1,17 @@
+00.30s: Point Nemo turns your lesson PDF into a local underwater study adventure.
+
+06.25s: Start with your own notes. Choose one English, text-based PDF from your local library.
+
+13.25s: The safety gate checks the file and its signature before local processing begins.
+
+19.25s: Sonar reads your lesson. Local Ollama creates nine questions, then validation checks answers against source evidence.
+
+27.25s: Explore three topics on your ocean map. Clear each encounter to unlock the next.
+
+34.25s: Every correction has a source. Miss a question, and see the correct answer, an explanation, and the exact supporting quote with its PDF page.
+
+45.25s: Then face the final review: the same nine questions, shuffled. Get eight right to complete the run.
+
+53.25s: See your result, and try the lesson again.
+
+57.15s: One lesson. One descent.

@@ -1,0 +1,192 @@
+TAP version 13
+# Subtest: admission checks signature and extension
+ok 1 - admission checks signature and extension
+  ---
+  duration_ms: 2.1428
+  type: 'test'
+  ...
+# Subtest: normalization counts nonwhitespace, rejects mixed scan pages and retains blank pages
+ok 2 - normalization counts nonwhitespace, rejects mixed scan pages and retains blank pages
+  ---
+  duration_ms: 2.8368
+  type: 'test'
+  ...
+# Subtest: local Qwen tokenizer counts actual BPE tokens and complete repair prompts
+ok 3 - local Qwen tokenizer counts actual BPE tokens and complete repair prompts
+  ---
+  duration_ms: 363.4434
+  type: 'test'
+  ...
+# Subtest: source instructions and model role tokens stay inside escaped source data
+ok 4 - source instructions and model role tokens stay inside escaped source data
+  ---
+  duration_ms: 0.1671
+  type: 'test'
+  ...
+# Subtest: postvalidation rejects duplicate normalized stems, wrong coverage, options, and foreign quotes
+ok 5 - postvalidation rejects duplicate normalized stems, wrong coverage, options, and foreign quotes
+  ---
+  duration_ms: 26.5469
+  type: 'test'
+  ...
+# Subtest: one repair may fix invalid data, and a second invalid set persists nothing
+not ok 6 - one repair may fix invalid data, and a second invalid set persists nothing
+  ---
+  duration_ms: 48.8441
+  type: 'test'
+  location: 'C:\\Users\\redd\\Documents\\ChatGPT\\pointnemo\\apps\\api\\tests\\generation-release.test.ts:76:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    'failed' !== 'ready'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'ready'
+  actual: 'failed'
+  operator: 'strictEqual'
+  stack: |-
+    <anonymous> (C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api\tests\generation-release.test.ts:78:102)
+    async databaseTest (C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api\tests\generation-release.test.ts:39:182)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: global deadline includes extraction and never resets for inference or repair
+not ok 7 - global deadline includes extraction and never resets for inference or repair
+  ---
+  duration_ms: 61.9252
+  type: 'test'
+  location: 'C:\\Users\\redd\\Documents\\ChatGPT\\pointnemo\\apps\\api\\tests\\generation-release.test.ts:81:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    0 !== 1
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 1
+  actual: 0
+  operator: 'strictEqual'
+  stack: |-
+    <anonymous> (C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api\tests\generation-release.test.ts:84:134)
+    async databaseTest (C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api\tests\generation-release.test.ts:39:182)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: inference timeout fails without repair even if the model ignores cancellation
+ok 8 - inference timeout fails without repair even if the model ignores cancellation
+  ---
+  duration_ms: 113.2643
+  type: 'test'
+  ...
+# Subtest: over-budget source rejects before inference and repair budget is also checked
+ok 9 - over-budget source rejects before inference and repair budget is also checked
+  ---
+  duration_ms: 55.2189
+  type: 'test'
+  ...
+# Subtest: cancel is idempotent during extraction and generation; late model data cannot commit
+ok 10 - cancel is idempotent during extraction and generation; late model data cannot commit
+  ---
+  duration_ms: 165.2503
+  type: 'test'
+  ...
+# Subtest: cancel during validation prevents the final atomic commit
+ok 11 - cancel during validation prevents the final atomic commit
+  ---
+  duration_ms: 49.8628
+  type: 'test'
+  ...
+# Subtest: delete cancels active work, cascades all records, and repeated delete is harmless
+not ok 12 - delete cancels active work, cascades all records, and repeated delete is harmless
+  ---
+  duration_ms: 27.0363
+  type: 'test'
+  location: 'C:\\Users\\redd\\Documents\\ChatGPT\\pointnemo\\apps\\api\\tests\\generation-release.test.ts:108:1'
+  failureType: 'testCodeFailure'
+  error: 'Question set was not found.'
+  code: 'QUESTION_SET_NOT_FOUND'
+  name: 'NotFoundError'
+  stack: |-
+    GameRunService.requireSetMetadata (C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api\src\services\game-run.ts:95:21)
+    GameRunService.createRun (C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api\src\services\game-run.ts:124:10)
+    <anonymous> (C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api\tests\generation-release.test.ts:109:227)
+    async databaseTest (C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api\tests\generation-release.test.ts:39:182)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: same hash requests fresh independent sets and attempts never cross documents
+not ok 13 - same hash requests fresh independent sets and attempts never cross documents
+  ---
+  duration_ms: 42.8093
+  type: 'test'
+  location: 'C:\\Users\\redd\\Documents\\ChatGPT\\pointnemo\\apps\\api\\tests\\generation-release.test.ts:114:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    4 !== 2
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 2
+  actual: 4
+  operator: 'strictEqual'
+  stack: |-
+    <anonymous> (C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api\tests\generation-release.test.ts:116:10)
+    async databaseTest (C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api\tests\generation-release.test.ts:39:182)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: unseen document rejects demo evidence and never receives a demo fallback
+not ok 14 - unseen document rejects demo evidence and never receives a demo fallback
+  ---
+  duration_ms: 26.9011
+  type: 'test'
+  location: 'C:\\Users\\redd\\Documents\\ChatGPT\\pointnemo\\apps\\api\\tests\\generation-release.test.ts:120:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    'failed' !== 'ready'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'ready'
+  actual: 'failed'
+  operator: 'strictEqual'
+  stack: |-
+    <anonymous> (C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api\tests\generation-release.test.ts:122:249)
+    async databaseTest (C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api\tests\generation-release.test.ts:39:182)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: stale nonterminal jobs fail on startup and terminal states remain terminal
+ok 15 - stale nonterminal jobs fail on startup and terminal states remain terminal
+  ---
+  duration_ms: 19.6298
+  type: 'test'
+  ...
+# Subtest: metadata incompatibility blocks reuse after any version or digest change
+ok 16 - metadata incompatibility blocks reuse after any version or digest change
+  ---
+  duration_ms: 0.5677
+  type: 'test'
+  ...
+# Subtest: extractor honors cancellation and malformed bytes cannot persist
+ok 17 - extractor honors cancellation and malformed bytes cannot persist
+  ---
+  duration_ms: 1060.0416
+  type: 'test'
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 12
+# fail 5
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2610.1764

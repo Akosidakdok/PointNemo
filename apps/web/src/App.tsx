@@ -46,6 +46,7 @@ export function App() {
   const [navKey, setNavKey] = useState(0);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeInstanceId, setActiveInstanceId] = useState<string | null>("PN-001");
+  const [activeLessonId, setActiveLessonId] = useState("marine-biology");
   const [activeLessonTitle,setActiveLessonTitle]=useState("Introduction to Marine Biology (sample)");
   const [bossUnlocked, setBossUnlocked] = useState(false);
   const [resultsUnlocked, setResultsUnlocked] = useState(false);
@@ -61,17 +62,19 @@ export function App() {
       setCurrentScreen(screen);
       setNavKey((k) => k + 1);
     },
-    [activeInstanceId]
+    []
   );
 
   // Selected Lesson State from Library Hub
-  const [selectedLessonId, setSelectedLessonId] = useState<string>("marine-biology");
+  const [selectedLessonId, setSelectedLessonId] = useState<string>();
   const [selectedLessonAction, setSelectedLessonAction] = useState<"resume" | "new">("resume");
+  const [lessonSelectionKey, setLessonSelectionKey] = useState(0);
 
   const handleSelectLessonFromLibrary = useCallback(
     (lessonId: string, action: "resume" | "new") => {
       setSelectedLessonId(lessonId);
       setSelectedLessonAction(action);
+      setLessonSelectionKey((key) => key + 1);
       handleNavigate("descent");
     },
     [handleNavigate]
@@ -407,6 +410,7 @@ export function App() {
             <LibraryHubView
               questionSets={questionSets}
               activeInstanceId={activeInstanceId}
+              activeLessonId={activeLessonId}
               activeLessonTitle={activeLessonTitle}
               onOpenUpload={() => handleNavigate("upload")}
               onGoToSeas={() => handleNavigate("seas")}
@@ -448,6 +452,7 @@ export function App() {
               navKey={navKey}
               initialLessonId={selectedLessonId}
               initialAction={selectedLessonAction}
+              lessonSelectionKey={lessonSelectionKey}
               initialSubscreen={
                 currentScreen === "seas"
                   ? "seas"
@@ -460,7 +465,7 @@ export function App() {
               onNavigateScreen={(screen) => handleNavigate(screen)}
               onUploadNewPdf={() => handleNavigate("upload")}
               reducedMotion={reducedMotion}
-              onUpdateActiveInstanceId={(id,title) => {setActiveInstanceId(id);if(title)setActiveLessonTitle(title);}}
+              onUpdateActiveInstanceId={(id,title,lessonId) => {setActiveInstanceId(id);if(title)setActiveLessonTitle(title);if(lessonId)setActiveLessonId(lessonId);}}
               onUpdateProgress={handleUpdateProgress}
             />
           )}

@@ -1,0 +1,235 @@
+{
+  "id": "5540eb4e-90c9-4ce0-8482-de358dee27c4",
+  "documentId": "a91477bf-c627-41f9-8fcf-e1b9bfaec75f",
+  "filename": "point-nemo-marine-biology.pdf",
+  "extractedPages": [
+    {
+      "pageNumber": 1,
+      "chunkId": "chunk-1",
+      "text": "POINT NEMO / STUDY NOTES Introduction to Marine Biology 1 / 2 Life in the ocean An introductory lesson on ocean zones, food webs, and adaptations. Each topic provides facts and explanations that can support study questions. 1. Ocean zones and sunlight The sunlit zone is the upper ocean layer where enough sunlight is available for photosynthesis. Phytoplankton are microscopic organisms that drift in the water. Many phytoplankton use sunlight, carbon dioxide, and water to make sugars through photosynthesis. This process also releases oxygen. Light becomes weaker as depth increases because seawater absorbs and scatters it. The twilight zone receives some light, but generally not enough to support photosynthesis. The deeper midnight zone receives no sunlight. These zones describe light conditions; they are not separate bodies of water. Photosynthesis depends on light, so it is concentrated near the ocean surface. An organism living in the midnight zone cannot rely on sunlight to produce its food. Food can still reach deep habitats when organic material sinks from shallower water. 2. Energy in marine food webs A producer makes organic food from an energy source. In a sunlit marine food web, phytoplankton are important producers. A consumer obtains energy by eating other organisms. Zooplankton that eat phytoplankton are primary consumers; small fish that eat those zooplankton are secondary consumers. One example food chain is phytoplankton to zooplankton to small fish to a larger predatory fish. The arrows show the direction in which food energy moves. A food web connects many food chains because a species may eat several kinds of food and may have several predators."
+    },
+    {
+      "pageNumber": 2,
+      "chunkId": "chunk-2",
+      "text": "POINT NEMO / STUDY NOTES Introduction to Marine Biology 2 / 2 Surviving below the surface 2. Energy in marine food webs / continued At each feeding step, organisms use energy for movement, growth, and other life processes. Some energy is released as heat, so less energy is available to the next feeding level. This helps explain why food webs generally support fewer large predators than small organisms near the base. Decomposers, including many bacteria, break down dead organisms and waste. Decomposition returns nutrients to the environment, where producers can use them again. Nutrients cycle through ecosystems, while energy flows through them and is eventually dispersed as heat. 3. Adaptations to deep water An adaptation is an inherited characteristic that helps an organism survive or reproduce in its environment. Deep ocean habitats have little or no sunlight, high pressure, and often limited food. Different species have different adaptations; no single feature describes all deep-sea animals. Bioluminescence is light produced by living organisms through chemical reactions. Some deep-sea animals use it to attract prey, communicate, or avoid predators. It is different from reflecting light: a bioluminescent organism produces light rather than merely reflecting an outside source. Marine snow consists of sinking organic particles, including dead plankton and waste. It carries food from upper waters into deeper habitats. Some deep-sea animals conserve energy by moving slowly or waiting for prey, which can help when meals are scarce. Near some hydrothermal vents, certain microbes use energy from chemical reactions to make organic food. This process is called chemosynthesis. Unlike photosynthesis, chemosynthesis does not require sunlight. These microbes can support local food webs in otherwise dark surroundings. Connections to remember Sunlight supports photosynthesis near the surface. Feeding transfers energy through food webs. Sinking organic matter links surface life to deep habitats, while chemosynthesis provides another source of food production in some deep environments."
+    }
+  ],
+  "metadata": {
+    "documentHash": "dcb2893d310868b06fb27d712f241201c74e6cc1f75c4ce064ac2e936b306119",
+    "extractorVersion": "pdf-parse@2.4.5/point-nemo-text-v3",
+    "promptVersion": "point-nemo-extractive-question-v29",
+    "schemaVersion": "point-nemo-questions-v2",
+    "tokenizerDigest": "d9011691d2d6b47762206b71f4a78429b5614850725b47ae06bef96674eed416",
+    "modelTag": "qwen2.5:3b",
+    "modelDigest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+    "settingsHash": "5ae4819088a0d717b8e637e23701834f385f2bfacbc17a76dd5bbbdb270668ce",
+    "createdAt": "2026-10-10T00:30:31.408Z"
+  },
+  "compatible": true,
+  "topics": [
+    {
+      "id": "bdb2a7fb-4cd1-49a7-9e89-f6d51b5e7eb2",
+      "name": "Ocean Zones and Photosynthesis"
+    },
+    {
+      "id": "472fba59-d71d-43a4-9d57-28ada9cfae95",
+      "name": "Marine Food Web Energy Flow"
+    },
+    {
+      "id": "d5bd40d4-ce62-4f78-a9d8-fc814fb501f8",
+      "name": "Deep Sea Adaptations and Energy Sources"
+    }
+  ],
+  "questions": [
+    {
+      "id": "29db825e-a525-4daf-9824-ccd3c6adb89c",
+      "topicId": "bdb2a7fb-4cd1-49a7-9e89-f6d51b5e7eb2",
+      "difficulty": "easy",
+      "prompt": "What is the upper ocean layer where photosynthesis occurs?",
+      "options": [
+        "abyssal zone",
+        "pelagic zone",
+        "benthic zone",
+        "sunlit zone"
+      ],
+      "answerIndex": 3,
+      "explanation": "The sunlit zone is the upper ocean layer where photosynthesis occurs.",
+      "evidence": [
+        {
+          "pageNumber": 1,
+          "chunkId": "chunk-1",
+          "quote": "POINT NEMO / STUDY NOTES Introduction to Marine Biology 1 / 2 Life in the ocean An introductory lesson on ocean zones, food webs, and adaptations. Each topic provides facts and explanations that can support study questions. 1. Ocean zones and sunlight The sunlit zone is the upper ocean layer where enough sunlight is available for photosynthesis."
+        }
+      ]
+    },
+    {
+      "id": "68c5365e-b31f-453f-ae98-b6ee13241eac",
+      "topicId": "bdb2a7fb-4cd1-49a7-9e89-f6d51b5e7eb2",
+      "difficulty": "medium",
+      "prompt": "Which organisms use sunlight, carbon dioxide, and water to make sugars through photosynthesis?",
+      "options": [
+        "Many fish",
+        "Many phytoplankton",
+        "Many whales",
+        "Many sharks"
+      ],
+      "answerIndex": 1,
+      "explanation": "The passage describes phytoplankton, which are the organisms that use sunlight, carbon dioxide, and water to make sugars through photosynthesis.",
+      "evidence": [
+        {
+          "pageNumber": 1,
+          "chunkId": "chunk-1",
+          "quote": "Ocean zones and sunlight The sunlit zone is the upper ocean layer where enough sunlight is available for photosynthesis. Phytoplankton are microscopic organisms that drift in the water. Many phytoplankton use sunlight, carbon dioxide, and water to make sugars through photosynthesis. This process also releases oxygen."
+        }
+      ]
+    },
+    {
+      "id": "c464128b-8a8b-4b90-a8d7-c9d37cf1d9d1",
+      "topicId": "bdb2a7fb-4cd1-49a7-9e89-f6d51b5e7eb2",
+      "difficulty": "hard",
+      "prompt": "Which zone receives no sunlight, according to the passage?",
+      "options": [
+        "The twilight zone receives some",
+        "The light zone receives some",
+        "The deeper midnight zone receives no",
+        "The mid-depth zone receives some"
+      ],
+      "answerIndex": 2,
+      "explanation": "The passage states that the deeper midnight zone receives no sunlight, distinguishing it from the twilight zone which receives some light.",
+      "evidence": [
+        {
+          "pageNumber": 1,
+          "chunkId": "chunk-1",
+          "quote": "Light becomes weaker as depth increases because seawater absorbs and scatters it. The twilight zone receives some light, but generally not enough to support photosynthesis. The deeper midnight zone receives no sunlight. These zones describe light conditions; they are not separate bodies of water."
+        }
+      ]
+    },
+    {
+      "id": "7f003504-8d24-4998-8c27-618a606377fa",
+      "topicId": "472fba59-d71d-43a4-9d57-28ada9cfae95",
+      "difficulty": "easy",
+      "prompt": "In a sunlit marine food web, what are important producers?",
+      "options": [
+        "zooplankton",
+        "fish",
+        "phytoplankton",
+        "algae"
+      ],
+      "answerIndex": 2,
+      "explanation": "The passage states that in a sunlit marine food web, phytoplankton are important producers.",
+      "evidence": [
+        {
+          "pageNumber": 1,
+          "chunkId": "chunk-1",
+          "quote": "2. Energy in marine food webs A producer makes organic food from an energy source. In a sunlit marine food web, phytoplankton are important producers."
+        }
+      ]
+    },
+    {
+      "id": "7d28733c-c224-49f8-b7df-512ed656d3db",
+      "topicId": "472fba59-d71d-43a4-9d57-28ada9cfae95",
+      "difficulty": "medium",
+      "prompt": "At each feeding step, what do organisms use energy for?",
+      "options": [
+        "energy for movement and growth only",
+        "energy for movement, growth, and other",
+        "energy for movement and other processes only",
+        "energy for growth and other processes only"
+      ],
+      "answerIndex": 1,
+      "explanation": "The passage states that at each feeding step, organisms use energy for movement, growth, and other life processes.",
+      "evidence": [
+        {
+          "pageNumber": 2,
+          "chunkId": "chunk-2",
+          "quote": "POINT NEMO / STUDY NOTES Introduction to Marine Biology 2 / 2 Surviving below the surface 2. Energy in marine food webs / continued At each feeding step, organisms use energy for movement, growth, and other life processes."
+        }
+      ]
+    },
+    {
+      "id": "e739759e-39bc-4024-9957-49435df0e225",
+      "topicId": "472fba59-d71d-43a4-9d57-28ada9cfae95",
+      "difficulty": "hard",
+      "prompt": "Which of the following best explains why food webs generally support fewer large predators than small organisms near the base?",
+      "options": [
+        "fewer large predators",
+        "more large predators",
+        "equal numbers of large and small predators",
+        "more small predators than large predators"
+      ],
+      "answerIndex": 0,
+      "explanation": "The passage states that some energy is released as heat, reducing energy available to the next feeding level, which explains fewer large predators.",
+      "evidence": [
+        {
+          "pageNumber": 2,
+          "chunkId": "chunk-2",
+          "quote": "Energy in marine food webs / continued At each feeding step, organisms use energy for movement, growth, and other life processes. Some energy is released as heat, so less energy is available to the next feeding level. This helps explain why food webs generally support fewer large predators than small organisms near the base."
+        }
+      ]
+    },
+    {
+      "id": "b9910b78-aa51-4332-bcba-0b79c4d1a0cb",
+      "topicId": "d5bd40d4-ce62-4f78-a9d8-fc814fb501f8",
+      "difficulty": "easy",
+      "prompt": "What is defined as an inherited characteristic that helps an organism survive or reproduce in its environment?",
+      "options": [
+        "A species",
+        "An adaptation",
+        "A habitat",
+        "A food source"
+      ],
+      "answerIndex": 1,
+      "explanation": "The passage defines an adaptation as an inherited characteristic that helps an organism survive or reproduce in its environment.",
+      "evidence": [
+        {
+          "pageNumber": 2,
+          "chunkId": "chunk-2",
+          "quote": "Nutrients cycle through ecosystems, while energy flows through them and is eventually dispersed as heat. 3. Adaptations to deep water An adaptation is an inherited characteristic that helps an organism survive or reproduce in its environment."
+        }
+      ]
+    },
+    {
+      "id": "23a49cdf-27e6-4a4c-b1fd-7c34935e3bca",
+      "topicId": "d5bd40d4-ce62-4f78-a9d8-fc814fb501f8",
+      "difficulty": "medium",
+      "prompt": "What is bioluminescence, according to the passage?",
+      "options": [
+        "Photosynthesis",
+        "Bioluminescence",
+        "Chemical reactions",
+        "Heat production"
+      ],
+      "answerIndex": 1,
+      "explanation": "The passage defines bioluminescence as light produced by living organisms through chemical reactions.",
+      "evidence": [
+        {
+          "pageNumber": 2,
+          "chunkId": "chunk-2",
+          "quote": "Deep ocean habitats have little or no sunlight, high pressure, and often limited food. Different species have different adaptations; no single feature describes all deep-sea animals. Bioluminescence is light produced by living organisms through chemical reactions."
+        }
+      ]
+    },
+    {
+      "id": "f54229c3-4aaf-4e49-a1e3-51645fa4b410",
+      "topicId": "d5bd40d4-ce62-4f78-a9d8-fc814fb501f8",
+      "difficulty": "hard",
+      "prompt": "What is the process called when certain microbes use energy from chemical reactions to make organic food near hydrothermal vents?",
+      "options": [
+        "photosynthesis",
+        "thermosynthesis",
+        "chemoatmosynthesis",
+        "chemosynthesis"
+      ],
+      "answerIndex": 3,
+      "explanation": "The passage explains that near hydrothermal vents, certain microbes use energy from chemical reactions to make organic food, which is called chemosynthesis.",
+      "evidence": [
+        {
+          "pageNumber": 2,
+          "chunkId": "chunk-2",
+          "quote": "Marine snow consists of sinking organic particles, including dead plankton and waste. It carries food from upper waters into deeper habitats. Some deep-sea animals conserve energy by moving slowly or waiting for prey, which can help when meals are scarce. Near some hydrothermal vents, certain microbes use energy from chemical reactions to make organic food. This process is called chemosynthesis."
+        }
+      ]
+    }
+  ],
+  "createdAt": "2026-10-10T00:30:31.408Z"
+}

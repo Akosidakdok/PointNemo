@@ -14,9 +14,9 @@ try {
   const server = app.listen(config.port, "127.0.0.1", () => {
     console.log(`Point Nemo listening at http://127.0.0.1:${config.port}`);
   });
-  server.once("error", () => {
+  server.once("error", (error) => {
     database?.close();
-    console.error("Point Nemo could not listen on the configured local port.");
+    console.error(`Point Nemo listener error (pid ${process.pid}, active=${server.listening}): ${error.message}`);
     process.exitCode = 1;
   });
 

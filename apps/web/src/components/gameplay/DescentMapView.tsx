@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   type AssetBundle,
   SpriteAnimation,
@@ -32,6 +32,11 @@ export function DescentMapView({
 }: DescentMapViewProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const heldKeysRef = useRef<Set<string>>(new Set());
+  const virtualKeysRef = useRef<Set<string>>(new Set());
+  const virtualStartRef = useRef({ x: instance.player.x, y: instance.player.y });
+  const confirmationRef = useRef<HTMLDivElement | null>(null);
+  const updatePlayerRef = useRef(onUpdatePlayer);
+  updatePlayerRef.current = onUpdatePlayer;
   const playerPosRef = useRef({ ...instance.player });
   const mapImageRef = useRef<HTMLImageElement | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -41,7 +46,19 @@ export function DescentMapView({
   // Synchronize internal ref with external instance player state
   useEffect(() => {
     playerPosRef.current = { ...instance.player };
+    heldKeysRef.current.clear();
+    virtualKeysRef.current.clear();
+    setPendingNode(null);
+    setIgnoredNode(null);
   }, [instance.id]);
+
+  useEffect(() => {
+    if (pendingNode === null) return;
+    heldKeysRef.current.clear();
+    virtualKeysRef.current.clear();
+    confirmationRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+    return () => { canvasRef.current?.focus({ preventScroll: true }); };
+  }, [pendingNode]);
 
   // Load world map image
   useEffect(() => {
@@ -62,7 +79,7 @@ export function DescentMapView({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (pendingNode !== null) return;
       const target=e.target as HTMLElement | null;
-      if(target?.closest("input,textarea,select,[contenteditable='true']") || e.ctrlKey || e.metaKey || e.altKey)return;
+      if(document.hidden || document.querySelector('[role="dialog"][aria-modal="true"]') || target?.closest("input,textarea,select,[contenteditable='true']") || e.ctrlKey || e.metaKey || e.altKey)return;
       const code = e.code;
       if (
         code === "KeyW" ||
@@ -82,21 +99,30 @@ export function DescentMapView({
 
     const handleBlur = () => {
       heldKeysRef.current.clear();
+      virtualKeysRef.current.clear();
+    };
+    const handleFocus = () => {
+      if (document.activeElement?.closest('[role="dialog"]')) handleBlur();
     };
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
     window.addEventListener("blur", handleBlur);
+    document.addEventListener("visibilitychange", handleBlur);
+    document.addEventListener("focusin", handleFocus);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("blur", handleBlur);
+      document.removeEventListener("visibilitychange", handleBlur);
+      document.removeEventListener("focusin", handleFocus);
+      handleBlur();
     };
   }, [pendingNode]);
 
   const stepDirection=(direction:"up"|"down"|"left"|"right")=>{
-    if(instance.activeEncounter || pendingNode!==null)return;
+    if(instance.activeEncounter || pendingNode!==null || document.hidden || document.querySelector('[role="dialog"][aria-modal="true"]'))return;
     const player=playerPosRef.current;
     player.x=Math.max(0.05,Math.min(0.95,player.x+(direction==="left"?-0.03:direction==="right"?0.03:0)));
     player.y=Math.max(0.05,Math.min(0.95,player.y+(direction==="up"?-0.03:direction==="down"?0.03:0)));
@@ -105,13 +131,13 @@ export function DescentMapView({
     const target=BASE_ROUTE_POINTS[instance.routeNode];
     if(target) {
       const distance=Math.hypot(player.x-target.x,player.y-target.y);
-      if(distance<0.07 && ignoredNode!==instance.routeNode){heldKeysRef.current.clear();setPendingNode(instance.routeNode);}
+      if(distance<0.07 && ignoredNode!==instance.routeNode){heldKeysRef.current.clear();virtualKeysRef.current.clear();setPendingNode(instance.routeNode);}
       else if(distance>0.12 && ignoredNode===instance.routeNode)setIgnoredNode(null);
     }
   };
 
   // Virtual D-pad for mobile / touch accessibility
-  const handleVirtualDirection = useCallback((dir: "up" | "down" | "left" | "right", active: boolean) => {
+  const handleVirtualDirection = (dir: "up" | "down" | "left" | "right", active: boolean) => {
     const codeMap: Record<string, string> = {
       up: "KeyW",
       down: "KeyS",
@@ -120,11 +146,13 @@ export function DescentMapView({
     };
     const code = codeMap[dir];
     if (active) {
-      heldKeysRef.current.add(code);
+      if (pendingNode !== null || instance.activeEncounter) return;
+      virtualStartRef.current = { ...playerPosRef.current };
+      virtualKeysRef.current.add(code);
     } else {
-      heldKeysRef.current.delete(code);
+      virtualKeysRef.current.delete(code);
     }
-  }, []);
+  };
 
   // Canvas render & animation loop
   useEffect(() => {
@@ -156,15 +184,21 @@ export function DescentMapView({
       const height = canvas.height;
 
       // 1. Process Player Movement
+      const paused = document.hidden || pendingNode !== null || instance.activeEncounter || Boolean(document.querySelector('[role="dialog"][aria-modal="true"]'));
+      if (paused) {
+        heldKeysRef.current.clear();
+        virtualKeysRef.current.clear();
+      }
+      const hasKey = (code: string) => heldKeysRef.current.has(code) || virtualKeysRef.current.has(code);
       let dx =
-        Number(heldKeysRef.current.has("KeyD") || heldKeysRef.current.has("ArrowRight")) -
-        Number(heldKeysRef.current.has("KeyA") || heldKeysRef.current.has("ArrowLeft"));
+        Number(hasKey("KeyD") || hasKey("ArrowRight")) -
+        Number(hasKey("KeyA") || hasKey("ArrowLeft"));
       let dy =
-        Number(heldKeysRef.current.has("KeyS") || heldKeysRef.current.has("ArrowDown")) -
-        Number(heldKeysRef.current.has("KeyW") || heldKeysRef.current.has("ArrowUp"));
+        Number(hasKey("KeyS") || hasKey("ArrowDown")) -
+        Number(hasKey("KeyW") || hasKey("ArrowUp"));
 
       const length = Math.hypot(dx, dy);
-      const isMoving = length > 0 && !instance.activeEncounter && pendingNode===null;
+      const isMoving = length > 0 && !paused;
 
       if (isMoving) {
         dx /= length;
@@ -179,7 +213,7 @@ export function DescentMapView({
           playerPosRef.current.facing = dy < 0 ? "up" : "down";
         }
 
-        onUpdatePlayer(
+        updatePlayerRef.current(
           playerPosRef.current.x,
           playerPosRef.current.y,
           playerPosRef.current.facing
@@ -192,6 +226,7 @@ export function DescentMapView({
           if (dist < 0.07) {
             if (ignoredNode !== instance.routeNode) {
               heldKeysRef.current.clear();
+              virtualKeysRef.current.clear();
               setPendingNode(instance.routeNode);
             }
           } else if (dist > 0.12) {
@@ -381,7 +416,7 @@ export function DescentMapView({
 
     animId = requestAnimationFrame(render);
     return () => cancelAnimationFrame(animId);
-  }, [bundle, mapLoaded, instance.routeNode, instance.activeEncounter, pendingNode, ignoredNode, lesson, reducedMotion, onReachTarget, onUpdatePlayer]);
+  }, [bundle, mapLoaded, instance.id, instance.routeNode, instance.activeEncounter, pendingNode, ignoredNode, lesson, reducedMotion]);
 
   const activeTopic = lesson.topics[instance.routeNode] || "Encounter";
 
@@ -409,12 +444,27 @@ export function DescentMapView({
           className="pixel-scene"
           aria-label="Interactive study map. Use W, A, S, D to move to the highlighted quiz marker."
           tabIndex={0}
+          onPointerDown={() => canvasRef.current?.focus({ preventScroll: true })}
         />
         {pendingNode !== null && (
           <div className="encounter-confirm-overlay">
-            <div className="encounter-confirm-card">
+            <div ref={confirmationRef} className="encounter-confirm-card" role="dialog" aria-modal="true" aria-labelledby="quiz-ready-title"
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  event.preventDefault();
+                  setIgnoredNode(pendingNode);
+                  setPendingNode(null);
+                }
+                if (event.key === "Tab") {
+                  const buttons = confirmationRef.current?.querySelectorAll("button");
+                  if (!buttons?.length) return;
+                  const first = buttons[0], last = buttons[buttons.length - 1];
+                  if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+                  else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+                }
+              }}>
               <p className="eyebrow">QUIZ READY</p>
-              <h3>Ready for this question?</h3>
+              <h3 id="quiz-ready-title">Ready for this quiz?</h3>
               <p>
                 {pendingNode <= 3
                   ? `You've reached the ${lesson.topics[pendingNode] || "quiz"} challenge.`
@@ -430,7 +480,7 @@ export function DescentMapView({
                     setPendingNode(null);
                   }}
                 >
-                  Start Question ▶
+                  {pendingNode === 4 ? "Open final review ▶" : "Start topic quiz ▶"}
                 </button>
                 <button
                   type="button"
@@ -462,66 +512,39 @@ export function DescentMapView({
           margin: "8px 0 12px",
         }}
       >
-        <button
-          type="button"
-          className="secondary-button"
-          style={{ width: "44px", height: "44px", padding: 0 }}
-          onPointerDown={() => handleVirtualDirection("up", true)}
-          onPointerUp={() => handleVirtualDirection("up", false)}
-          onPointerLeave={() => handleVirtualDirection("up", false)}
-          onPointerCancel={() => handleVirtualDirection("up", false)}
-          onClick={()=>stepDirection("up")}
-          aria-label="Swim Up"
-        >
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-            <polygon points="8,3 13,13 3,13" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          className="secondary-button"
-          style={{ width: "44px", height: "44px", padding: 0 }}
-          onPointerDown={() => handleVirtualDirection("left", true)}
-          onPointerUp={() => handleVirtualDirection("left", false)}
-          onPointerLeave={() => handleVirtualDirection("left", false)}
-          onPointerCancel={() => handleVirtualDirection("left", false)}
-          onClick={()=>stepDirection("left")}
-          aria-label="Swim Left"
-        >
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-            <polygon points="3,8 13,3 13,13" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          className="secondary-button"
-          style={{ width: "44px", height: "44px", padding: 0 }}
-          onPointerDown={() => handleVirtualDirection("down", true)}
-          onPointerUp={() => handleVirtualDirection("down", false)}
-          onPointerLeave={() => handleVirtualDirection("down", false)}
-          onPointerCancel={() => handleVirtualDirection("down", false)}
-          onClick={()=>stepDirection("down")}
-          aria-label="Swim Down"
-        >
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-            <polygon points="8,13 13,3 3,3" />
-          </svg>
-        </button>
-        <button
-          type="button"
-          className="secondary-button"
-          style={{ width: "44px", height: "44px", padding: 0 }}
-          onPointerDown={() => handleVirtualDirection("right", true)}
-          onPointerUp={() => handleVirtualDirection("right", false)}
-          onPointerLeave={() => handleVirtualDirection("right", false)}
-          onPointerCancel={() => handleVirtualDirection("right", false)}
-          onClick={()=>stepDirection("right")}
-          aria-label="Swim Right"
-        >
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-            <polygon points="13,8 3,3 3,13" />
-          </svg>
-        </button>
+        {([
+          ["up", "8,3 13,13 3,13"],
+          ["left", "3,8 13,3 13,13"],
+          ["down", "8,13 13,3 3,3"],
+          ["right", "13,8 3,3 3,13"],
+        ] as const).map(([direction, points]) => (
+          <button
+            key={direction}
+            type="button"
+            className="secondary-button"
+            style={{ width: "44px", height: "44px", padding: 0, touchAction: "none" }}
+            disabled={pendingNode !== null || instance.activeEncounter}
+            onPointerDown={(event) => {
+              if (event.button !== 0) return;
+              event.currentTarget.setPointerCapture(event.pointerId);
+              handleVirtualDirection(direction, true);
+            }}
+            onPointerUp={(event) => {
+              handleVirtualDirection(direction, false);
+              // A quick tap still moves; a hold must not add a second step on release.
+              const start = virtualStartRef.current, player = playerPosRef.current;
+              if (event.button === 0 && start.x === player.x && start.y === player.y) stepDirection(direction);
+            }}
+            onLostPointerCapture={() => handleVirtualDirection(direction, false)}
+            onPointerCancel={() => handleVirtualDirection(direction, false)}
+            onClick={(event) => { if (event.detail === 0) stepDirection(direction); }}
+            aria-label={`Swim ${direction}`}
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <polygon points={points} />
+            </svg>
+          </button>
+        ))}
       </div>
 
       <ol className="route-stops" aria-label="Sequential lesson checkpoints">
@@ -556,7 +579,7 @@ export function DescentMapView({
         <span id="route-status">
           {instance.routeNode === 4
             ? "All 3 topics completed! Swim to the final marker to take your review quiz."
-            : `Move to the highlighted ${activeTopic} marker to start your quiz. Answer correctly to unlock the next topic.`}
+            : `Swim to the highlighted ${activeTopic} marker. Complete all ${lesson.isCustom ? "3 questions and score at least 2 correct" : "sample questions correctly"} to unlock the next topic.`}
         </span>
         <span className="key-hints">
           <kbd>W</kbd>

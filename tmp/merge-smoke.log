@@ -1,0 +1,15 @@
+
+> point-nemo@0.1.0 test:smoke
+> tsx scripts/smoke-test.ts
+
+=== Point Nemo API Route Smoke Test ===
+Ephemeral API listening on http://127.0.0.1:59619
+✓ GET /api/health -> 200 ok
+✓ POST /api/documents -> 202 (jobId: e1157ae6-7c15-44a0-b68c-90eaf6575ea0)
+✓ GET /api/jobs/:id -> 200 ready (questionSetId: 4df78682-7a94-4547-b661-bbad96bd6370)
+✓ GET /api/question-sets/:id -> 200 (3 topics, 9 questions)
+✓ POST /api/runs -> 201 created (runId: de61f86b-9f84-4828-aedf-4dd748e04076, slot 0 ready)
+✓ GET /api/runs/:id -> 200 (authoritative state retrieved)
+✓ POST /api/runs/:id/answers -> 200 (correct answer recorded, HP and XP updated)
+✓ Identical retry -> 200 idempotent (no double damage or XP)
+=== All Route Smoke Tests Passed! ===

@@ -1,0 +1,362 @@
+
+> point-nemo@0.1.0 test:api
+> npm run test --workspace=@point-nemo/api
+
+
+> @point-nemo/api@0.1.0 test
+> tsx --test tests/**/*.test.ts
+
+TAP version 13
+# Subtest: run creation from a ready question set
+ok 1 - run creation from a ready question set
+  ---
+  duration_ms: 70.6732
+  type: 'test'
+  ...
+# Subtest: fixed 18-slot ordering
+ok 2 - fixed 18-slot ordering
+  ---
+  duration_ms: 32.3566
+  type: 'test'
+  ...
+# Subtest: correct and incorrect answers calculate HP, combo, XP, and damage
+ok 3 - correct and incorrect answers calculate HP, combo, XP, and damage
+  ---
+  duration_ms: 46.7463
+  type: 'test'
+  ...
+# Subtest: duplicate identical retry idempotence
+ok 4 - duplicate identical retry idempotence
+  ---
+  duration_ms: 41.0121
+  type: 'test'
+  ...
+# Subtest: changed answer conflict
+ok 5 - changed answer conflict
+  ---
+  duration_ms: 42.1532
+  type: 'test'
+  ...
+# Subtest: out-of-order answer conflict
+ok 6 - out-of-order answer conflict
+  ---
+  duration_ms: 32.8307
+  type: 'test'
+  ...
+# Subtest: boss 8/9 pass and run completion
+ok 7 - boss 8/9 pass and run completion
+  ---
+  duration_ms: 54.459
+  type: 'test'
+  ...
+# Subtest: boss 7/9 fail ends run in failed state
+ok 8 - boss 7/9 fail ends run in failed state
+  ---
+  duration_ms: 49.7912
+  type: 'test'
+  ...
+# Subtest: transaction rollback on invalid answers
+ok 9 - transaction rollback on invalid answers
+  ---
+  duration_ms: 27.4275
+  type: 'test'
+  ...
+# Subtest: restart/read persistence from SQLite
+ok 10 - restart/read persistence from SQLite
+  ---
+  duration_ms: 45.2558
+  type: 'test'
+  ...
+# Subtest: surface: 2/3 passes after all three slots despite zero HP
+ok 11 - surface: 2/3 passes after all three slots despite zero HP
+  ---
+  duration_ms: 30.0517
+  type: 'test'
+  ...
+# Subtest: surface: 1/3 fails after all three slots despite zero HP
+ok 12 - surface: 1/3 fails after all three slots despite zero HP
+  ---
+  duration_ms: 37.8501
+  type: 'test'
+  ...
+# Subtest: twilight: 2/3 passes after all three slots despite zero HP
+ok 13 - twilight: 2/3 passes after all three slots despite zero HP
+  ---
+  duration_ms: 44.8195
+  type: 'test'
+  ...
+# Subtest: twilight: 1/3 fails after all three slots despite zero HP
+ok 14 - twilight: 1/3 fails after all three slots despite zero HP
+  ---
+  duration_ms: 40.7299
+  type: 'test'
+  ...
+# Subtest: midnight: 2/3 passes after all three slots despite zero HP
+ok 15 - midnight: 2/3 passes after all three slots despite zero HP
+  ---
+  duration_ms: 41.2985
+  type: 'test'
+  ...
+# Subtest: midnight: 1/3 fails after all three slots despite zero HP
+ok 16 - midnight: 1/3 fails after all three slots despite zero HP
+  ---
+  duration_ms: 34.3128
+  type: 'test'
+  ...
+# Subtest: boss consumes the ninth slot after eight early correct answers reduce enemy HP to zero
+ok 17 - boss consumes the ninth slot after eight early correct answers reduce enemy HP to zero
+  ---
+  duration_ms: 50.0444
+  type: 'test'
+  ...
+# Subtest: legacy metadata and incompatible game rules cannot start or advance a run
+ok 18 - legacy metadata and incompatible game rules cannot start or advance a run
+  ---
+  duration_ms: 34.6861
+  type: 'test'
+  ...
+# Subtest: state update failure rolls back both the accepted attempt and score
+ok 19 - state update failure rolls back both the accepted attempt and score
+  ---
+  duration_ms: 41.1272
+  type: 'test'
+  ...
+# Subtest: calibration catches reworded duplicate facts and overlapping answer choices
+ok 20 - calibration catches reworded duplicate facts and overlapping answer choices
+  ---
+  duration_ms: 29.125
+  type: 'test'
+  ...
+# Subtest: planner rejects reusing the same focus fact in multiple slots
+ok 21 - planner rejects reusing the same focus fact in multiple slots
+  ---
+  duration_ms: 1.9777
+  type: 'test'
+  ...
+# Subtest: planner allows repeated generic goal wording when each slot has a different source fact
+ok 22 - planner allows repeated generic goal wording when each slot has a different source fact
+  ---
+  duration_ms: 1.0455
+  type: 'test'
+  ...
+# Subtest: LocalPdfExtractor admits the networking fixture
+ok 23 - LocalPdfExtractor admits the networking fixture
+  ---
+  duration_ms: 1432.8248
+  type: 'test'
+  ...
+# Subtest: valid model output is persisted as one complete question set
+ok 24 - valid model output is persisted as one complete question set
+  ---
+  duration_ms: 514.0767
+  type: 'test'
+  ...
+# Subtest: invalid model output fails closed without persisting a question set
+ok 25 - invalid model output fails closed without persisting a question set
+  ---
+  duration_ms: 80.8065
+  type: 'test'
+  ...
+# Subtest: admission checks signature and extension
+ok 26 - admission checks signature and extension
+  ---
+  duration_ms: 4.2339
+  type: 'test'
+  ...
+# Subtest: normalization counts nonwhitespace, rejects mixed scan pages and retains blank pages
+ok 27 - normalization counts nonwhitespace, rejects mixed scan pages and retains blank pages
+  ---
+  duration_ms: 4.9912
+  type: 'test'
+  ...
+# Subtest: local Qwen tokenizer counts actual BPE tokens and complete repair prompts
+ok 28 - local Qwen tokenizer counts actual BPE tokens and complete repair prompts
+  ---
+  duration_ms: 579.5696
+  type: 'test'
+  ...
+# Subtest: source instructions and model role tokens stay inside escaped source data
+ok 29 - source instructions and model role tokens stay inside escaped source data
+  ---
+  duration_ms: 0.1783
+  type: 'test'
+  ...
+# Subtest: postvalidation rejects duplicate normalized stems, wrong coverage, options, and foreign quotes
+ok 30 - postvalidation rejects duplicate normalized stems, wrong coverage, options, and foreign quotes
+  ---
+  duration_ms: 27.618
+  type: 'test'
+  ...
+# Subtest: one repair may fix invalid data, and a second invalid set persists nothing
+ok 31 - one repair may fix invalid data, and a second invalid set persists nothing
+  ---
+  duration_ms: 82.2321
+  type: 'test'
+  ...
+# Subtest: global deadline includes extraction and never resets for inference or repair
+ok 32 - global deadline includes extraction and never resets for inference or repair
+  ---
+  duration_ms: 127.0528
+  type: 'test'
+  ...
+# Subtest: inference timeout fails without repair even if the model ignores cancellation
+ok 33 - inference timeout fails without repair even if the model ignores cancellation
+  ---
+  duration_ms: 128.7002
+  type: 'test'
+  ...
+# Subtest: over-budget source rejects before inference and repair budget is also checked
+ok 34 - over-budget source rejects before inference and repair budget is also checked
+  ---
+  duration_ms: 42.6143
+  type: 'test'
+  ...
+# Subtest: cancel is idempotent during extraction and generation; late model data cannot commit
+ok 35 - cancel is idempotent during extraction and generation; late model data cannot commit
+  ---
+  duration_ms: 160.341
+  type: 'test'
+  ...
+# Subtest: cancel during validation prevents the final atomic commit
+ok 36 - cancel during validation prevents the final atomic commit
+  ---
+  duration_ms: 91.9232
+  type: 'test'
+  ...
+# Subtest: delete cancels active work, cascades all records, and repeated delete is harmless
+ok 37 - delete cancels active work, cascades all records, and repeated delete is harmless
+  ---
+  duration_ms: 106.846
+  type: 'test'
+  ...
+# Subtest: same hash requests fresh independent sets and attempts never cross documents
+ok 38 - same hash requests fresh independent sets and attempts never cross documents
+  ---
+  duration_ms: 38.5415
+  type: 'test'
+  ...
+# Subtest: unseen document rejects demo evidence and never receives a demo fallback
+not ok 39 - unseen document rejects demo evidence and never receives a demo fallback
+  ---
+  duration_ms: 39.832
+  type: 'test'
+  location: 'C:\\Users\\redd\\Documents\\ChatGPT\\pointnemo\\apps\\api\\tests\\generation-release.test.ts:120:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    + actual - expected
+    
+    + 'INVALID_MODEL_OUTPUT'
+    - 'SOURCE_EVIDENCE_INVALID'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'SOURCE_EVIDENCE_INVALID'
+  actual: 'INVALID_MODEL_OUTPUT'
+  operator: 'strictEqual'
+  stack: |-
+    <anonymous> (C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api\tests\generation-release.test.ts:122:336)
+    async databaseTest (C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api\tests\generation-release.test.ts:39:182)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: stale nonterminal jobs fail on startup and terminal states remain terminal
+ok 40 - stale nonterminal jobs fail on startup and terminal states remain terminal
+  ---
+  duration_ms: 23.3589
+  type: 'test'
+  ...
+# Subtest: metadata incompatibility blocks reuse after any version or digest change
+ok 41 - metadata incompatibility blocks reuse after any version or digest change
+  ---
+  duration_ms: 1.0462
+  type: 'test'
+  ...
+# Subtest: extractor honors cancellation and malformed bytes cannot persist
+ok 42 - extractor honors cancellation and malformed bytes cannot persist
+  ---
+  duration_ms: 1147.9814
+  type: 'test'
+  ...
+# Subtest: release configuration uses port 3000, external app-data storage, and the pinned loopback model
+ok 43 - release configuration uses port 3000, external app-data storage, and the pinned loopback model
+  ---
+  duration_ms: 2.1534
+  type: 'test'
+  ...
+# Subtest: v4 migration preserves descendants, permits independent duplicate hashes, and applies legacy metadata defaults
+ok 44 - v4 migration preserves descendants, permits independent duplicate hashes, and applies legacy metadata defaults
+  ---
+  duration_ms: 185.8692
+  type: 'test'
+  ...
+# Subtest: mutations enforce local Host/Origin while allowing same-origin requests and plain CLI requests
+ok 45 - mutations enforce local Host/Origin while allowing same-origin requests and plain CLI requests
+  ---
+  duration_ms: 154.1838
+  type: 'test'
+  ...
+# Subtest: explicit development mode admits the Vite loopback origin
+ok 46 - explicit development mode admits the Vite loopback origin
+  ---
+  duration_ms: 53.8437
+  type: 'test'
+  ...
+# Subtest: built web assets and deep SPA links are served without masking missing API routes/assets
+ok 47 - built web assets and deep SPA links are served without masking missing API routes/assets
+  ---
+  duration_ms: 64.7487
+  type: 'test'
+  ...
+# Subtest: health reports real database and model/tokenizer readiness and safe failures
+ok 48 - health reports real database and model/tokenizer readiness and safe failures
+  ---
+  duration_ms: 33.9533
+  type: 'test'
+  ...
+# Subtest: unexpected API errors and malformed JSON omit private source/output and do not log it
+ok 49 - unexpected API errors and malformed JSON omit private source/output and do not log it
+  ---
+  duration_ms: 29.7833
+  type: 'test'
+  ...
+# Subtest: document library, cancellation, and repeated deletion honor their HTTP contracts
+ok 50 - document library, cancellation, and repeated deletion honor their HTTP contracts
+  ---
+  duration_ms: 35.4803
+  type: 'test'
+  ...
+# Subtest: runs HTTP API endpoints: create, get, answer, and error contracts
+ok 51 - runs HTTP API endpoints: create, get, answer, and error contracts
+  ---
+  duration_ms: 249.2472
+  type: 'test'
+  ...
+# Subtest: run routes reject incompatible saved metadata and rules on create/resume/answers
+ok 52 - run routes reject incompatible saved metadata and rules on create/resume/answers
+  ---
+  duration_ms: 65.6742
+  type: 'test'
+  ...
+# Subtest: completed history and identical final retries remain available after runtime metadata changes
+ok 53 - completed history and identical final retries remain available after runtime metadata changes
+  ---
+  duration_ms: 76.6466
+  type: 'test'
+  ...
+1..53
+# tests 53
+# suites 0
+# pass 52
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3440.6946
+npm error Lifecycle script `test` failed with error:
+npm error code 1
+npm error path C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api
+npm error workspace @point-nemo/api@0.1.0
+npm error location C:\Users\redd\Documents\ChatGPT\pointnemo\apps\api
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c tsx --test tests/**/*.test.ts

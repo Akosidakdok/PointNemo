@@ -1,0 +1,67 @@
+1
+00:00:00,300 --> 00:00:04,422
+Point Nemo turns your lesson PDF into a local underwater study adventure.
+
+2
+00:00:06,250 --> 00:00:08,013
+Start with your own notes.
+
+3
+00:00:08,013 --> 00:00:12,013
+Choose one English, text-based PDF from your local library.
+
+4
+00:00:13,250 --> 00:00:16,932
+The safety gate checks the file and its signature before local processing
+
+5
+00:00:16,932 --> 00:00:17,285
+begins.
+
+6
+00:00:19,250 --> 00:00:20,725
+Sonar reads your lesson.
+
+7
+00:00:20,725 --> 00:00:25,334
+Local Ollama creates nine questions, then validation checks answers against
+
+8
+00:00:25,334 --> 00:00:26,317
+source evidence.
+
+9
+00:00:27,250 --> 00:00:29,803
+Explore three topics on your ocean map.
+
+10
+00:00:29,803 --> 00:00:32,421
+Clear each encounter to unlock the next.
+
+11
+00:00:34,250 --> 00:00:36,023
+Every correction has a source.
+
+12
+00:00:36,023 --> 00:00:40,396
+Miss a question, and see the correct answer, an explanation, and the exact
+
+13
+00:00:40,396 --> 00:00:42,464
+supporting quote with its PDF page.
+
+14
+00:00:45,250 --> 00:00:49,002
+Then face the final review: the same nine questions, shuffled.
+
+15
+00:00:49,002 --> 00:00:51,180
+Get eight right to complete the run.
+
+16
+00:00:53,250 --> 00:00:55,632
+See your result, and try the lesson again.
+
+17
+00:00:57,150 --> 00:00:59,782
+One lesson. One descent.

@@ -1,13 +1,14 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { type AssetBundle } from "../../game/sprites";
-import { type LessonRecord, type DescentInstance, INITIAL_LESSON_CATALOG, lessonParts, bossPassScore } from "../../game/lessonCatalog";
+import { type LessonRecord, type DescentInstance, INITIAL_LESSON_CATALOG, lessonParts } from "../../game/lessonCatalog";
+import { answerPart, continuePart, answerBoss, continueBoss, resumeScreen, resolveGameplayScreen, type GameplaySubscreen } from "../../game/quizFlow";
 import { ChooseSeaView } from "./ChooseSeaView";
 import { DescentMapView } from "./DescentMapView";
 import { EncounterCombatView } from "./EncounterCombatView";
 import { LessonBossView } from "./LessonBossView";
 import { GameplayResultsView } from "./GameplayResultsView";
 
-export type GameplaySubscreen = "seas" | "descent" | "encounter" | "boss" | "results";
+export type { GameplaySubscreen } from "../../game/quizFlow";
 
 interface GameplayModuleProps {
   bundle: AssetBundle | null;
@@ -15,12 +16,13 @@ interface GameplayModuleProps {
   initialSubscreen?: GameplaySubscreen;
   initialLessonId?: string;
   initialAction?: "resume" | "new";
+  lessonSelectionKey?: number;
   navKey?: number;
   enabled?: boolean;
   onNavigateScreen: (screen: "seas" | "descent" | "boss" | "results" | "library") => void;
   onUploadNewPdf: () => void;
   reducedMotion?: boolean;
-  onUpdateActiveInstanceId?: (id: string | null, title?: string) => void;
+  onUpdateActiveInstanceId?: (id: string | null, title?: string, lessonId?: string) => void;
   onUpdateProgress?: (bossUnlocked: boolean, resultsUnlocked: boolean) => void;
 }
 
@@ -60,6 +62,7 @@ export function GameplayModule({
   initialSubscreen = "seas",
   initialLessonId,
   initialAction = "resume",
+  lessonSelectionKey = 0,
   navKey,
   enabled = true,
   onNavigateScreen,
@@ -85,6 +88,9 @@ export function GameplayModule({
   const currentInstance = instances.get(activeInstanceId)!;
   const instanceRef = useRef(currentInstance);
   instanceRef.current = currentInstance;
+  const navigationRef = useRef(onNavigateScreen);
+  navigationRef.current = onNavigateScreen;
+  const consumedSelectionKey = useRef<number | null>(null);
   const parts = lessonParts(activeLesson);
   const part = parts[currentInstance.routeNode - 1] ?? [];
   const questionIndex = currentInstance.questionIndex ?? 0;
@@ -92,16 +98,14 @@ export function GameplayModule({
 
   useEffect(() => {
     if (!enabled) return;
-    const requested = initialSubscreen;
-    if (requested === "boss" && currentInstance.state !== "active") setSubscreen("results");
-    else if (requested === "boss" && !currentInstance.bossReached)
-      setSubscreen(currentInstance.activeEncounter ? "encounter" : "descent");
-    else if (requested === "results" && currentInstance.state === "active")
-      setSubscreen(currentInstance.activeEncounter ? "encounter" : "descent");
-    else if (requested === "descent" && currentInstance.state !== "active") setSubscreen("results");
-    else if (requested === "descent" && currentInstance.activeEncounter) setSubscreen("encounter");
-    else setSubscreen(requested);
-  }, [initialSubscreen, navKey, enabled]);
+    // A pending lesson request will choose its own screen after selecting the run.
+    if (initialSubscreen === "descent" && initialLessonId && consumedSelectionKey.current !== lessonSelectionKey) return;
+    const resolved = resolveGameplayScreen(initialSubscreen, instanceRef.current);
+    setSubscreen(resolved);
+    const externalScreen = resolved === "encounter" ? "descent" : resolved;
+    const requestedScreen = initialSubscreen === "encounter" ? "descent" : initialSubscreen;
+    if (externalScreen !== requestedScreen) navigationRef.current(externalScreen);
+  }, [initialSubscreen, navKey, enabled, initialLessonId, lessonSelectionKey]);
 
   useEffect(() => {
     onUpdateProgress?.(
@@ -111,9 +115,9 @@ export function GameplayModule({
   }, [currentInstance.bossReached, currentInstance.state, onUpdateProgress]);
 
   const navigate = useCallback(
-    (screen: "seas" | "descent" | "boss" | "results") => {
+    (screen: GameplaySubscreen) => {
       setSubscreen(screen);
-      onNavigateScreen(screen);
+      onNavigateScreen(screen === "encounter" ? "descent" : screen);
     },
     [onNavigateScreen]
   );
@@ -121,7 +125,7 @@ export function GameplayModule({
   const handleSelectLesson = useCallback(
     (lessonId: string, action: "resume" | "new" = "resume") => {
       const lesson = allLessons.find((entry) => entry.id === lessonId);
-      if (!lesson || (lesson.isCustom && lessonParts(lesson).some((questions) => questions.length !== 3)))
+      if (!lesson || (lesson.isCustom && (lessonParts(lesson).length !== 3 || lessonParts(lesson).some((questions) => questions.length !== 3))))
         return;
       let id = activeInstanceByLesson.get(lessonId);
       if (action === "new" || !id || !instances.has(id)) {
@@ -131,25 +135,20 @@ export function GameplayModule({
       }
       setActiveLessonId(lessonId);
       setActiveInstanceId(id!);
-      onUpdateActiveInstanceId?.(id!, lesson.title);
+      onUpdateActiveInstanceId?.(id!, lesson.title, lesson.id);
       const instance = instances.get(id!);
-      navigate(
-        instance?.state && instance.state !== "active"
-          ? "results"
-          : instance?.bossReached
-          ? "boss"
-          : "descent"
-      );
+      navigate(instance ? resumeScreen(instance) : "descent");
     },
     [activeInstanceByLesson, allLessons, instances, navigate, onUpdateActiveInstanceId]
   );
 
   // Synchronize when parent requests specific lesson selection or retake
   useEffect(() => {
-    if (initialLessonId && initialSubscreen === "descent") {
-      handleSelectLesson(initialLessonId, initialAction || "resume");
-    }
-  }, [initialLessonId, initialAction, navKey, initialSubscreen, handleSelectLesson]);
+    if (!enabled || !initialLessonId || initialSubscreen !== "descent" || consumedSelectionKey.current === lessonSelectionKey) return;
+    // A library selection is a single request, not a reaction to every position/answer update.
+    consumedSelectionKey.current = lessonSelectionKey;
+    handleSelectLesson(initialLessonId, initialAction);
+  }, [enabled, initialLessonId, initialAction, lessonSelectionKey, initialSubscreen, handleSelectLesson]);
 
   const handleUpdatePlayer = useCallback(
     (x: number, y: number, facing: "up" | "down" | "left" | "right") => {
@@ -182,102 +181,36 @@ export function GameplayModule({
     [activeInstanceId, navigate]
   );
 
-  const handleAnswerCombat = (option: number) => {
+  const updateQuiz = (transition: (instance: DescentInstance) => DescentInstance) => {
     setInstances((previous) => {
-      const instance = previous.get(activeInstanceId)!;
-      if (instance.routePartAnswered || !instance.activeEncounter || instance.state !== "active" || !currentQuestion)
-        return previous;
-      const correct = option === currentQuestion.correct;
-      return new Map(previous).set(activeInstanceId, {
-        ...instance,
-        routePartAnswered: true,
-        selectedOption: option,
-        partCorrect: (instance.partCorrect ?? 0) + (correct ? 1 : 0),
-        xp: (instance.xp ?? 0) + (correct ? 10 : 0),
-        enemyHP: correct ? Math.max(0, instance.enemyHP - 50) : instance.enemyHP,
-        playerHP: correct ? instance.playerHP : Math.max(0, instance.playerHP - 50),
-      });
+      const instance = previous.get(activeInstanceId);
+      if (!instance) return previous;
+      const next = transition(instance);
+      return next === instance ? previous : new Map(previous).set(activeInstanceId, next);
     });
+  };
+
+  const handleAnswerCombat = (option: number) => {
+    updateQuiz((instance) => answerPart(instance, activeLesson, currentInstance.routeNode, questionIndex, option));
   };
 
   const handleContinuePart = () => {
-    if (!currentInstance.routePartAnswered) return;
-    if (questionIndex < part.length - 1) {
-      setInstances((previous) =>
-        new Map(previous).set(activeInstanceId, {
-          ...previous.get(activeInstanceId)!,
-          questionIndex: questionIndex + 1,
-          routePartAnswered: false,
-          selectedOption: null,
-        })
-      );
-      return;
-    }
-    const passed = (currentInstance.partCorrect ?? 0) >= Math.ceil((part.length * 2) / 3);
-    setInstances((previous) => {
-      const instance = previous.get(activeInstanceId)!;
-      if (!instance.routePartAnswered || instance.routeNode !== currentInstance.routeNode)
-        return previous;
-      return new Map(previous).set(
-        activeInstanceId,
-        passed
-          ? {
-              ...instance,
-              routeNode: instance.routeNode + 1,
-              activeEncounter: false,
-              routePartAnswered: false,
-              selectedOption: null,
-              questionIndex: 0,
-              partCorrect: 0,
-              clearedParts: (instance.clearedParts ?? 0) + 1,
-              playerHP: 100,
-              enemyHP: instance.routeNode === 3 ? 80 : 100,
-            }
-          : { ...instance, state: "failed", activeEncounter: false }
-      );
-    });
-    navigate(passed ? "descent" : "results");
+    const next = continuePart(currentInstance, activeLesson, currentInstance.routeNode, questionIndex);
+    if (next === currentInstance) return;
+    updateQuiz((instance) => continuePart(instance, activeLesson, currentInstance.routeNode, questionIndex));
+    if (!next.activeEncounter) navigate(next.state === "failed" ? "results" : "descent");
   };
 
   const handleBossAnswer = (option: number) => {
-    setInstances((previous) => {
-      const instance = previous.get(activeInstanceId)!;
-      const index = instance.bossQuestionIndex ?? 0,
-        answers = instance.bossAnswers ?? [];
-      if (answers.length > index || instance.state !== "active") return previous;
-      const question = parts.flat()[instance.bossOrder![index]];
-      const correct = question && option === question.correct;
-      return new Map(previous).set(activeInstanceId, {
-        ...instance,
-        bossAnswers: [...answers, option],
-        bossScore: (instance.bossScore ?? 0) + (correct ? 1 : 0),
-        xp: (instance.xp ?? 0) + (correct ? 10 : 0),
-        playerHP: correct ? instance.playerHP : Math.max(0, instance.playerHP - 50),
-        enemyHP: correct ? Math.max(0, instance.enemyHP - 10) : instance.enemyHP,
-      });
-    });
+    updateQuiz((instance) => answerBoss(instance, activeLesson, currentInstance.bossQuestionIndex ?? 0, option));
   };
 
   const handleContinueBoss = () => {
-    const index = currentInstance.bossQuestionIndex ?? 0,
-      total = parts.flat().length;
-    if ((currentInstance.bossAnswers?.length ?? 0) <= index) return;
-    if (index < total - 1)
-      setInstances((previous) =>
-        new Map(previous).set(activeInstanceId, {
-          ...previous.get(activeInstanceId)!,
-          bossQuestionIndex: index + 1,
-        })
-      );
-    else {
-      setInstances((previous) =>
-        new Map(previous).set(activeInstanceId, {
-          ...previous.get(activeInstanceId)!,
-          state: (currentInstance.bossScore ?? 0) >= bossPassScore(total) ? "completed" : "failed",
-        })
-      );
-      navigate("results");
-    }
+    const index = currentInstance.bossQuestionIndex ?? 0;
+    const next = continueBoss(currentInstance, activeLesson, index);
+    if (next === currentInstance) return;
+    updateQuiz((instance) => continueBoss(instance, activeLesson, index));
+    if (next.state !== "active") navigate("results");
   };
 
   if (!enabled) return null;

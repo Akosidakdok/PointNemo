@@ -1,0 +1,20 @@
+
+> point-nemo@0.1.0 typecheck
+> npm run build --workspace=@point-nemo/shared && npm run typecheck --workspaces --if-present
+
+
+> @point-nemo/shared@0.1.0 build
+> tsc -b
+
+
+> @point-nemo/api@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @point-nemo/web@0.1.0 typecheck
+> tsc -b --pretty false
+
+
+> @point-nemo/shared@0.1.0 typecheck
+> tsc --noEmit
+

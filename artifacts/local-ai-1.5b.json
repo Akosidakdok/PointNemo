@@ -1,0 +1,319 @@
+{
+  "createdAt": "2026-10-09T22:30:15.250Z",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 3050 6GB Laptop GPU, 6144 MiB",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12450HX",
+    "ramGiB": 7.714714050292969
+  },
+  "databasePath": "C:\\Users\\redd\\AppData\\Local\\Temp\\point-nemo-benchmark-gUJM52\\benchmark.sqlite",
+  "note": "Small synthetic-fixture benchmark. Automated validation is not a proof of answer correctness; review exported questions and evidence.",
+  "summary": [
+    {
+      "model": "qwen2.5:1.5b",
+      "samples": 4,
+      "medianMs": 41544,
+      "p95Ms": 46754,
+      "firstPassRate": 0,
+      "completionRate": 0
+    }
+  ],
+  "skipped": [],
+  "records": [
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "fe246397-605f-4f59-bc89-aaec53766b20",
+        "documentId": "35134915-52dd-4459-a935-10fa24273d7a",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "INVALID_MODEL_OUTPUT",
+        "errorMessage": "The repair returned an unexpected or repeated question slot.",
+        "errorStage": "validating",
+        "elapsedTimeMs": 35887,
+        "createdAt": "2026-10-09T22:27:26.789Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 1822,
+          "sourceReused": 0,
+          "selectionMs": 9,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "inputTokens": 883,
+          "initial_total_duration": 16323190900,
+          "initial_load_duration": 4634380700,
+          "initial_prompt_eval_duration": 371869000,
+          "initial_eval_duration": 11292793000,
+          "initial_prompt_eval_count": 883,
+          "initial_prompt_eval_cached_count": 0,
+          "initial_eval_count": 1112,
+          "initial_tokensPerSecond": 98.46988251710627,
+          "generationMs": 34010,
+          "validationMs": 14,
+          "repairedQuestions": 7,
+          "repairInputTokens": 1271,
+          "repair_total_duration": 17668927400,
+          "repair_load_duration": 26576700,
+          "repair_prompt_eval_duration": 302772000,
+          "repair_eval_duration": 17292488000,
+          "repair_prompt_eval_count": 1271,
+          "repair_prompt_eval_cached_count": 36,
+          "repair_eval_count": 1638,
+          "repair_tokensPerSecond": 94.72321160494661,
+          "totalMs": 35887
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T06:58:02.6744701+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "startup": "warm",
+      "job": {
+        "id": "c2e019cb-eb09-4c39-aaf4-6ac344a36be5",
+        "documentId": "cd27e71b-433e-4211-a590-8073ed3662aa",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "INVALID_MODEL_OUTPUT",
+        "errorMessage": "Question 3: evidence Too small: expected array to have >=1 items Question 4: evidence Too small: expected array to have >=1 items Question 5: evidence Too small: expected array to have >=1 items Question 6: evidence Too small: expected array to have >=1 items Question 7: evidence Too small: expected array to have >=1 items Question 8: evidence Too small: expected array to have >=1 items Question 9: evidence Too small: expected array to have >=1 items",
+        "errorStage": "validating",
+        "elapsedTimeMs": 41546,
+        "createdAt": "2026-10-09T22:28:02.861Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 32,
+          "sourceReused": 0,
+          "selectionMs": 4,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "inputTokens": 883,
+          "initial_total_duration": 11554061700,
+          "initial_load_duration": 20275700,
+          "initial_prompt_eval_duration": 53518000,
+          "initial_eval_duration": 11373200000,
+          "initial_prompt_eval_count": 883,
+          "initial_prompt_eval_cached_count": 882,
+          "initial_eval_count": 1136,
+          "initial_tokensPerSecond": 99.88393767805015,
+          "generationMs": 41482,
+          "validationMs": 5,
+          "repairedQuestions": 7,
+          "repairInputTokens": 1233,
+          "repair_total_duration": 29910341500,
+          "repair_load_duration": 27071200,
+          "repair_prompt_eval_duration": 87946000,
+          "repair_eval_duration": 29693723000,
+          "repair_prompt_eval_count": 1233,
+          "repair_prompt_eval_cached_count": 1046,
+          "repair_eval_count": 2826,
+          "repair_tokensPerSecond": 95.17162937096167,
+          "totalMs": 41544
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T06:58:44.3993465+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "499f6eb3-8daa-4248-bf16-6dac22c21c78",
+        "documentId": "ca87364a-6dc5-4e9e-9fb7-cdc1efba9fd9",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "INVALID_MODEL_OUTPUT",
+        "errorMessage": "Question 2: evidence Too small: expected array to have >=1 items Question 3: evidence Too small: expected array to have >=1 items Question 4: evidence Too small: expected array to have >=1 items Question 5: evidence Too small: expected array to have >=1 items Question 6: evidence Too small: expected array to have >=1 items Question 7: evidence Too small: expected array to have >=1 items Question 8: evidence Too small: expected array to have >=1 items Question 9: evidence Too small: expected array to have >=1 items",
+        "errorStage": "validating",
+        "elapsedTimeMs": 46755,
+        "createdAt": "2026-10-09T22:28:44.667Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 52,
+          "sourceReused": 0,
+          "selectionMs": 7,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "inputTokens": 1053,
+          "initial_total_duration": 19686837800,
+          "initial_load_duration": 4944002700,
+          "initial_prompt_eval_duration": 442899000,
+          "initial_eval_duration": 14267604000,
+          "initial_prompt_eval_count": 1053,
+          "initial_prompt_eval_cached_count": 0,
+          "initial_eval_count": 1411,
+          "initial_tokensPerSecond": 98.89537164053614,
+          "generationMs": 46640,
+          "validationMs": 22,
+          "repairedQuestions": 8,
+          "repairInputTokens": 1737,
+          "repair_total_duration": 26933849600,
+          "repair_load_duration": 54167900,
+          "repair_prompt_eval_duration": 403470000,
+          "repair_eval_duration": 26403355000,
+          "repair_prompt_eval_count": 1737,
+          "repair_prompt_eval_cached_count": 36,
+          "repair_eval_count": 2423,
+          "repair_tokensPerSecond": 91.76864076553908,
+          "totalMs": 46754
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T06:59:31.4155167+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "startup": "warm",
+      "job": {
+        "id": "ca99818e-014e-4b98-8b81-751b551510c0",
+        "documentId": "a5317caf-8552-41d0-a15a-f527d345a2e0",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "INVALID_MODEL_OUTPUT",
+        "errorMessage": "Question 2: evidence Too small: expected array to have >=1 items Question 3: evidence Too small: expected array to have >=1 items Question 4: evidence Too small: expected array to have >=1 items Question 5: evidence Too small: expected array to have >=1 items Question 6: evidence Too small: expected array to have >=1 items Question 7: evidence Too small: expected array to have >=1 items Question 8: evidence Too small: expected array to have >=1 items Question 9: evidence Too small: expected array to have >=1 items",
+        "errorStage": "validating",
+        "elapsedTimeMs": 43466,
+        "createdAt": "2026-10-09T22:29:31.565Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 89,
+          "sourceReused": 0,
+          "selectionMs": 10,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "inputTokens": 1053,
+          "initial_total_duration": 16241970300,
+          "initial_load_duration": 40722600,
+          "initial_prompt_eval_duration": 50027000,
+          "initial_eval_duration": 15998430000,
+          "initial_prompt_eval_count": 1053,
+          "initial_prompt_eval_cached_count": 1052,
+          "initial_eval_count": 1688,
+          "initial_tokensPerSecond": 105.51035320340807,
+          "generationMs": 43340,
+          "validationMs": 4,
+          "repairedQuestions": 8,
+          "repairInputTokens": 1582,
+          "repair_total_duration": 27080410800,
+          "repair_load_duration": 10138400,
+          "repair_prompt_eval_duration": 145701000,
+          "repair_eval_duration": 26834309000,
+          "repair_prompt_eval_count": 1582,
+          "repair_prompt_eval_cached_count": 1044,
+          "repair_eval_count": 2776,
+          "repair_tokensPerSecond": 103.44965469392187,
+          "totalMs": 43463
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:00:15.027087+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      }
+    }
+  ]
+}

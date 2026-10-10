@@ -1,0 +1,87 @@
+[
+  {
+    "start": 0.3,
+    "end": 4.422083333333333,
+    "text": "Point Nemo turns your lesson PDF into a local underwater study adventure."
+  },
+  {
+    "start": 6.25,
+    "end": 8.012876470588235,
+    "text": "Start with your own notes."
+  },
+  {
+    "start": 8.012876470588235,
+    "end": 12.01325,
+    "text": "Choose one English, text-based PDF from your local library."
+  },
+  {
+    "start": 13.25,
+    "end": 16.931975520833333,
+    "text": "The safety gate checks the file and its signature before local processing"
+  },
+  {
+    "start": 16.931975520833333,
+    "end": 17.285041666666668,
+    "text": "begins."
+  },
+  {
+    "start": 19.25,
+    "end": 20.724830434782607,
+    "text": "Sonar reads your lesson."
+  },
+  {
+    "start": 20.724830434782607,
+    "end": 25.333675543478257,
+    "text": "Local Ollama creates nine questions, then validation checks answers against"
+  },
+  {
+    "start": 25.333675543478257,
+    "end": 26.31689583333333,
+    "text": "source evidence."
+  },
+  {
+    "start": 27.25,
+    "end": 29.802977848101264,
+    "text": "Explore three topics on your ocean map."
+  },
+  {
+    "start": 29.802977848101264,
+    "end": 32.421416666666666,
+    "text": "Clear each encounter to unlock the next."
+  },
+  {
+    "start": 34.25,
+    "end": 36.022864208633095,
+    "text": "Every correction has a source."
+  },
+  {
+    "start": 36.022864208633095,
+    "end": 40.39592925659473,
+    "text": "Miss a question, and see the correct answer, an explanation, and the exact"
+  },
+  {
+    "start": 40.39592925659473,
+    "end": 42.46427083333334,
+    "text": "supporting quote with its PDF page."
+  },
+  {
+    "start": 45.25,
+    "end": 49.00167219387755,
+    "text": "Then face the final review: the same nine questions, shuffled."
+  },
+  {
+    "start": 49.00167219387755,
+    "end": 51.180062500000005,
+    "text": "Get eight right to complete the run."
+  },
+  {
+    "start": 53.25,
+    "end": 55.6325,
+    "text": "See your result, and try the lesson again."
+  },
+  {
+    "start": 57.15,
+    "end": 59.782041666666665,
+    "text": "One lesson. One descent."
+  }
+]

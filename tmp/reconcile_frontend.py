@@ -1,0 +1,20 @@
+from pathlib import Path
+p=Path('apps/web/src/components/intake/DocumentIntakeModule.tsx')
+s=p.read_text(encoding='utf-8').replace('useState, useRef, useCallback','useState, useCallback')
+s=s.replace('import { type QuestionSet, type GenerationJob } from "@point-nemo/shared";','import { type QuestionSet, type GenerationJob } from "@point-nemo/shared";\nimport { PdfSafetyGate } from "./PdfSafetyGate";')
+start=s.index('            <label\n              className="dropzone"')
+end=s.index('              <label className="saved-reuse-option">',start)
+s=s[:start]+'            <PdfSafetyGate onFileChange={setSelectedFile} />\n\n            {selectedFile && (\n'+s[end:]
+s=s.replace('selectedFile && !fileError','selectedFile').replace('One PDF · max 5 MB · up to 3 pages · 300–8,000 readable characters','One text-based PDF · max 5 MiB · at least 300 readable characters')
+s=s.replace('Inference model: <b>{modelName} (Local Ollama)</b>','Offline AI: <b>Local &amp; Private</b><span className="sr-only"> · {modelName}</span>')
+p.write_text(s,encoding='utf-8',newline='\n')
+p=Path('apps/web/src/components/navigation/AppHeader.tsx');s=p.read_text(encoding='utf-8')
+start=s.index('        <span className="nav-divider"');end=s.index('      </nav>',start)
+s=s[:start]+s[end:]
+s=s.replace('<b>05</b> Lesson Boss','Final Review').replace('<b>06</b> Results','<b>05</b> Results')
+p.write_text(s,encoding='utf-8',newline='\n')
+p=Path('apps/web/src/App.tsx');s=p.read_text(encoding='utf-8')
+s=s.replace('  const [resultsUnlocked, setResultsUnlocked] = useState(false);','  const [resultsUnlocked, setResultsUnlocked] = useState(false);\n  const [maxUnlockedStep,setMaxUnlockedStep]=useState(1);')
+s=s.replace('      setCurrentScreen(screen);','      const steps: Record<AppNavScreen,number>={library:1,upload:2,sonar:2,seas:3,descent:4,boss:4,results:5,profile:1};\n      setMaxUnlockedStep((previous)=>Math.max(previous,steps[screen]));\n      setCurrentScreen(screen);',1)
+s=s.replace('          resultsUnlocked={resultsUnlocked}','          resultsUnlocked={resultsUnlocked}\n          maxUnlockedStep={maxUnlockedStep}')
+p.write_text(s,encoding='utf-8',newline='\n')

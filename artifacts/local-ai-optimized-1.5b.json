@@ -1,0 +1,1032 @@
+{
+  "createdAt": "2026-10-09T22:32:30.857Z",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 3050 6GB Laptop GPU, 6144 MiB",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12450HX",
+    "ramGiB": 7.714714050292969
+  },
+  "baseline": null,
+  "databasePath": "C:\\Users\\redd\\AppData\\Local\\Temp\\point-nemo-benchmark-aHRfHC\\benchmark.sqlite",
+  "note": "Small synthetic-fixture benchmark. Automated validation is not a proof of answer correctness; review exported questions and evidence.",
+  "summary": [
+    {
+      "model": "qwen2.5:1.5b",
+      "samples": 4,
+      "medianMs": 18322,
+      "p95Ms": 35955,
+      "firstPassRate": 0,
+      "completionRate": 0
+    }
+  ],
+  "skipped": [],
+  "records": [
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "c35091ae-f08d-46f1-861f-98f77c3dc8f9",
+        "documentId": "f7827d3a-af90-4d17-bc7f-9feba589bbd0",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "DUPLICATE_QUESTION",
+        "errorMessage": "Question 5 repeats question 1. Test a different source-supported fact or application, not a rewording. The question and correct answer are disconnected from their cited passage. Use a supported fact or application. Question 6 repeats question 2. Test a different source-supported fact or application, not a rewording. The question and correct answer are disconnected from their cited passage. Use a supported fact or application. Question 8 repeats question 3. Test a different source-supported fact or application, not a rewording. The question and correct answer are disconnected from their cited passage. Use a supported fact or application. Question 9 repeats question 4. Test a different source-supported fact or application, not a rewording.",
+        "errorStage": "validating",
+        "elapsedTimeMs": 25293,
+        "createdAt": "2026-10-09T22:30:56.670Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 1986,
+          "sourceReused": 0,
+          "selectionMs": 18,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "inputTokens": 936,
+          "initial_total_duration": 17751988300,
+          "initial_load_duration": 5996323800,
+          "initial_prompt_eval_duration": 333344000,
+          "initial_eval_duration": 11387164000,
+          "initial_prompt_eval_count": 936,
+          "initial_prompt_eval_cached_count": 0,
+          "initial_eval_count": 1187,
+          "initial_tokensPerSecond": 104.24017780019678,
+          "generationMs": 23239,
+          "validationMs": 17,
+          "repairedQuestions": 4,
+          "repairInputTokens": 1323,
+          "repair_total_duration": 5472866100,
+          "repair_load_duration": 35115200,
+          "repair_prompt_eval_duration": 291611000,
+          "repair_eval_duration": 5089765000,
+          "repair_prompt_eval_count": 1323,
+          "repair_prompt_eval_cached_count": 36,
+          "repair_eval_count": 468,
+          "repair_tokensPerSecond": 91.94923537727185,
+          "totalMs": 25292
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:01:16.4547168+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "status": "ready",
+          "topics": [
+            {
+              "name": "IP Addressing"
+            },
+            {
+              "name": "DNS"
+            },
+            {
+              "name": "HTTP"
+            }
+          ],
+          "questions": {
+            "0": {
+              "prompt": "A fictional lookup for 'study.example' returns 192.0.2.25 to the client. What does this indicate about the IP address format?",
+              "options": [
+                "IPv4",
+                "IPv6",
+                "Both IPv4 and IPv6",
+                "Neither IPv4 nor IPv6"
+              ],
+              "answerIndex": 0,
+              "explanation": "The IP address format is IPv4 because it uses 32 bits and is typically formatted as four decimal numbers.",
+              "evidenceId": "p1s1"
+            },
+            "1": {
+              "prompt": "A DNS resolver receives a name lookup from a client and obtains the requested record. What does this indicate about the client's request?",
+              "options": [
+                "A request for a resource",
+                "A request for a domain name",
+                "A request for an IP address",
+                "A request for a DNS record"
+              ],
+              "answerIndex": 1,
+              "explanation": "The client's request is for a domain name, as the resolver is receiving a name lookup.",
+              "evidenceId": "p2s2"
+            },
+            "2": {
+              "prompt": "A GET request asks for a representation of a resource. What does this indicate about the request?",
+              "options": [
+                "A request for a resource",
+                "A request for a domain name",
+                "A request for an IP address",
+                "A request for a DNS record"
+              ],
+              "answerIndex": 0,
+              "explanation": "The request is for a resource, as GET is used to request a representation of a resource.",
+              "evidenceId": "p3s2"
+            },
+            "3": {
+              "prompt": "An AAAA record contains an IPv6 address. What does this indicate about the record?",
+              "options": [
+                "An IPv4 address",
+                "An IPv6 address",
+                "Both IPv4 and IPv6 addresses",
+                "Neither IPv4 nor IPv6 addresses"
+              ],
+              "answerIndex": 1,
+              "explanation": "The record contains an IPv6 address, indicating that the record is for an IPv6 address.",
+              "evidenceId": "p2s3"
+            },
+            "4": {
+              "prompt": "A POST request submits data to a resource for processing. What does this indicate about the request?",
+              "options": [
+                "A request for a resource",
+                "A request for a domain name",
+                "A request for an IP address",
+                "A request for a DNS record"
+              ],
+              "answerIndex": 2,
+              "explanation": "The request is for a resource, as POST is used to submit data to a resource for processing.",
+              "evidenceId": "p1s4"
+            },
+            "5": {
+              "prompt": "An address tells the network where to deliver data; it does not describe the contents of that data. What does this indicate about the address?",
+              "options": [
+                "It is a domain name",
+                "It is an IP address",
+                "It is a DNS record",
+                "It is a resource identifier"
+              ],
+              "answerIndex": 0,
+              "explanation": "The address is a domain name, as it does not describe the contents of the data.",
+              "evidenceId": "p3s7"
+            },
+            "6": {
+              "prompt": "A DNS cache keeps a previous lookup result for the record's time to live (TTL). What does this indicate about the cache?",
+              "options": [
+                "It stores the current IP address",
+                "It stores the current DNS record",
+                "It stores the current domain name",
+                "It stores the current resource identifier"
+              ],
+              "answerIndex": 2,
+              "explanation": "The cache stores the current DNS record, as it keeps a previous lookup result for the record's time to live (TTL).",
+              "evidenceId": "p2s6"
+            },
+            "7": {
+              "prompt": "Once that lifetime expires, the resolver must obtain a current answer rather than treating the expired entry as fresh. What does this indicate about the TTL?",
+              "options": [
+                "It is a short time to live",
+                "It is a long time to live",
+                "It is a fixed time to live",
+                "It is not a time to live"
+              ],
+              "answerIndex": 1,
+              "explanation": "The TTL is a long time to live, indicating that the entry is not fresh.",
+              "evidenceId": "p3s8"
+            },
+            "8": {
+              "prompt": "The client can use the status code to distinguish a successful /notes response from a missing resource. What does this indicate about the status code?",
+              "options": [
+                "It indicates a successful request",
+                "It indicates a missing resource",
+                "It indicates a successful resource",
+                "It indicates a successful request and a missing resource"
+              ],
+              "answerIndex": 0,
+              "explanation": "The status code 200 indicates a successful request, while 404 indicates a missing resource.",
+              "evidenceId": "p2s8"
+            }
+          }
+        },
+        {
+          "questions": {
+            "4": {
+              "prompt": "A fictional lookup for 'study.example' returns 192.0.2.25 to the client. What does this indicate about the IP address format?",
+              "options": [
+                "IPv4",
+                "IPv6",
+                "IPv4 and IPv6",
+                "Not an IP address"
+              ],
+              "answerIndex": 0,
+              "explanation": "The IP address 192.0.2.25 is in the IPv4 format, consisting of four decimal numbers.",
+              "evidenceId": "p1s1"
+            },
+            "5": {
+              "prompt": "A DNS resolver receives a name lookup from a client and obtains the requested record. What does this indicate about the client's request?",
+              "options": [
+                "A request for a domain name",
+                "A request for an IP address",
+                "A request for a resource",
+                "A request for a file"
+              ],
+              "answerIndex": 1,
+              "explanation": "The client is requesting a domain name, which is translated into an IP address.",
+              "evidenceId": "p3s1"
+            },
+            "7": {
+              "prompt": "A GET request asks for a representation of a resource. What does this indicate about the request?",
+              "options": [
+                "A request for a domain name",
+                "A request for an IP address",
+                "A request for a resource",
+                "A request for a file"
+              ],
+              "answerIndex": 1,
+              "explanation": "The GET request is for a resource, which could be a file or data.",
+              "evidenceId": "p2s2"
+            },
+            "8": {
+              "prompt": "An AAAA record contains an IPv6 address. What does this indicate about the record?",
+              "options": [
+                "An IPv4 address",
+                "An IPv6 address",
+                "An IP address",
+                "A domain name"
+              ],
+              "answerIndex": 1,
+              "explanation": "The AAAA record contains an IPv6 address, which is a type of IP address.",
+              "evidenceId": "p3s2"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "startup": "warm",
+      "job": {
+        "id": "21b7a7d1-7261-4f40-b7a0-96f4ceab9e75",
+        "documentId": "cdf70abb-ffbb-4062-9fe1-c4a5ac1700f8",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "DUPLICATE_QUESTION",
+        "errorMessage": "Question 5 repeats question 1. Test a different source-supported fact or application, not a rewording. The question and correct answer are disconnected from their cited passage. Use a supported fact or application. Question 8 repeats question 2. Test a different source-supported fact or application, not a rewording. Question 9 repeats question 3. Test a different source-supported fact or application, not a rewording.",
+        "errorStage": "validating",
+        "elapsedTimeMs": 35955,
+        "createdAt": "2026-10-09T22:31:22.097Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 56,
+          "sourceReused": 0,
+          "selectionMs": 6,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "inputTokens": 936,
+          "initial_total_duration": 24846195500,
+          "initial_load_duration": 63732900,
+          "initial_prompt_eval_duration": 14597000,
+          "initial_eval_duration": 11214161000,
+          "initial_prompt_eval_count": 936,
+          "initial_prompt_eval_cached_count": 935,
+          "initial_eval_count": 1187,
+          "initial_tokensPerSecond": 105.84831089904986,
+          "generationMs": 35850,
+          "validationMs": 6,
+          "repairedQuestions": 3,
+          "repairInputTokens": 1317,
+          "repair_total_duration": 10989819100,
+          "repair_load_duration": 9334900,
+          "repair_prompt_eval_duration": 95741000,
+          "repair_eval_duration": 3822073000,
+          "repair_prompt_eval_count": 1317,
+          "repair_prompt_eval_cached_count": 1027,
+          "repair_eval_count": 358,
+          "repair_tokensPerSecond": 93.66644750113355,
+          "totalMs": 35955
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:01:58.047533+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "status": "ready",
+          "topics": [
+            {
+              "name": "IP Addressing"
+            },
+            {
+              "name": "DNS"
+            },
+            {
+              "name": "HTTP"
+            }
+          ],
+          "questions": {
+            "0": {
+              "prompt": "A fictional lookup for 'study.example' returns 192.0.2.25 to the client. What does this indicate about the IP address format?",
+              "options": [
+                "IPv4",
+                "IPv6",
+                "Both IPv4 and IPv6",
+                "Neither IPv4 nor IPv6"
+              ],
+              "answerIndex": 0,
+              "explanation": "The IP address format is IPv4 because it uses 32 bits and is typically formatted as four decimal numbers.",
+              "evidenceId": "p1s1"
+            },
+            "1": {
+              "prompt": "A DNS resolver receives a name lookup from a client and obtains the requested record. What does this indicate about the client's request?",
+              "options": [
+                "A request for a resource",
+                "A request for a domain name",
+                "A request for an IP address",
+                "A request for a DNS record"
+              ],
+              "answerIndex": 1,
+              "explanation": "The client's request is for a domain name, as the resolver is receiving a name lookup.",
+              "evidenceId": "p2s2"
+            },
+            "2": {
+              "prompt": "A GET request asks for a representation of a resource. What does this indicate about the request?",
+              "options": [
+                "A request for a resource",
+                "A request for a domain name",
+                "A request for an IP address",
+                "A request for a DNS record"
+              ],
+              "answerIndex": 0,
+              "explanation": "The request is for a resource, as GET is used to request a representation of a resource.",
+              "evidenceId": "p3s2"
+            },
+            "3": {
+              "prompt": "An AAAA record contains an IPv6 address. What does this indicate about the record?",
+              "options": [
+                "It is a DNS record for an IPv4 address",
+                "It is a DNS record for an IPv6 address",
+                "It is a DNS record for a domain name",
+                "It is a DNS record for a resource"
+              ],
+              "answerIndex": 1,
+              "explanation": "The record is a DNS record for an IPv6 address.",
+              "evidenceId": "p2s3"
+            },
+            "4": {
+              "prompt": "A POST request submits data to a resource for processing. What does this indicate about the request?",
+              "options": [
+                "A request for a resource",
+                "A request for a domain name",
+                "A request for an IP address",
+                "A request for a DNS record"
+              ],
+              "answerIndex": 2,
+              "explanation": "The request is for a resource, as POST is used to submit data to a resource for processing.",
+              "evidenceId": "p1s4"
+            },
+            "5": {
+              "prompt": "An address tells the network where to deliver data; it does not describe the contents of that data. What does this indicate about the address?",
+              "options": [
+                "It is a DNS record",
+                "It is an IP address",
+                "It is a domain name",
+                "It is a resource identifier"
+              ],
+              "answerIndex": 0,
+              "explanation": "The address is an IP address, as it tells the network where to deliver data but does not describe the contents of that data.",
+              "evidenceId": "p1s5"
+            },
+            "6": {
+              "prompt": "A DNS cache keeps a previous lookup result for the record's time to live (TTL). What does this indicate about the cache?",
+              "options": [
+                "It is a DNS record",
+                "It is an IP address",
+                "It is a domain name",
+                "It is a resource identifier"
+              ],
+              "answerIndex": 1,
+              "explanation": "The cache is an IP address, as it keeps a previous lookup result for the record's time to live (TTL).",
+              "evidenceId": "p2s6"
+            },
+            "7": {
+              "prompt": "Once that lifetime expires, the resolver must obtain a current answer rather than treating the expired entry as fresh. What does this indicate about the TTL?",
+              "options": [
+                "It is a DNS record",
+                "It is an IP address",
+                "It is a domain name",
+                "It is a resource identifier"
+              ],
+              "answerIndex": 2,
+              "explanation": "The TTL is a domain name, as it is the time to live for the record.",
+              "evidenceId": "p3s7"
+            },
+            "8": {
+              "prompt": "The client can use the status code to distinguish a successful /notes response from a missing resource. What does this indicate about the status code?",
+              "options": [
+                "It is a DNS record",
+                "It is an IP address",
+                "It is a domain name",
+                "It is a resource identifier"
+              ],
+              "answerIndex": 3,
+              "explanation": "The status code is a resource identifier, as it is used to distinguish a successful response from a missing resource.",
+              "evidenceId": "p2s8"
+            }
+          }
+        },
+        {
+          "questions": {
+            "4": {
+              "prompt": "A fictional lookup for 'study.example' returns 192.0.2.25 to the client. What does this indicate about the IP address format?",
+              "options": [
+                "IPv4",
+                "IPv6",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 0,
+              "explanation": "The IP address 192.0.2.25 is an IPv4 address, which is indicated by the four decimal numbers.",
+              "evidenceId": "p1s1"
+            },
+            "7": {
+              "prompt": "A DNS resolver receives a name lookup from a client and obtains the requested record. What does this indicate about the client's request?",
+              "options": [
+                "A request for a domain name",
+                "A request for a resource",
+                "A request for an IP address",
+                "A request for a DNS record"
+              ],
+              "answerIndex": 1,
+              "explanation": "The client's request is for a domain name, as indicated by the DNS resolver receiving a name lookup.",
+              "evidenceId": "p3s1"
+            },
+            "8": {
+              "prompt": "A GET request asks for a representation of a resource. What does this indicate about the request?",
+              "options": [
+                "A request for a domain name",
+                "A request for a resource",
+                "A request for an IP address",
+                "A request for a DNS record"
+              ],
+              "answerIndex": 1,
+              "explanation": "The GET request is for a resource, as indicated by the request for a resource.",
+              "evidenceId": "p3s2"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "ec6f2bb7-eb3b-44db-94f4-96958f3ce94e",
+        "documentId": "4243a5e3-cdf1-44ba-8b85-ea70f8ec82bd",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "DUPLICATE_QUESTION",
+        "errorMessage": "Question 7 repeats question 1. Test a different source-supported fact or application, not a rewording. Question 8 repeats question 2. Test a different source-supported fact or application, not a rewording. The question and correct answer are disconnected from their cited passage. Use a supported fact or application. Question 9 repeats question 3. Test a different source-supported fact or application, not a rewording.",
+        "errorStage": "validating",
+        "elapsedTimeMs": 18323,
+        "createdAt": "2026-10-09T22:31:58.093Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 22,
+          "sourceReused": 0,
+          "selectionMs": 5,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "inputTokens": 1106,
+          "initial_total_duration": 14269259300,
+          "initial_load_duration": 4638792700,
+          "initial_prompt_eval_duration": 359495000,
+          "initial_eval_duration": 9252863000,
+          "initial_prompt_eval_count": 1106,
+          "initial_prompt_eval_cached_count": 0,
+          "initial_eval_count": 936,
+          "initial_tokensPerSecond": 101.15787945849841,
+          "generationMs": 18264,
+          "validationMs": 10,
+          "repairedQuestions": 3,
+          "repairInputTokens": 1442,
+          "repair_total_duration": 3980249200,
+          "repair_load_duration": 74708700,
+          "repair_prompt_eval_duration": 320958000,
+          "repair_eval_duration": 3487067000,
+          "repair_prompt_eval_count": 1442,
+          "repair_prompt_eval_cached_count": 36,
+          "repair_eval_count": 316,
+          "repair_tokensPerSecond": 90.62057023854145,
+          "totalMs": 18322
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:02:16.4112799+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "status": "ready",
+          "topics": [
+            {
+              "name": "TCP vs UDP"
+            },
+            {
+              "name": "Subnetting"
+            },
+            {
+              "name": "Ports"
+            }
+          ],
+          "questions": {
+            "0": {
+              "prompt": "A client wants to send a file to a server using the most efficient protocol. Which protocol should the client use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 0,
+              "explanation": "TCP is used for reliable, ordered data transfer, which is suitable for file transfer.",
+              "evidenceId": "p1s1"
+            },
+            "1": {
+              "prompt": "An application needs to send a series of messages to a server. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 1,
+              "explanation": "UDP is used for sending individual datagrams without establishing a connection, which is suitable for sending messages.",
+              "evidenceId": "p1s2"
+            },
+            "2": {
+              "prompt": "A client wants to update its position on a server. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 2,
+              "explanation": "UDP is used for sending individual datagrams without establishing a connection, which is suitable for position updates.",
+              "evidenceId": "p1s6"
+            },
+            "3": {
+              "prompt": "A client wants to send a large file to a server. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 0,
+              "explanation": "TCP is used for reliable, ordered data transfer, which is suitable for large file transfer.",
+              "evidenceId": "p1s1"
+            },
+            "4": {
+              "prompt": "An application needs to send a message to a server. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 1,
+              "explanation": "UDP is used for sending individual datagrams without establishing a connection, which is suitable for sending messages.",
+              "evidenceId": "p1s2"
+            },
+            "5": {
+              "prompt": "A client wants to send a small message to a server. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 0,
+              "explanation": "UDP is used for sending individual datagrams without establishing a connection, which is suitable for small messages.",
+              "evidenceId": "p1s2"
+            },
+            "6": {
+              "prompt": "A client wants to send a large file to a server. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 0,
+              "explanation": "TCP is used for reliable, ordered data transfer, which is suitable for large file transfer.",
+              "evidenceId": "p1s1"
+            },
+            "7": {
+              "prompt": "An application needs to send a message to a server. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 1,
+              "explanation": "UDP is used for sending individual datagrams without establishing a connection, which is suitable for sending messages.",
+              "evidenceId": "p1s2"
+            },
+            "8": {
+              "prompt": "A client wants to send a small message to a server. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 0,
+              "explanation": "UDP is used for sending individual datagrams without establishing a connection, which is suitable for small messages.",
+              "evidenceId": "p1s2"
+            }
+          }
+        },
+        {
+          "questions": {
+            "6": {
+              "prompt": "A client wants to send a file to a server using the most efficient protocol. Which protocol should the client use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 0,
+              "explanation": "TCP is the most efficient protocol for sending files because it guarantees delivery and ordering, ensuring the file is received in the correct order.",
+              "evidenceId": "p2s1"
+            },
+            "7": {
+              "prompt": "An application needs to send a series of messages to a server. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 1,
+              "explanation": "UDP is more efficient for sending a series of messages because it does not guarantee delivery or ordering, making it suitable for applications that can handle loss or reordering.",
+              "evidenceId": "p1s2"
+            },
+            "8": {
+              "prompt": "A client wants to update its position on a server. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 2,
+              "explanation": "UDP is more efficient for updating positions because it does not guarantee delivery or ordering, making it suitable for applications that can handle occasional loss.",
+              "evidenceId": "p2s2"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "generation",
+      "model": "qwen2.5:1.5b",
+      "fixture": "fixtures/networking-unseen.pdf",
+      "startup": "warm",
+      "job": {
+        "id": "b6cf0671-e974-4711-a754-911671532a84",
+        "documentId": "3b916c77-502a-4049-ab8e-42f8e5628f4f",
+        "state": "failed",
+        "phase": "failed",
+        "canRetry": true,
+        "errorCode": "DUPLICATE_QUESTION",
+        "errorMessage": "Question 3 repeats question 1. Test a different source-supported fact or application, not a rewording. The question and correct answer are disconnected from their cited passage. Use a supported fact or application. Question 4 repeats question 2. Test a different source-supported fact or application, not a rewording. The question and correct answer are disconnected from their cited passage. Use a supported fact or application. Question 6 repeats question 5. Test a different source-supported fact or application, not a rewording. The question and correct answer are disconnected from their cited passage. Use a supported fact or application. Question 7 repeats question 5. Test a different source-supported fact or application, not a rewording. Question 7 repeats question 6. Test a different source-supported fact or application, not a rewording. The question and correct answer are disconnected from their cited passage. Use a supported fact or application. Question 8 repeats question 5. Test a different source-supported fact or application, not a rewording. Question 8 repeats question 6. Test a different source-supported fact or application, not a rewording. Question 8 repeats question 7. ",
+        "errorStage": "validating",
+        "elapsedTimeMs": 14127,
+        "createdAt": "2026-10-09T22:32:16.627Z",
+        "retryCount": 1,
+        "timings": {
+          "extractionMs": 21,
+          "sourceReused": 0,
+          "selectionMs": 6,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "inputTokens": 1106,
+          "initial_total_duration": 8135423800,
+          "initial_load_duration": 15281000,
+          "initial_prompt_eval_duration": 44666000,
+          "initial_eval_duration": 7986218000,
+          "initial_prompt_eval_count": 1106,
+          "initial_prompt_eval_cached_count": 1105,
+          "initial_eval_count": 798,
+          "initial_tokensPerSecond": 99.92214086818066,
+          "generationMs": 14071,
+          "validationMs": 9,
+          "repairedQuestions": 6,
+          "repairInputTokens": 1799,
+          "repair_total_duration": 5911623700,
+          "repair_load_duration": 32749000,
+          "repair_prompt_eval_duration": 254594000,
+          "repair_eval_duration": 5520519000,
+          "repair_prompt_eval_count": 1799,
+          "repair_prompt_eval_cached_count": 1061,
+          "repair_eval_count": 560,
+          "repair_tokensPerSecond": 101.4397378217519,
+          "totalMs": 14128
+        }
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:02:30.7445855+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "status": "ready",
+          "topics": [
+            {
+              "name": "TCP vs UDP"
+            },
+            {
+              "name": "Subnetting"
+            },
+            {
+              "name": "Ports"
+            }
+          ],
+          "questions": {
+            "0": {
+              "prompt": "A client wants to send a file copy request to a server. Which protocol should they use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 0,
+              "explanation": "TCP is used for reliable, ordered data transfer, suitable for file copies.",
+              "evidenceId": "p1s1"
+            },
+            "1": {
+              "prompt": "An application needs to send a message that is not guaranteed to be delivered or ordered. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 1,
+              "explanation": "UDP is used for sending individual datagrams without a connection.",
+              "evidenceId": "p1s2"
+            },
+            "2": {
+              "prompt": "A client wants to update its position on a server. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 2,
+              "explanation": "UDP is suitable for applications that can tolerate occasional loss, such as position updates.",
+              "evidenceId": "p1s5"
+            },
+            "3": {
+              "prompt": "A server listens on a specific port for incoming connections. Which protocol is being used?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 0,
+              "explanation": "TCP is used for establishing a connection and delivering a reliable, ordered byte stream.",
+              "evidenceId": "p1s3"
+            },
+            "4": {
+              "prompt": "A client wants to send a message that is not guaranteed to be delivered or ordered. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 1,
+              "explanation": "UDP is used for sending individual datagrams without a connection.",
+              "evidenceId": "p1s6"
+            },
+            "5": {
+              "prompt": "A client wants to send a message that is not guaranteed to be delivered or ordered. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 1,
+              "explanation": "UDP is used for sending individual datagrams without a connection.",
+              "evidenceId": "p1s6"
+            },
+            "6": {
+              "prompt": "A client wants to send a message that is not guaranteed to be delivered or ordered. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 1,
+              "explanation": "UDP is used for sending individual datagrams without a connection.",
+              "evidenceId": "p1s6"
+            },
+            "7": {
+              "prompt": "A client wants to send a message that is not guaranteed to be delivered or ordered. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 1,
+              "explanation": "UDP is used for sending individual datagrams without a connection.",
+              "evidenceId": "p1s6"
+            },
+            "8": {
+              "prompt": "A client wants to send a message that is not guaranteed to be delivered or ordered. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "Both",
+                "Neither"
+              ],
+              "answerIndex": 1,
+              "explanation": "UDP is used for sending individual datagrams without a connection.",
+              "evidenceId": "p1s6"
+            }
+          }
+        },
+        {
+          "questions": {
+            "2": {
+              "prompt": "A client wants to send a file copy request to a server. Which protocol should they use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 0,
+              "explanation": "TCP is used for reliable, ordered data transfer, suitable for file copying.",
+              "evidenceId": "p1s1"
+            },
+            "3": {
+              "prompt": "An application needs to send a message that is not guaranteed to be delivered or ordered. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 2,
+              "explanation": "UDP is used for sending individual datagrams without establishing a connection.",
+              "evidenceId": "p1s3"
+            },
+            "5": {
+              "prompt": "A client wants to send a message that is not guaranteed to be delivered or ordered. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 2,
+              "explanation": "UDP is used for sending individual datagrams without establishing a connection.",
+              "evidenceId": "p1s3"
+            },
+            "6": {
+              "prompt": "A client wants to send a message that is not guaranteed to be delivered or ordered. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 2,
+              "explanation": "UDP is used for sending individual datagrams without establishing a connection.",
+              "evidenceId": "p1s3"
+            },
+            "7": {
+              "prompt": "A client wants to send a message that is not guaranteed to be delivered or ordered. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 2,
+              "explanation": "UDP is used for sending individual datagrams without establishing a connection.",
+              "evidenceId": "p1s3"
+            },
+            "8": {
+              "prompt": "A client wants to send a message that is not guaranteed to be delivered or ordered. Which protocol should it use?",
+              "options": [
+                "TCP",
+                "UDP",
+                "ICMP",
+                "RTP"
+              ],
+              "answerIndex": 2,
+              "explanation": "UDP is used for sending individual datagrams without establishing a connection.",
+              "evidenceId": "p1s3"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

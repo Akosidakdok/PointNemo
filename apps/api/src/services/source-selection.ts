@@ -105,9 +105,18 @@ export function resolveEvidence(output: unknown, passages: SourcePassage[]): unk
   return { ...(output as object), questions: (output as any).questions.map((question: any) => {
     if (!question || typeof question !== "object" || !("evidenceId" in question)) return question;
     const { evidenceId, slot: _slot, correctAnswer, distractors, ...fields } = question;
+    // Recover harmless presentation mistakes without rewriting the answer or
+    // accepting a declarative statement as a question.
+    if (typeof fields.prompt === "string") {
+      fields.prompt = fields.prompt.trim();
+      if (!fields.prompt.endsWith("?") && /^(?:what|which|who|when|where|why|how|can|could|does|do|is|are|should|would)\b/i.test(fields.prompt)) {
+        fields.prompt = fields.prompt.replace(/[.!]+$/, "") + "?";
+      }
+    }
     if (typeof correctAnswer === "string" && Array.isArray(distractors)) {
       const answerIndex = createHash("sha256").update(String(fields.prompt)).digest()[0]! % 4;
-      const options = [...distractors]; options.splice(answerIndex,0,correctAnswer);
+      const cleanChoice = (value: unknown): unknown => typeof value === "string" ? value.trim().replace(/^[A-D][).]\s+/, "") : value;
+      const options = distractors.map(cleanChoice); options.splice(answerIndex,0,cleanChoice(correctAnswer));
       fields.options = options; fields.answerIndex = answerIndex;
     }
     const passage = catalog.get(evidenceId);

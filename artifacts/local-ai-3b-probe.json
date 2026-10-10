@@ -1,0 +1,471 @@
+{
+  "createdAt": "2026-10-09T22:34:55.700Z",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 3050 6GB Laptop GPU, 6144 MiB",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-12450HX",
+    "ramGiB": 7.714714050292969
+  },
+  "baseline": null,
+  "databasePath": "C:\\Users\\redd\\AppData\\Local\\Temp\\point-nemo-benchmark-rL2Zwo\\benchmark.sqlite",
+  "note": "Small synthetic-fixture benchmark. Automated validation is not a proof of answer correctness; review exported questions and evidence.",
+  "summary": [
+    {
+      "model": "qwen2.5:3b",
+      "samples": 1,
+      "medianMs": 26346,
+      "p95Ms": 26346,
+      "firstPassRate": 1,
+      "completionRate": 1
+    }
+  ],
+  "skipped": [],
+  "records": [
+    {
+      "kind": "generation",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "startup": "cold",
+      "job": {
+        "id": "496fdf34-dbcd-47fa-a39b-e43c6b871c25",
+        "documentId": "57277835-5247-4337-9a73-62d3425cbaf3",
+        "state": "ready",
+        "phase": "ready",
+        "canRetry": false,
+        "questionSetId": "c85836c2-0a13-44c2-8e46-53037e85337e",
+        "elapsedTimeMs": 26348,
+        "createdAt": "2026-10-09T22:34:27.600Z",
+        "retryCount": 0,
+        "timings": {
+          "extractionMs": 1468,
+          "sourceReused": 0,
+          "selectionMs": 10,
+          "totalPassages": 24,
+          "selectedPassages": 24,
+          "selectedPages": 3,
+          "totalPages": 3,
+          "inputTokens": 950,
+          "initial_total_duration": 24702857800,
+          "initial_load_duration": 8778580400,
+          "initial_prompt_eval_duration": 812781000,
+          "initial_eval_duration": 15080811000,
+          "initial_prompt_eval_count": 950,
+          "initial_prompt_eval_cached_count": 0,
+          "initial_eval_count": 881,
+          "initial_tokensPerSecond": 58.41860891963967,
+          "generationMs": 24707,
+          "validationMs": 9,
+          "validationStorageMs": 100,
+          "totalMs": 26346
+        }
+      },
+      "questionSet": {
+        "id": "c85836c2-0a13-44c2-8e46-53037e85337e",
+        "documentId": "57277835-5247-4337-9a73-62d3425cbaf3",
+        "filename": "networking-demo.pdf",
+        "extractedPages": [
+          {
+            "pageNumber": 1,
+            "chunkId": "chunk-1",
+            "text": "Topic 1: IP Addressing An IP address identifies a network interface and helps routers direct packets to a destination. IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1). IPv6 uses 128 bits, represented in hexadecimal. Each IPv4 decimal number represents an 8-bit octet and ranges from 0 to 255. The four octets together account for the 32 bits in an IPv4 address. A router examines the destination IP address when choosing where to forward a packet. An address tells the network where to deliver data; it does not describe the contents of that data."
+          },
+          {
+            "pageNumber": 2,
+            "chunkId": "chunk-2",
+            "text": "Topic 2: DNS DNS translates human-readable domain names into IP addresses. For example, a fictional lookup for study.example can return 192.0.2.25 to the client. A DNS resolver receives a name lookup from a client and obtains the requested record. An A record contains an IPv4 address. An AAAA record contains an IPv6 address. A DNS cache keeps a previous lookup result for the record's time to live (TTL). Reusing an unexpired cached answer avoids another lookup. Once that lifetime expires, the resolver must obtain a current answer rather than treating the expired entry as fresh."
+          },
+          {
+            "pageNumber": 3,
+            "chunkId": "chunk-3",
+            "text": "Topic 3: HTTP HTTP is an application-layer protocol used to exchange requests and responses. In its client-server model, a client sends a request and a server returns a response. A GET request asks for a representation of a resource. In this synthetic example, GET /notes requests the study notes stored at the /notes path. A POST request submits data to a resource for processing. An HTTP response includes a status code and may include a body. Status code 200 means the request succeeded. Status code 404 means the requested resource was not found. The client can use the status code to distinguish a successful /notes response from a missing resource."
+          }
+        ],
+        "metadata": {
+          "documentHash": "559955e2e5b78308a7d7caadd1fde078decf06f9bd3152ffcd66cff3ce7aae76",
+          "extractorVersion": "pdf-parse@2.4.5/point-nemo-text-v3",
+          "promptVersion": "point-nemo-passages-v4",
+          "schemaVersion": "point-nemo-questions-v2",
+          "tokenizerDigest": "d9011691d2d6b47762206b71f4a78429b5614850725b47ae06bef96674eed416",
+          "modelTag": "qwen2.5:3b",
+          "modelDigest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+          "settingsHash": "22dc1ff78f34bb8ab4c22b8c2233c2273082a34cdffd60f1e73a839fef9f5845",
+          "createdAt": "2026-10-09T22:34:53.947Z"
+        },
+        "compatible": true,
+        "topics": [
+          {
+            "id": "308fe260-9b95-49dd-bc83-1a01502ac2ce",
+            "name": "IP Addressing"
+          },
+          {
+            "id": "85699828-6f6e-41c0-acf1-6fe3ac48e1e7",
+            "name": "DNS"
+          },
+          {
+            "id": "44c80eae-7608-40d3-ac70-d7874fa29a1d",
+            "name": "HTTP"
+          }
+        ],
+        "questions": [
+          {
+            "id": "02bae03f-7395-4b6f-ade6-76019f6a6302",
+            "topicId": "308fe260-9b95-49dd-bc83-1a01502ac2ce",
+            "difficulty": "easy",
+            "prompt": "How many bits does IPv4 use?",
+            "options": [
+              "32",
+              "16",
+              "64",
+              "128"
+            ],
+            "answerIndex": 0,
+            "explanation": "IPv4 uses 32 bits for addressing.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "IPv4 uses 32 bits, typically formatted as four decimal numbers (e.g., 192.168.1.1)."
+              }
+            ]
+          },
+          {
+            "id": "0251a026-5cc0-4045-b62b-2b634928d9ec",
+            "topicId": "308fe260-9b95-49dd-bc83-1a01502ac2ce",
+            "difficulty": "medium",
+            "prompt": "What does each IPv4 decimal number represent?",
+            "options": [
+              "16-bit octet",
+              "4-bit octet",
+              "8-bit octet",
+              "12-bit octet"
+            ],
+            "answerIndex": 2,
+            "explanation": "Each IPv4 decimal number represents an 8-bit octet.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "Each IPv4 decimal number represents an 8-bit octet and ranges from 0 to 255."
+              }
+            ]
+          },
+          {
+            "id": "4a00870c-e3f1-49d7-a4cb-c964b264195b",
+            "topicId": "308fe260-9b95-49dd-bc83-1a01502ac2ce",
+            "difficulty": "hard",
+            "prompt": "How many IPv4 decimal numbers are there in an address?",
+            "options": [
+              "2",
+              "8",
+              "16",
+              "4"
+            ],
+            "answerIndex": 3,
+            "explanation": "An IPv4 address consists of four decimal numbers.",
+            "evidence": [
+              {
+                "pageNumber": 1,
+                "chunkId": "chunk-1",
+                "quote": "The four octets together account for the 32 bits in an IPv4 address."
+              }
+            ]
+          },
+          {
+            "id": "dfe3c21a-1415-4bdd-b39f-a197dd348a53",
+            "topicId": "85699828-6f6e-41c0-acf1-6fe3ac48e1e7",
+            "difficulty": "easy",
+            "prompt": "What does a DNS resolver do when a client requests a lookup for study.example?",
+            "options": [
+              "Creates a new record",
+              "Forwards the request to another server",
+              "Returns the cached answer",
+              "Obtains the requested record"
+            ],
+            "answerIndex": 3,
+            "explanation": "A DNS resolver fetches the requested record from DNS servers.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "For example, a fictional lookup for study.example can return 192.0.2.25 to the client."
+              }
+            ]
+          },
+          {
+            "id": "f3470b4a-11bf-4d51-a0c9-13de2c9630b5",
+            "topicId": "85699828-6f6e-41c0-acf1-6fe3ac48e1e7",
+            "difficulty": "medium",
+            "prompt": "What type of record contains an IPv4 address?",
+            "options": [
+              "A record",
+              "AAAA record",
+              "IP record",
+              "DNS record"
+            ],
+            "answerIndex": 0,
+            "explanation": "An A record maps a domain name to an IPv4 address.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "An A record contains an IPv4 address."
+              }
+            ]
+          },
+          {
+            "id": "5730a423-3faf-4eb3-8129-bc744292da91",
+            "topicId": "85699828-6f6e-41c0-acf1-6fe3ac48e1e7",
+            "difficulty": "hard",
+            "prompt": "What happens when a DNS lookup result expires?",
+            "options": [
+              "The resolver must obtain a current answer",
+              "The resolver uses the expired entry as fresh",
+              "The resolver caches the expired entry",
+              "The resolver ignores the expired entry"
+            ],
+            "answerIndex": 0,
+            "explanation": "Once the TTL expires, the resolver must obtain a current answer.",
+            "evidence": [
+              {
+                "pageNumber": 2,
+                "chunkId": "chunk-2",
+                "quote": "Once that lifetime expires, the resolver must obtain a current answer rather than treating the expired entry as fresh."
+              }
+            ]
+          },
+          {
+            "id": "9f904f31-7e18-47fa-acc7-e92028c4baf6",
+            "topicId": "44c80eae-7608-40d3-ac70-d7874fa29a1d",
+            "difficulty": "easy",
+            "prompt": "What is the client-server model in HTTP used for?",
+            "options": [
+              "Encrypting data",
+              "Storing data",
+              "Exchanging requests and responses",
+              "Updating data"
+            ],
+            "answerIndex": 2,
+            "explanation": "HTTP operates in a client-server model for exchanging requests and responses.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "In its client-server model, a client sends a request and a server returns a response."
+              }
+            ]
+          },
+          {
+            "id": "a023dfc5-0c16-45e3-ac7d-537eb132bee3",
+            "topicId": "44c80eae-7608-40d3-ac70-d7874fa29a1d",
+            "difficulty": "medium",
+            "prompt": "What does a GET request do?",
+            "options": [
+              "Updates a resource",
+              "Deletes a resource",
+              "Asks for a resource representation",
+              "Creates a resource"
+            ],
+            "answerIndex": 2,
+            "explanation": "A GET request asks for a representation of a resource.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "A GET request asks for a representation of a resource."
+              }
+            ]
+          },
+          {
+            "id": "faa900b6-3b41-48c8-983a-743442b11823",
+            "topicId": "44c80eae-7608-40d3-ac70-d7874fa29a1d",
+            "difficulty": "hard",
+            "prompt": "What status code indicates a missing resource?",
+            "options": [
+              "200",
+              "300",
+              "500",
+              "404"
+            ],
+            "answerIndex": 3,
+            "explanation": "Status code 404 means the requested resource was not found.",
+            "evidence": [
+              {
+                "pageNumber": 3,
+                "chunkId": "chunk-3",
+                "quote": "The client can use the status code to distinguish a successful /notes response from a missing resource."
+              }
+            ]
+          }
+        ],
+        "createdAt": "2026-10-09T22:34:53.947Z"
+      },
+      "runtime": {
+        "models": [
+          {
+            "name": "qwen2.5:3b",
+            "model": "qwen2.5:3b",
+            "size": 2403178905,
+            "digest": "357c53fb659c5076de1d65ccb0b397446227b71a42be9d1603d46168015c9e4b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "3.1B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:04:53.8465014+08:00",
+            "size_vram": 2403178905,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          },
+          {
+            "name": "qwen2.5:1.5b",
+            "model": "qwen2.5:1.5b",
+            "size": 1360758046,
+            "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "qwen2",
+              "families": [
+                "qwen2"
+              ],
+              "parameter_size": "1.5B",
+              "quantization_level": "Q4_K_M"
+            },
+            "expires_at": "2026-10-10T07:04:10.2462054+08:00",
+            "size_vram": 1360758046,
+            "context_length": 8192,
+            "runner": "llamacpp"
+          }
+        ]
+      },
+      "drafts": [
+        {
+          "status": "ready",
+          "topics": [
+            {
+              "name": "IP Addressing"
+            },
+            {
+              "name": "DNS"
+            },
+            {
+              "name": "HTTP"
+            }
+          ],
+          "questions": {
+            "0": {
+              "evidenceId": "p1s2",
+              "prompt": "How many bits does IPv4 use?",
+              "correctAnswer": "32",
+              "distractors": [
+                "16",
+                "64",
+                "128"
+              ],
+              "explanation": "IPv4 uses 32 bits for addressing."
+            },
+            "1": {
+              "evidenceId": "p1s4",
+              "prompt": "What does each IPv4 decimal number represent?",
+              "correctAnswer": "8-bit octet",
+              "distractors": [
+                "16-bit octet",
+                "4-bit octet",
+                "12-bit octet"
+              ],
+              "explanation": "Each IPv4 decimal number represents an 8-bit octet."
+            },
+            "2": {
+              "evidenceId": "p1s5",
+              "prompt": "How many IPv4 decimal numbers are there in an address?",
+              "correctAnswer": "4",
+              "distractors": [
+                "2",
+                "8",
+                "16"
+              ],
+              "explanation": "An IPv4 address consists of four decimal numbers."
+            },
+            "3": {
+              "evidenceId": "p2s2",
+              "prompt": "What does a DNS resolver do when a client requests a lookup for study.example?",
+              "correctAnswer": "Obtains the requested record",
+              "distractors": [
+                "Creates a new record",
+                "Forwards the request to another server",
+                "Returns the cached answer"
+              ],
+              "explanation": "A DNS resolver fetches the requested record from DNS servers."
+            },
+            "4": {
+              "evidenceId": "p2s4",
+              "prompt": "What type of record contains an IPv4 address?",
+              "correctAnswer": "A record",
+              "distractors": [
+                "AAAA record",
+                "IP record",
+                "DNS record"
+              ],
+              "explanation": "An A record maps a domain name to an IPv4 address."
+            },
+            "5": {
+              "evidenceId": "p2s8",
+              "prompt": "What happens when a DNS lookup result expires?",
+              "correctAnswer": "The resolver must obtain a current answer",
+              "distractors": [
+                "The resolver uses the expired entry as fresh",
+                "The resolver caches the expired entry",
+                "The resolver ignores the expired entry"
+              ],
+              "explanation": "Once the TTL expires, the resolver must obtain a current answer."
+            },
+            "6": {
+              "evidenceId": "p3s2",
+              "prompt": "What is the client-server model in HTTP used for?",
+              "correctAnswer": "Exchanging requests and responses",
+              "distractors": [
+                "Encrypting data",
+                "Storing data",
+                "Updating data"
+              ],
+              "explanation": "HTTP operates in a client-server model for exchanging requests and responses."
+            },
+            "7": {
+              "evidenceId": "p3s3",
+              "prompt": "What does a GET request do?",
+              "correctAnswer": "Asks for a resource representation",
+              "distractors": [
+                "Updates a resource",
+                "Deletes a resource",
+                "Creates a resource"
+              ],
+              "explanation": "A GET request asks for a representation of a resource."
+            },
+            "8": {
+              "evidenceId": "p3s9",
+              "prompt": "What status code indicates a missing resource?",
+              "correctAnswer": "404",
+              "distractors": [
+                "200",
+                "300",
+                "500"
+              ],
+              "explanation": "Status code 404 means the requested resource was not found."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "cache",
+      "model": "qwen2.5:3b",
+      "fixture": "fixtures/networking-demo.pdf",
+      "elapsedMs": 1627.8837999999996,
+      "reused": true
+    }
+  ]
+}

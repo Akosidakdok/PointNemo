@@ -1,0 +1,632 @@
+
+> point-nemo@0.1.0 test
+> npm run test:assets && npm run test:api && npm run test:web
+
+
+> point-nemo@0.1.0 test:assets
+> node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: configuration exposes all tunable stats
+ok 1 - configuration exposes all tunable stats
+  ---
+  duration_ms: 1.4198
+  type: 'test'
+  ...
+# Subtest: idle advances to scanning and detects a player from any direction through obstacles
+ok 2 - idle advances to scanning and detects a player from any direction through obstacles
+  ---
+  duration_ms: 1.4693
+  type: 'test'
+  ...
+# Subtest: player outside radius is ignored and scanning returns to idle
+ok 3 - player outside radius is ignored and scanning returns to idle
+  ---
+  duration_ms: 0.3638
+  type: 'test'
+  ...
+# Subtest: sonar alerts all living compatible enemies within radius exactly once
+ok 4 - sonar alerts all living compatible enemies within radius exactly once
+  ---
+  duration_ms: 0.4684
+  type: 'test'
+  ...
+# Subtest: pulses repeat at the interval only during direct contact and do not relay on alert
+ok 5 - pulses repeat at the interval only during direct contact and do not relay on alert
+  ---
+  duration_ms: 0.4505
+  type: 'test'
+  ...
+# Subtest: alarm movement follows target without overshoot and forgets after memory expires
+ok 6 - alarm movement follows target without overshoot and forgets after memory expires
+  ---
+  duration_ms: 0.2834
+  type: 'test'
+  ...
+# Subtest: health reaches zero and dead fish no longer detects, moves, or pulses
+ok 7 - health reaches zero and dead fish no longer detects, moves, or pulses
+  ---
+  duration_ms: 0.2546
+  type: 'test'
+  ...
+# Subtest: networking-demo: exact SHA-256, three extracted source pages, facts, and admission limits
+ok 8 - networking-demo: exact SHA-256, three extracted source pages, facts, and admission limits
+  ---
+  duration_ms: 108.657
+  type: 'test'
+  ...
+# Subtest: networking-unseen: exact SHA-256, three extracted source pages, facts, and admission limits
+ok 9 - networking-unseen: exact SHA-256, three extracted source pages, facts, and admission limits
+  ---
+  duration_ms: 14.9939
+  type: 'test'
+  ...
+# Subtest: unseen fixture has distinct topics/facts/hash and is excluded from sample answers
+ok 10 - unseen fixture has distinct topics/facts/hash and is excluded from sample answers
+  ---
+  duration_ms: 3.0249
+  type: 'test'
+  ...
+# Subtest: native generator reproduces all checked-in artifacts byte for byte across runs and time zones
+ok 11 - native generator reproduces all checked-in artifacts byte for byte across runs and time zones
+  ---
+  duration_ms: 162.5015
+  type: 'test'
+  ...
+# Subtest: a dry run cannot accidentally perform a model access request
+ok 12 - a dry run cannot accidentally perform a model access request
+  ---
+  duration_ms: 2.9794
+  type: 'test'
+  ...
+# Subtest: both selectors route to the exact requested model with PNG defaults
+ok 13 - both selectors route to the exact requested model with PNG defaults
+  ---
+  duration_ms: 0.4316
+  type: 'test'
+  ...
+# Subtest: invalid inputs are rejected before any billable request
+ok 14 - invalid inputs are rejected before any billable request
+  ---
+  duration_ms: 9.3284
+  type: 'test'
+  ...
+# Subtest: dry run needs no key and does not create files or call OpenAI
+ok 15 - dry run needs no key and does not create files or call OpenAI
+  ---
+  duration_ms: 4.0703
+  type: 'test'
+  ...
+# Subtest: generation sends the selected model and saves PNG plus key-free metadata
+ok 16 - generation sends the selected model and saves PNG plus key-free metadata
+  ---
+  duration_ms: 43.1924
+  type: 'test'
+  ...
+# Subtest: references use multipart edits with correct image fields and no forced content type
+ok 17 - references use multipart edits with correct image fields and no forced content type
+  ---
+  duration_ms: 15.6022
+  type: 'test'
+  ...
+# Subtest: existing images and metadata are protected without API calls
+ok 18 - existing images and metadata are protected without API calls
+  ---
+  duration_ms: 8.4562
+  type: 'test'
+  ...
+# Subtest: missing key leaves no placeholders
+ok 19 - missing key leaves no placeholders
+  ---
+  duration_ms: 2.7835
+  type: 'test'
+  ...
+# Subtest: API failures remove reserved files, redact upstream details, and never retry
+ok 20 - API failures remove reserved files, redact upstream details, and never retry
+  ---
+  duration_ms: 23.6346
+  type: 'test'
+  ...
+# Subtest: network failures, timeouts, unreadable responses, and invalid images clean up outputs
+ok 21 - network failures, timeouts, unreadable responses, and invalid images clean up outputs
+  ---
+  duration_ms: 28.002
+  type: 'test'
+  ...
+# Subtest: ExtractedDocumentSchema accepts both supported three-page fixtures
+ok 22 - ExtractedDocumentSchema accepts both supported three-page fixtures
+  ---
+  duration_ms: 5.2415
+  type: 'test'
+  ...
+# Subtest: ExtractedDocumentSchema accepts exact admission boundaries
+ok 23 - ExtractedDocumentSchema accepts exact admission boundaries
+  ---
+  duration_ms: 0.551
+  type: 'test'
+  ...
+# Subtest: ExtractedDocumentSchema admits documents with no upper page, file size, or character limit
+ok 24 - ExtractedDocumentSchema admits documents with no upper page, file size, or character limit
+  ---
+  duration_ms: 0.4328
+  type: 'test'
+  ...
+# Subtest: ExtractedDocumentSchema rejects fewer than 300 non-whitespace characters
+ok 25 - ExtractedDocumentSchema rejects fewer than 300 non-whitespace characters
+  ---
+  duration_ms: 3.4455
+  type: 'test'
+  ...
+# Subtest: QuestionSetSchema accepts nine questions with three topics and a difficulty matrix
+ok 26 - QuestionSetSchema accepts nine questions with three topics and a difficulty matrix
+  ---
+  duration_ms: 7.4679
+  type: 'test'
+  ...
+# Subtest: QuestionSetSchema rejects incomplete or oversized question/topic arrays
+ok 27 - QuestionSetSchema rejects incomplete or oversized question/topic arrays
+  ---
+  duration_ms: 7.0914
+  type: 'test'
+  ...
+# Subtest: Question schemas reject invalid answer indices, options, difficulty, and source pages
+ok 28 - Question schemas reject invalid answer indices, options, difficulty, and source pages
+  ---
+  duration_ms: 10.2928
+  type: 'test'
+  ...
+# Subtest: DescentRunSchema validates snapshots and rejects invalid bounds
+ok 29 - DescentRunSchema validates snapshots and rejects invalid bounds
+  ---
+  duration_ms: 3.9604
+  type: 'test'
+  ...
+# Subtest: SubmitAnswerRequestSchema requires a slot UUID and an integer option index from zero to three
+ok 30 - SubmitAnswerRequestSchema requires a slot UUID and an integer option index from zero to three
+  ---
+  duration_ms: 1.015
+  type: 'test'
+  ...
+# Subtest: all atlas dimensions and frame coordinates match shipped PNGs
+ok 31 - all atlas dimensions and frame coordinates match shipped PNGs
+  ---
+  duration_ms: 30.9071
+  type: 'test'
+  ...
+# Subtest: frames within each species have identical anchor and canvas dimensions
+ok 32 - frames within each species have identical anchor and canvas dimensions
+  ---
+  duration_ms: 1.1723
+  type: 'test'
+  ...
+# Subtest: swimming loops wrap, nonlooping attacks stop, and replay resets the clock
+ok 33 - swimming loops wrap, nonlooping attacks stop, and replay resets the clock
+  ---
+  duration_ms: 0.9375
+  type: 'test'
+  ...
+# Subtest: one fixed species scale works for every pose and draw uses the common anchor
+ok 34 - one fixed species scale works for every pose and draw uses the common anchor
+  ---
+  duration_ms: 0.9902
+  type: 'test'
+  ...
+# Subtest: water mirrors alternating columns and rows, including negative camera coordinates
+ok 35 - water mirrors alternating columns and rows, including negative camera coordinates
+  ---
+  duration_ms: 0.3078
+  type: 'test'
+  ...
+1..35
+# tests 35
+# suites 0
+# pass 35
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 766.0338
+
+> point-nemo@0.1.0 test:api
+> npm run test --workspace=@point-nemo/api
+
+
+> @point-nemo/api@0.1.0 test
+> tsx --test tests/**/*.test.ts
+
+TAP version 13
+# Subtest: run creation from a ready question set
+ok 1 - run creation from a ready question set
+  ---
+  duration_ms: 80.5763
+  type: 'test'
+  ...
+# Subtest: fixed 18-slot ordering
+ok 2 - fixed 18-slot ordering
+  ---
+  duration_ms: 27.3046
+  type: 'test'
+  ...
+# Subtest: correct and incorrect answers calculate HP, combo, XP, and damage
+ok 3 - correct and incorrect answers calculate HP, combo, XP, and damage
+  ---
+  duration_ms: 38.5802
+  type: 'test'
+  ...
+# Subtest: duplicate identical retry idempotence
+ok 4 - duplicate identical retry idempotence
+  ---
+  duration_ms: 36.705
+  type: 'test'
+  ...
+# Subtest: changed answer conflict
+ok 5 - changed answer conflict
+  ---
+  duration_ms: 28.7781
+  type: 'test'
+  ...
+# Subtest: out-of-order answer conflict
+ok 6 - out-of-order answer conflict
+  ---
+  duration_ms: 27.9163
+  type: 'test'
+  ...
+# Subtest: boss 8/9 pass and run completion
+ok 7 - boss 8/9 pass and run completion
+  ---
+  duration_ms: 57.6766
+  type: 'test'
+  ...
+# Subtest: boss 7/9 fail ends run in failed state
+ok 8 - boss 7/9 fail ends run in failed state
+  ---
+  duration_ms: 49.4533
+  type: 'test'
+  ...
+# Subtest: transaction rollback on invalid answers
+ok 9 - transaction rollback on invalid answers
+  ---
+  duration_ms: 35.1963
+  type: 'test'
+  ...
+# Subtest: restart/read persistence from SQLite
+ok 10 - restart/read persistence from SQLite
+  ---
+  duration_ms: 59.6506
+  type: 'test'
+  ...
+# Subtest: surface: 2/3 passes after all three slots despite zero HP
+ok 11 - surface: 2/3 passes after all three slots despite zero HP
+  ---
+  duration_ms: 43.2771
+  type: 'test'
+  ...
+# Subtest: surface: 1/3 fails after all three slots despite zero HP
+ok 12 - surface: 1/3 fails after all three slots despite zero HP
+  ---
+  duration_ms: 35.7254
+  type: 'test'
+  ...
+# Subtest: twilight: 2/3 passes after all three slots despite zero HP
+ok 13 - twilight: 2/3 passes after all three slots despite zero HP
+  ---
+  duration_ms: 38.2012
+  type: 'test'
+  ...
+# Subtest: twilight: 1/3 fails after all three slots despite zero HP
+ok 14 - twilight: 1/3 fails after all three slots despite zero HP
+  ---
+  duration_ms: 37.1095
+  type: 'test'
+  ...
+# Subtest: midnight: 2/3 passes after all three slots despite zero HP
+ok 15 - midnight: 2/3 passes after all three slots despite zero HP
+  ---
+  duration_ms: 40.8014
+  type: 'test'
+  ...
+# Subtest: midnight: 1/3 fails after all three slots despite zero HP
+ok 16 - midnight: 1/3 fails after all three slots despite zero HP
+  ---
+  duration_ms: 48.9988
+  type: 'test'
+  ...
+# Subtest: boss consumes the ninth slot after eight early correct answers reduce enemy HP to zero
+ok 17 - boss consumes the ninth slot after eight early correct answers reduce enemy HP to zero
+  ---
+  duration_ms: 57.1499
+  type: 'test'
+  ...
+# Subtest: legacy metadata and incompatible game rules cannot start or advance a run
+ok 18 - legacy metadata and incompatible game rules cannot start or advance a run
+  ---
+  duration_ms: 26.7038
+  type: 'test'
+  ...
+# Subtest: state update failure rolls back both the accepted attempt and score
+ok 19 - state update failure rolls back both the accepted attempt and score
+  ---
+  duration_ms: 24.8687
+  type: 'test'
+  ...
+# Subtest: calibration catches reworded duplicate facts and overlapping answer choices
+ok 20 - calibration catches reworded duplicate facts and overlapping answer choices
+  ---
+  duration_ms: 20.232
+  type: 'test'
+  ...
+# Subtest: planner rejects reusing the same focus fact in multiple slots
+ok 21 - planner rejects reusing the same focus fact in multiple slots
+  ---
+  duration_ms: 1.3015
+  type: 'test'
+  ...
+# Subtest: planner allows repeated generic goal wording when each slot has a different source fact
+ok 22 - planner allows repeated generic goal wording when each slot has a different source fact
+  ---
+  duration_ms: 0.509
+  type: 'test'
+  ...
+# Subtest: LocalPdfExtractor admits the networking fixture
+ok 23 - LocalPdfExtractor admits the networking fixture
+  ---
+  duration_ms: 1400.4946
+  type: 'test'
+  ...
+# Subtest: valid model output is persisted as one complete question set
+ok 24 - valid model output is persisted as one complete question set
+  ---
+  duration_ms: 490.287
+  type: 'test'
+  ...
+# Subtest: invalid model output fails closed without persisting a question set
+ok 25 - invalid model output fails closed without persisting a question set
+  ---
+  duration_ms: 27.6403
+  type: 'test'
+  ...
+# Subtest: admission checks signature and extension
+ok 26 - admission checks signature and extension
+  ---
+  duration_ms: 1.6284
+  type: 'test'
+  ...
+# Subtest: normalization counts nonwhitespace, rejects mixed scan pages and retains blank pages
+ok 27 - normalization counts nonwhitespace, rejects mixed scan pages and retains blank pages
+  ---
+  duration_ms: 3.4956
+  type: 'test'
+  ...
+# Subtest: local Qwen tokenizer counts actual BPE tokens and complete repair prompts
+ok 28 - local Qwen tokenizer counts actual BPE tokens and complete repair prompts
+  ---
+  duration_ms: 670.2635
+  type: 'test'
+  ...
+# Subtest: source instructions and model role tokens stay inside escaped source data
+ok 29 - source instructions and model role tokens stay inside escaped source data
+  ---
+  duration_ms: 0.2146
+  type: 'test'
+  ...
+# Subtest: postvalidation rejects duplicate normalized stems, wrong coverage, options, and foreign quotes
+ok 30 - postvalidation rejects duplicate normalized stems, wrong coverage, options, and foreign quotes
+  ---
+  duration_ms: 14.441
+  type: 'test'
+  ...
+# Subtest: one repair may fix invalid data, and a second invalid set persists nothing
+ok 31 - one repair may fix invalid data, and a second invalid set persists nothing
+  ---
+  duration_ms: 55.0382
+  type: 'test'
+  ...
+# Subtest: global deadline includes extraction and never resets for inference or repair
+ok 32 - global deadline includes extraction and never resets for inference or repair
+  ---
+  duration_ms: 116.2414
+  type: 'test'
+  ...
+# Subtest: inference timeout fails without repair even if the model ignores cancellation
+ok 33 - inference timeout fails without repair even if the model ignores cancellation
+  ---
+  duration_ms: 120.6694
+  type: 'test'
+  ...
+# Subtest: over-budget source rejects before inference and repair budget is also checked
+ok 34 - over-budget source rejects before inference and repair budget is also checked
+  ---
+  duration_ms: 45.489
+  type: 'test'
+  ...
+# Subtest: cancel is idempotent during extraction and generation; late model data cannot commit
+ok 35 - cancel is idempotent during extraction and generation; late model data cannot commit
+  ---
+  duration_ms: 186.3101
+  type: 'test'
+  ...
+# Subtest: cancel during validation prevents the final atomic commit
+ok 36 - cancel during validation prevents the final atomic commit
+  ---
+  duration_ms: 50.3822
+  type: 'test'
+  ...
+# Subtest: delete cancels active work, cascades all records, and repeated delete is harmless
+ok 37 - delete cancels active work, cascades all records, and repeated delete is harmless
+  ---
+  duration_ms: 138.0173
+  type: 'test'
+  ...
+# Subtest: same hash requests fresh independent sets and attempts never cross documents
+ok 38 - same hash requests fresh independent sets and attempts never cross documents
+  ---
+  duration_ms: 50.7554
+  type: 'test'
+  ...
+# Subtest: unseen document rejects demo evidence and never receives a demo fallback
+ok 39 - unseen document rejects demo evidence and never receives a demo fallback
+  ---
+  duration_ms: 53.6673
+  type: 'test'
+  ...
+# Subtest: stale nonterminal jobs fail on startup and terminal states remain terminal
+ok 40 - stale nonterminal jobs fail on startup and terminal states remain terminal
+  ---
+  duration_ms: 21.6409
+  type: 'test'
+  ...
+# Subtest: metadata incompatibility blocks reuse after any version or digest change
+ok 41 - metadata incompatibility blocks reuse after any version or digest change
+  ---
+  duration_ms: 0.9268
+  type: 'test'
+  ...
+# Subtest: extractor honors cancellation and malformed bytes cannot persist
+ok 42 - extractor honors cancellation and malformed bytes cannot persist
+  ---
+  duration_ms: 1040.4824
+  type: 'test'
+  ...
+# Subtest: release configuration uses port 3000, external app-data storage, and the pinned loopback model
+ok 43 - release configuration uses port 3000, external app-data storage, and the pinned loopback model
+  ---
+  duration_ms: 3.2051
+  type: 'test'
+  ...
+# Subtest: v4 migration preserves descendants, permits independent duplicate hashes, and applies legacy metadata defaults
+ok 44 - v4 migration preserves descendants, permits independent duplicate hashes, and applies legacy metadata defaults
+  ---
+  duration_ms: 200.5243
+  type: 'test'
+  ...
+# Subtest: mutations enforce local Host/Origin while allowing same-origin requests and plain CLI requests
+ok 45 - mutations enforce local Host/Origin while allowing same-origin requests and plain CLI requests
+  ---
+  duration_ms: 167.1275
+  type: 'test'
+  ...
+# Subtest: explicit development mode admits the Vite loopback origin
+ok 46 - explicit development mode admits the Vite loopback origin
+  ---
+  duration_ms: 48.9848
+  type: 'test'
+  ...
+# Subtest: built web assets and deep SPA links are served without masking missing API routes/assets
+ok 47 - built web assets and deep SPA links are served without masking missing API routes/assets
+  ---
+  duration_ms: 72.0213
+  type: 'test'
+  ...
+# Subtest: health reports real database and model/tokenizer readiness and safe failures
+ok 48 - health reports real database and model/tokenizer readiness and safe failures
+  ---
+  duration_ms: 38.6832
+  type: 'test'
+  ...
+# Subtest: unexpected API errors and malformed JSON omit private source/output and do not log it
+ok 49 - unexpected API errors and malformed JSON omit private source/output and do not log it
+  ---
+  duration_ms: 33.0446
+  type: 'test'
+  ...
+# Subtest: document library, cancellation, and repeated deletion honor their HTTP contracts
+ok 50 - document library, cancellation, and repeated deletion honor their HTTP contracts
+  ---
+  duration_ms: 42.0148
+  type: 'test'
+  ...
+# Subtest: runs HTTP API endpoints: create, get, answer, and error contracts
+ok 51 - runs HTTP API endpoints: create, get, answer, and error contracts
+  ---
+  duration_ms: 255.6055
+  type: 'test'
+  ...
+# Subtest: run routes reject incompatible saved metadata and rules on create/resume/answers
+ok 52 - run routes reject incompatible saved metadata and rules on create/resume/answers
+  ---
+  duration_ms: 73.6711
+  type: 'test'
+  ...
+# Subtest: completed history and identical final retries remain available after runtime metadata changes
+ok 53 - completed history and identical final retries remain available after runtime metadata changes
+  ---
+  duration_ms: 93.6439
+  type: 'test'
+  ...
+1..53
+# tests 53
+# suites 0
+# pass 53
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3320.6467
+
+> point-nemo@0.1.0 test:web
+> tsx --test apps/web/tests/*.test.ts
+
+TAP version 13
+# Subtest: dev proxy supports its actual local port while preserving origin rejection
+ok 1 - dev proxy supports its actual local port while preserving origin rejection
+  ---
+  duration_ms: 247.7813
+  type: 'test'
+  ...
+# Subtest: sprite loops survive first frames, backwards timestamps, and long pauses
+ok 2 - sprite loops survive first frames, backwards timestamps, and long pauses
+  ---
+  duration_ms: 1.0401
+  type: 'test'
+  ...
+# Subtest: a new or resumed loop starts without elapsed time
+ok 3 - a new or resumed loop starts without elapsed time
+  ---
+  duration_ms: 0.2895
+  type: 'test'
+  ...
+# Subtest: accepts a nonempty PDF at the 5 MiB boundary
+ok 4 - accepts a nonempty PDF at the 5 MiB boundary
+  ---
+  duration_ms: 1.4586
+  type: 'test'
+  ...
+# Subtest: rejects files with a non-PDF extension
+ok 5 - rejects files with a non-PDF extension
+  ---
+  duration_ms: 0.2264
+  type: 'test'
+  ...
+# Subtest: rejects empty PDFs
+ok 6 - rejects empty PDFs
+  ---
+  duration_ms: 0.0956
+  type: 'test'
+  ...
+# Subtest: rejects PDFs over 5 MiB
+ok 7 - rejects PDFs over 5 MiB
+  ---
+  duration_ms: 0.1073
+  type: 'test'
+  ...
+# Subtest: accepts a valid PDF header
+ok 8 - accepts a valid PDF header
+  ---
+  duration_ms: 0.188
+  type: 'test'
+  ...
+# Subtest: rejects a renamed text file and a truncated header
+ok 9 - rejects a renamed text file and a truncated header
+  ---
+  duration_ms: 0.1163
+  type: 'test'
+  ...
+1..9
+# tests 9
+# suites 0
+# pass 9
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2053.519

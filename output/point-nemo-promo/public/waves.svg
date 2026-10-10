@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="300" viewBox="0 0 600 300" fill="none" shape-rendering="geometricPrecision">
+  <!-- Smooth, anti-aliased seamless ocean wave currents -->
+  <g stroke="white" stroke-linecap="round">
+    <!-- Primary crest wave -->
+    <path d="M0 50 C 75 25, 225 75, 300 50 C 375 25, 525 75, 600 50" stroke-width="2.5" opacity=".7"/>
+    <!-- Secondary undulating mid-depth current -->
+    <path d="M0 140 C 75 165, 225 115, 300 140 C 375 165, 525 115, 600 140" stroke-width="2.2" opacity=".5"/>
+    <!-- Deep floor drift wave -->
+    <path d="M0 230 C 75 210, 225 250, 300 230 C 375 210, 525 250, 600 230" stroke-width="1.8" opacity=".35"/>
+    <!-- Subtle harmonic surface flow -->
+    <path d="M0 95 C 100 115, 200 75, 300 95 C 400 115, 500 75, 600 95" stroke-width="1.5" opacity=".25"/>
+  </g>
+  <!-- Ambient oceanic particles and gentle floating bubbles -->
+  <g fill="white">
+    <circle cx="110" cy="80" r="2.5" opacity=".35"/>
+    <circle cx="260" cy="190" r="3" opacity=".4"/>
+    <circle cx="430" cy="110" r="2" opacity=".3"/>
+    <circle cx="540" cy="245" r="3.2" opacity=".4"/>
+    <circle cx="340" cy="65" r="2" opacity=".3"/>
+    <circle cx="170" cy="270" r="2.5" opacity=".25"/>
+    <circle cx="480" cy="160" r="2.2" opacity=".35"/>
+  </g>
+</svg>

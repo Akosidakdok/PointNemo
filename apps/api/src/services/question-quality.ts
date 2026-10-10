@@ -7,6 +7,14 @@ export interface RepairSlot { index: number; topicName: string; difficulty: "eas
 export interface RepairPlan { topics: AIQuestionSetOutput["topics"]; questions: unknown[]; slots: RepairSlot[]; excludedSlots?: number[] }
 export interface QuestionPlan { topics: AIQuestionSetOutput["topics"]; slots: Array<{index:number;topicName:string;difficulty:"easy"|"medium"|"hard";goal:string;evidenceId:string}> }
 const normalize = (text: string): string => text.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, "").replace(/\s+/g, " ").trim();
+const numericValues = (text: string): string => (text.match(/[+-]?\d+(?:[.,]\d+)*/g) ?? []).sort().join("|");
+const choiceIdentity = (text: string): string => `${normalize(text)}|${numericValues(text)}`;
+const isNegated = (text: string): boolean => /\b(?:not|never|no|cannot|without|neither|nor)\b|n't\b/i.test(text);
+function contrastiveChoices(left: string, right: string): boolean {
+  const leftValues = numericValues(left), rightValues = numericValues(right);
+  const differentValues = Boolean(leftValues && rightValues && leftValues.split("|").length === rightValues.split("|").length && leftValues !== rightValues);
+  return differentValues || isNegated(left) !== isNegated(right);
+}
 // Conservative wording equivalences for choices. This is a repair trigger,
 // not a general semantic comparison or a proof that a distractor is false.
 const choiceFingerprint = (text:string):string => normalize(text)
@@ -14,20 +22,20 @@ const choiceFingerprint = (text:string):string => normalize(text)
   .replace(/\bwhere to send\b/g,"where to deliver")
   .replace(/\b(?:selects|identifies) (?:a |the )?host interface\b/g,"identifies a host interface")
   .replace(/\b(?:selects|identifies) (?:a |the )?application endpoint\b/g,"identifies an application endpoint")
-  .replace(/\b(?:an?|the|only)\b/g," ").replace(/\s+/g," ").trim().split(" ").sort().join(" ");
+  .replace(/\b(?:an?|the|only)\b/g," ")
+  .replace(/\b[\p{L}]{5,}s\b/gu,(word)=>/(?:ss|us|is|ics)$/.test(word)?word:word.slice(0,-1))
+  .replace(/\s+/g," ").trim();
 const stopWords = new Set("what which how why the a an is are was were of to in for and does do according source following statement best describe describes".split(" "));
 function terms(text: string): Set<string> { return new Set(normalize(text).split(" ").filter((t) => t.length > 2 && !stopWords.has(t))); }
 function semanticallyOverlappingChoices(left: string, right: string): boolean {
+  // Different values and positive/negative claims are valid distractors even
+  // when the surrounding sentence is identical.
+  if (contrastiveChoices(left, right)) return false;
   const leftFingerprint = choiceFingerprint(left), rightFingerprint = choiceFingerprint(right);
   if (leftFingerprint && leftFingerprint === rightFingerprint) return true;
-  const leftTerms = terms(left), rightTerms = terms(right);
-  if (leftTerms.size < 2 || rightTerms.size < 2) return false;
-  const overlap = [...leftTerms].filter((term) => rightTerms.has(term)).length;
-  const smaller = Math.min(leftTerms.size, rightTerms.size);
-  const union = new Set([...leftTerms, ...rightTerms]).size;
-  // Flag answer choices that keep nearly all of the same meaning-bearing words
-  // while changing only their order or a small amount of wording.
-  return overlap >= 2 && overlap / smaller >= 0.8 && overlap / union >= 0.65;
+  // Word overlap and reordered subjects are not proof of equivalent meaning.
+  // "A heats B" and "B heats A" can be different answers.
+  return false;
 }
 function normalizedPhrase(text: string): string {
   return text.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim();
@@ -84,10 +92,15 @@ export function inspectQuestions(output: unknown, pagesJson: string): { issues: 
     if (!normalize(q.prompt) || !q.prompt.trim().endsWith("?")) add(index, "INVALID_MODEL_OUTPUT", "Write a complete question ending in a question mark; do not return a statement that reveals the answer.");
     if (/(?:^|\s)[A-D][).]\s/u.test(q.prompt)) add(index, "INVALID_MODEL_OUTPUT", "Keep answer choices out of the prompt; return them only in the answer fields.");
     if (q.options.some((option)=>/^[A-D][).]\s/u.test(option))) add(index, "INVALID_MODEL_OUTPUT", "Return answer text without A/B/C/D labels.");
-    if (new Set(q.options.map(normalize)).size !== 4) add(index, "INVALID_MODEL_OUTPUT", "All four answer options must be distinct.");
+    if (new Set(q.options.map(choiceIdentity)).size !== 4) add(index, "INVALID_MODEL_OUTPUT", "All four answer options must be distinct.");
     if (q.options.some((option, optionIndex) => q.options.slice(optionIndex + 1).some((other) => semanticallyOverlappingChoices(option, other)))) {
       add(index,"INVALID_MODEL_OUTPUT","[answer_choices] Two choices express the same idea with different wording. Replace the overlap with a different, mutually exclusive wrong answer.");
     }
+    if (q.options.some((option,optionIndex)=>q.options.slice(optionIndex+1).some((other)=> {
+      if (contrastiveChoices(option,other)) return false;
+      const left=` ${normalize(option)} `,right=` ${normalize(other)} `;
+      return left.includes(right) || right.includes(left);
+    }))) add(index,"INVALID_MODEL_OUTPUT","[answer_choices] One option contains another option. Use four separate answers, including distinct wrong choices.");
     for (const evidence of q.evidence) {
       const page = pages.find((p) => p.pageNumber === evidence.pageNumber && p.chunkId === evidence.chunkId);
       if (!page?.text.includes(evidence.quote)) add(index, "SOURCE_EVIDENCE_INVALID", "Choose an evidence ID from SOURCE; the quote must be an exact passage in its cited page.");
@@ -96,13 +109,14 @@ export function inspectQuestions(output: unknown, pagesJson: string): { issues: 
     const answerWords = ` ${normalize(answer)} `;
     if (q.options.some((option,optionIndex)=> {
       if (optionIndex===q.answerIndex) return false;
+      if (contrastiveChoices(answer, option)) return false;
       const optionWords = ` ${normalize(option)} `;
       return optionWords.includes(answerWords) || answerWords.includes(optionWords);
     })) add(index,"INVALID_MODEL_OUTPUT","[answer_choices] A distractor contains the correct answer or is contained in it. Use three different, mutually exclusive wrong answers; do not split a correct statement into several correct options.");
     const evidenceText = q.evidence.map((e) => e.quote).join(" ");
     const normalizedAnswer = normalizedPhrase(answer);
     if (!normalizedAnswer || normalizedAnswer.split(" ").length > 12 || normalizedAnswer.length > 100 ||
-        !q.evidence.some((e)=>normalizedPhrase(e.quote).includes(normalizedAnswer))) {
+        !q.evidence.some((e)=>(` ${normalizedPhrase(e.quote)} `).includes(` ${normalizedAnswer} `))) {
       add(index,"SOURCE_EVIDENCE_INVALID","Copy the correct answer as a short exact phrase from its cited passage; do not substitute an unsupported plan label or add outside facts.");
     }
     // A conservative lexical screen catches disconnected answers. It is not an
