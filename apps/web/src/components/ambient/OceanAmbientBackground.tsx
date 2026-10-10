@@ -23,6 +23,46 @@ interface Bubble {
   alpha: number;
 }
 
+interface MarineSnow {
+  x: number;
+  y: number;
+  radius: number;
+  speedY: number;
+  driftX: number;
+  phase: number;
+  alpha: number;
+}
+
+interface KelpStalk {
+  rootX: number;
+  height: number;
+  segments: number;
+  swayAmp: number;
+  phase: number;
+  speed: number;
+  color: string;
+}
+
+interface SunRay {
+  topXRatio: number;
+  topWidth: number;
+  bottomXRatio: number;
+  bottomWidth: number;
+  heightRatio: number;
+  phase: number;
+  speed: number;
+  maxAlpha: number;
+}
+
+interface SonarPing {
+  x: number;
+  y: number;
+  radius: number;
+  maxRadius: number;
+  alpha: number;
+  speed: number;
+}
+
 interface Swimmer {
   id: string;
   species: string;
@@ -59,13 +99,12 @@ export function OceanAmbientBackground({
     let animId = 0;
     let prev = performance.now();
     let isTabVisible = !document.hidden;
+    let worldTime = 0;
+    let sonarTimer = 0;
 
     // --- 1. SPRITE ANIMATIONS ---
-    // Explorer Diver (directional swimming animations)
     const diverRight = new SpriteAnimation(bundle, "explorer.swim.right");
     const diverLeft = new SpriteAnimation(bundle, "explorer.swim.left");
-
-    // All Native Deep-Sea Fish Species
     const barreleyeAnim = new SpriteAnimation(bundle, "barreleye.swim");
     const blobfishLeft = new SpriteAnimation(bundle, "blobfish.swim.left");
     const blobfishRight = new SpriteAnimation(bundle, "blobfish.swim.right");
@@ -73,13 +112,20 @@ export function OceanAmbientBackground({
     const goblinAnim = new SpriteAnimation(bundle, "goblin.swim");
     const fringeheadAnim = new SpriteAnimation(bundle, "fringehead.swim");
 
-    // Canvas dimensions sync
+    // Navigation Buoy scale
+    let buoyScale = 0.2;
+    try {
+      buoyScale = speciesScale(bundle, "buoy", 84);
+    } catch {
+      buoyScale = 0.2;
+    }
+
+    // Handle viewport resize
     const handleResize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      rebuildKelp();
     };
-    handleResize();
-    window.addEventListener("resize", handleResize);
 
     const handleVisibilityChange = () => {
       isTabVisible = !document.hidden;
@@ -87,12 +133,15 @@ export function OceanAmbientBackground({
         prev = performance.now();
       }
     };
+    window.addEventListener("resize", handleResize);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
 
-    // --- 2. SWIMMING CREATURES ECOSYSTEM ---
+    // --- 2. SWIMMING CREATURES ---
     const swimmers: Swimmer[] = [
       // Explorer Diver (Epipelagic / Upper Layer)
       {
@@ -112,7 +161,7 @@ export function OceanAmbientBackground({
         opacityLight: 0.82,
         opacityDark: 0.88,
         edgeMargin: 80,
-        baseFacesLeft: false, // discrete left/right animations
+        baseFacesLeft: false,
       },
       // Barreleye Fish (Mesopelagic / Twilight Layer)
       {
@@ -192,7 +241,7 @@ export function OceanAmbientBackground({
         opacityLight: 0.64,
         opacityDark: 0.76,
         edgeMargin: 85,
-        baseFacesLeft: false, // discrete left/right animations
+        baseFacesLeft: false,
       },
       // Sarcastic Fringehead (Seabed / Hadal Layer)
       {
@@ -216,7 +265,90 @@ export function OceanAmbientBackground({
       },
     ];
 
-    // --- 3. AMBIENT BUBBLES ---
+    // --- 3. SURFACE NAVIGATION BUOY ---
+    const buoy = {
+      xRatio: 0.82,
+      baseYRatio: 0.11,
+      bobAmp: 5,
+      bobSpeed: 1.4,
+      tiltAmp: 0.04,
+      beaconPhase: 0,
+    };
+
+    // --- 4. VOLUMETRIC SUNBEAM SHAFTS ---
+    const sunRays: SunRay[] = [
+      {
+        topXRatio: 0.08,
+        topWidth: 70,
+        bottomXRatio: 0.22,
+        bottomWidth: 160,
+        heightRatio: 0.65,
+        phase: 0.3,
+        speed: 0.25,
+        maxAlpha: 0.045,
+      },
+      {
+        topXRatio: 0.32,
+        topWidth: 90,
+        bottomXRatio: 0.48,
+        bottomWidth: 200,
+        heightRatio: 0.70,
+        phase: 1.7,
+        speed: 0.22,
+        maxAlpha: 0.055,
+      },
+      {
+        topXRatio: 0.62,
+        topWidth: 80,
+        bottomXRatio: 0.78,
+        bottomWidth: 180,
+        heightRatio: 0.62,
+        phase: 3.1,
+        speed: 0.28,
+        maxAlpha: 0.04,
+      },
+    ];
+
+    // --- 5. SWAYING SEABED KELP FOREST ---
+    let kelpStalks: KelpStalk[] = [];
+    const rebuildKelp = () => {
+      const curW = window.innerWidth;
+      const curH = window.innerHeight;
+      const stalkCount = curW < 640 ? 6 : 12;
+      kelpStalks = Array.from({ length: stalkCount }, (_, i) => {
+        const spreadRatio = (i + 0.5) / stalkCount;
+        const xVariance = (Math.random() - 0.5) * (curW / stalkCount) * 0.7;
+        const kelpHeight = curH * (0.16 + Math.random() * 0.14);
+        const greenHue = 165 + Math.floor(Math.random() * 25);
+        return {
+          rootX: curW * spreadRatio + xVariance,
+          height: kelpHeight,
+          segments: 4,
+          swayAmp: 16 + Math.random() * 14,
+          phase: i * 0.7 + Math.random(),
+          speed: 0.9 + Math.random() * 0.5,
+          color:
+            theme === "light"
+              ? `rgba(20, ${greenHue}, 120, 0.38)`
+              : `rgba(16, ${greenHue - 15}, 95, 0.32)`,
+        };
+      });
+    };
+    rebuildKelp();
+
+    // --- 6. MARINE SNOW & PLANKTON DRIFT ---
+    const SNOW_COUNT = 32;
+    const marineSnow: MarineSnow[] = Array.from({ length: SNOW_COUNT }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      radius: 0.8 + Math.random() * 1.4,
+      speedY: 10 + Math.random() * 18,
+      driftX: (Math.random() - 0.5) * 16,
+      phase: Math.random() * Math.PI * 2,
+      alpha: 0.16 + Math.random() * 0.24,
+    }));
+
+    // --- 7. AMBIENT BUBBLE PARTICLES ---
     const BUBBLE_COUNT = 24;
     const bubbles: Bubble[] = Array.from({ length: BUBBLE_COUNT }, () => ({
       x: Math.random() * window.innerWidth,
@@ -229,9 +361,14 @@ export function OceanAmbientBackground({
       alpha: 0.18 + Math.random() * 0.26,
     }));
 
+    // --- 8. ACOUSTIC SONAR PINGS ---
+    const sonarPings: SonarPing[] = [];
+
+    // --- MAIN RENDER LOOP ---
     const render = (time: number) => {
       const dt = Math.max(0, Math.min((time - prev) / 1000, 0.1));
       prev = time;
+      worldTime += dt;
 
       if (!isTabVisible) {
         animId = requestAnimationFrame(render);
@@ -240,12 +377,167 @@ export function OceanAmbientBackground({
 
       const curWidth = canvas.width;
       const curHeight = canvas.height;
+      const isLight = theme === "light";
 
       ctx.clearRect(0, 0, curWidth, curHeight);
 
-      // --- A. RISING BUBBLE PARTICLES ---
+      // --- LAYER 1: VOLUMETRIC SUNLIGHT CAUSTIC SHAFTS ---
+      if (!reducedMotion) {
+        ctx.save();
+        for (const ray of sunRays) {
+          const sway = Math.sin(worldTime * ray.speed + ray.phase) * 24;
+          const x1 = curWidth * ray.topXRatio;
+          const x2 = x1 + ray.topWidth;
+          const x3 = curWidth * ray.bottomXRatio + sway + ray.bottomWidth;
+          const x4 = curWidth * ray.bottomXRatio + sway;
+          const yBottom = curHeight * ray.heightRatio;
+
+          const grad = ctx.createLinearGradient(0, 0, 0, yBottom);
+          const baseAlpha = isLight ? ray.maxAlpha * 1.3 : ray.maxAlpha;
+          grad.addColorStop(
+            0,
+            isLight
+              ? `rgba(255, 255, 255, ${baseAlpha * 1.6})`
+              : `rgba(48, 214, 242, ${baseAlpha * 1.2})`
+          );
+          grad.addColorStop(
+            0.6,
+            isLight
+              ? `rgba(185, 230, 255, ${baseAlpha * 0.8})`
+              : `rgba(32, 160, 210, ${baseAlpha * 0.6})`
+          );
+          grad.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.moveTo(x1, 0);
+          ctx.lineTo(x2, 0);
+          ctx.lineTo(x3, yBottom);
+          ctx.lineTo(x4, yBottom);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // --- LAYER 2: SWAYING SEABED KELP FOREST ---
       ctx.save();
-      const isLight = theme === "light";
+      for (const stalk of kelpStalks) {
+        ctx.strokeStyle = stalk.color;
+        ctx.fillStyle = stalk.color;
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = "round";
+
+        const rootY = curHeight;
+        const segH = stalk.height / stalk.segments;
+        let curX = stalk.rootX;
+        let curY = rootY;
+
+        ctx.beginPath();
+        ctx.moveTo(curX, curY);
+
+        const nodes: { x: number; y: number }[] = [{ x: curX, y: curY }];
+
+        for (let s = 1; s <= stalk.segments; s++) {
+          const sway = reducedMotion
+            ? 0
+            : Math.sin(worldTime * stalk.speed + stalk.phase + s * 0.45) *
+              (stalk.swayAmp * (s / stalk.segments));
+          const nextX = stalk.rootX + sway;
+          const nextY = rootY - s * segH;
+          const midX = (curX + nextX) / 2;
+          const midY = (curY + nextY) / 2;
+          ctx.quadraticCurveTo(curX, curY, midX, midY);
+          curX = nextX;
+          curY = nextY;
+          nodes.push({ x: nextX, y: nextY });
+        }
+        ctx.lineTo(curX, curY);
+        ctx.stroke();
+
+        // Draw small kelp fronds along nodes
+        for (let i = 1; i < nodes.length; i++) {
+          const pt = nodes[i];
+          const dir = i % 2 === 0 ? 1 : -1;
+          const leafSway = reducedMotion
+            ? 0
+            : Math.sin(worldTime * stalk.speed + stalk.phase + i) * 6;
+          ctx.beginPath();
+          ctx.ellipse(
+            pt.x + dir * 12,
+            pt.y + leafSway * 0.4,
+            12,
+            4.5,
+            dir * 0.35,
+            0,
+            Math.PI * 2
+          );
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+
+      // --- LAYER 3: MARINE SNOW DRIFT ---
+      ctx.save();
+      for (const snow of marineSnow) {
+        if (!reducedMotion) {
+          snow.y += snow.speedY * dt;
+          snow.phase += dt * 0.8;
+          snow.x += Math.sin(snow.phase) * snow.driftX * dt;
+
+          if (snow.y > curHeight + 10) {
+            snow.y = -10;
+            snow.x = Math.random() * curWidth;
+          }
+        }
+
+        ctx.beginPath();
+        ctx.arc(snow.x, snow.y, snow.radius, 0, Math.PI * 2);
+        ctx.fillStyle = isLight
+          ? `rgba(50, 120, 175, ${snow.alpha * 0.6})`
+          : `rgba(205, 245, 255, ${snow.alpha})`;
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // --- LAYER 4: ACOUSTIC TELEMETRY SONAR PINGS ---
+      sonarTimer += dt;
+      if (sonarTimer > 12) {
+        sonarTimer = 0;
+        sonarPings.push({
+          x: curWidth * 0.32,
+          y: curHeight * 0.58,
+          radius: 12,
+          maxRadius: 260,
+          alpha: 0.28,
+          speed: 38,
+        });
+      }
+
+      ctx.save();
+      for (let i = sonarPings.length - 1; i >= 0; i--) {
+        const p = sonarPings[i];
+        if (!reducedMotion) {
+          p.radius += p.speed * dt;
+          p.alpha *= Math.pow(0.94, dt * 60);
+        }
+        if (p.radius >= p.maxRadius || p.alpha < 0.01) {
+          sonarPings.splice(i, 1);
+          continue;
+        }
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = isLight
+          ? `rgba(32, 120, 180, ${p.alpha * 0.65})`
+          : `rgba(48, 214, 242, ${p.alpha})`;
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // --- LAYER 5: AMBIENT RISING BUBBLES ---
+      ctx.save();
       for (const b of bubbles) {
         if (!reducedMotion) {
           b.y -= b.speed * dt;
@@ -258,7 +550,6 @@ export function OceanAmbientBackground({
           }
         }
 
-        // Draw translucent circular bubble with soft specular highlight
         ctx.beginPath();
         ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
         ctx.fillStyle = isLight
@@ -272,7 +563,6 @@ export function OceanAmbientBackground({
         ctx.lineWidth = 1;
         ctx.stroke();
 
-        // Specular shine dot on top-left of bubble
         ctx.beginPath();
         ctx.arc(
           b.x - b.radius * 0.35,
@@ -286,7 +576,45 @@ export function OceanAmbientBackground({
       }
       ctx.restore();
 
-      // --- B. UPDATE ANIMATIONS & POSITIONS ---
+      // --- LAYER 6: SURFACE NAVIGATION BUOY WITH RED WARNING BEACON ---
+      const buoyX = curWidth * buoy.xRatio;
+      const buoyY =
+        curHeight * buoy.baseYRatio +
+        (reducedMotion ? 0 : Math.sin(worldTime * buoy.bobSpeed) * buoy.bobAmp);
+      const buoyTilt = reducedMotion
+        ? 0
+        : Math.sin(worldTime * buoy.bobSpeed * 0.7) * buoy.tiltAmp;
+
+      ctx.save();
+      ctx.translate(Math.round(buoyX), Math.round(buoyY));
+      ctx.rotate(buoyTilt);
+
+      // Blinking Red Beacon Core & Halo at mast tip
+      if (!reducedMotion) {
+        buoy.beaconPhase = (buoy.beaconPhase + dt * 2.4) % (Math.PI * 2);
+        const pulseR = 14 + Math.sin(buoy.beaconPhase) * 6;
+        const pulseA = 0.3 + Math.sin(buoy.beaconPhase) * 0.2;
+
+        ctx.beginPath();
+        ctx.arc(0, -32, pulseR, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 72, 83, ${pulseA})`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(0, -32, 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = "#ff4853";
+        ctx.shadowColor = "#ff4853";
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      ctx.globalAlpha = isLight ? 0.78 : 0.86;
+      drawFrame(ctx, bundle, "buoy", 0, 0, buoyScale);
+      ctx.restore();
+
+      // --- LAYER 7: SWIMMING MARINE LIFE & EXPLORER DIVER ---
       if (!reducedMotion) {
         diverRight.update(dt);
         diverLeft.update(dt);
@@ -303,7 +631,7 @@ export function OceanAmbientBackground({
           s.bobPhase += dt * s.bobSpeed;
           s.y = curHeight * s.baseYRatio + Math.sin(s.bobPhase) * s.bobAmp;
 
-          // Turnaround when swimming past screen edge
+          // Turnaround check at screen borders
           if (s.facing === "right" && s.x > curWidth + s.edgeMargin) {
             s.facing = "left";
             s.baseYRatio =
@@ -316,7 +644,6 @@ export function OceanAmbientBackground({
         }
       }
 
-      // --- C. DRAW ALL SWIMMERS ---
       ctx.imageSmoothingEnabled = false;
 
       for (const s of swimmers) {
@@ -333,16 +660,16 @@ export function OceanAmbientBackground({
               : blobfishLeft.frameName;
         } else if (s.species === "barreleye") {
           frameName = barreleyeAnim.frameName;
-          shouldFlip = s.facing === "right"; // base faces left
+          shouldFlip = s.facing === "right";
         } else if (s.species === "gulper") {
           frameName = gulperAnim.frameName;
-          shouldFlip = s.facing === "right"; // base faces left
+          shouldFlip = s.facing === "right";
         } else if (s.species === "goblin") {
           frameName = goblinAnim.frameName;
-          shouldFlip = s.facing === "right"; // base faces left
+          shouldFlip = s.facing === "right";
         } else if (s.species === "fringehead") {
           frameName = fringeheadAnim.frameName;
-          shouldFlip = s.facing === "right"; // base faces left
+          shouldFlip = s.facing === "right";
         }
 
         if (!frameName) continue;
