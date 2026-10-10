@@ -208,14 +208,14 @@ export function OceanAmbientBackground({
         id: "goblin",
         species: "goblin",
         x: width * 0.72,
-        y: height * 0.64,
-        baseYRatio: 0.64,
+        y: height * 0.55,
+        baseYRatio: 0.55,
         minYRatio: 0.48,
-        maxYRatio: 0.76,
+        maxYRatio: 0.62,
         speed: 42,
         facing: "left",
         bobPhase: Math.PI * 1.2,
-        bobAmp: 9,
+        bobAmp: 8,
         bobSpeed: 1.5,
         scale: speciesScale(bundle, "goblin", 74),
         opacityLight: 0.62,
@@ -223,19 +223,19 @@ export function OceanAmbientBackground({
         edgeMargin: 100,
         baseFacesLeft: true,
       },
-      // Blobfish (Benthic / Lower Layer)
+      // Blobfish (Benthic Layer)
       {
         id: "blobfish",
         species: "blobfish",
         x: width * 0.22,
-        y: height * 0.75,
-        baseYRatio: 0.75,
-        minYRatio: 0.62,
-        maxYRatio: 0.86,
+        y: height * 0.67,
+        baseYRatio: 0.67,
+        minYRatio: 0.60,
+        maxYRatio: 0.72,
         speed: 20,
         facing: "right",
         bobPhase: Math.PI * 1.6,
-        bobAmp: 20,
+        bobAmp: 14,
         bobSpeed: 0.9,
         scale: speciesScale(bundle, "blobfish", 58),
         opacityLight: 0.64,
@@ -243,23 +243,23 @@ export function OceanAmbientBackground({
         edgeMargin: 85,
         baseFacesLeft: false,
       },
-      // Sarcastic Fringehead (Seabed / Hadal Layer)
+      // Sarcastic Fringehead (Lower Benthic Layer - Elevated to prevent bottom overlap and clipping)
       {
         id: "fringehead",
         species: "fringehead",
         x: width * 0.60,
-        y: height * 0.87,
-        baseYRatio: 0.87,
-        minYRatio: 0.74,
-        maxYRatio: 0.94,
+        y: height * 0.78,
+        baseYRatio: 0.78,
+        minYRatio: 0.72,
+        maxYRatio: 0.82,
         speed: 28,
         facing: "left",
         bobPhase: Math.PI * 0.2,
-        bobAmp: 12,
-        bobSpeed: 2.0,
+        bobAmp: 8,
+        bobSpeed: 1.8,
         scale: speciesScale(bundle, "fringehead", 62),
-        opacityLight: 0.58,
-        opacityDark: 0.70,
+        opacityLight: 0.62,
+        opacityDark: 0.74,
         edgeMargin: 90,
         baseFacesLeft: true,
       },
@@ -318,7 +318,7 @@ export function OceanAmbientBackground({
       kelpStalks = Array.from({ length: stalkCount }, (_, i) => {
         const spreadRatio = (i + 0.5) / stalkCount;
         const xVariance = (Math.random() - 0.5) * (curW / stalkCount) * 0.7;
-        const kelpHeight = curH * (0.16 + Math.random() * 0.14);
+        const kelpHeight = curH * (0.09 + Math.random() * 0.07);
         const greenHue = 165 + Math.floor(Math.random() * 25);
         return {
           rootX: curW * spreadRatio + xVariance,
@@ -629,7 +629,10 @@ export function OceanAmbientBackground({
           const dir = s.facing === "right" ? 1 : -1;
           s.x += s.speed * dir * dt;
           s.bobPhase += dt * s.bobSpeed;
-          s.y = curHeight * s.baseYRatio + Math.sin(s.bobPhase) * s.bobAmp;
+          const rawY = curHeight * s.baseYRatio + Math.sin(s.bobPhase) * s.bobAmp;
+          const topMargin = 50;
+          const bottomMargin = 45;
+          s.y = Math.max(topMargin, Math.min(curHeight - bottomMargin, rawY));
 
           // Turnaround check at screen borders
           if (s.facing === "right" && s.x > curWidth + s.edgeMargin) {
