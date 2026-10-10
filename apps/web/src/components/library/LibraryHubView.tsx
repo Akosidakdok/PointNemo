@@ -148,27 +148,15 @@ export function LibraryHubView({
               </button>
               <span>Introduction to Marine Biology</span>
             </div>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <button
-                className="text-button"
-                type="button"
-                onClick={() =>
-                  onSelectLesson ? onSelectLesson("marine-biology", "resume") : onGoToSeas()
-                }
-              >
-                Resume
-              </button>
-              <button
-                className="text-button retake-btn"
-                type="button"
-                onClick={() =>
-                  onSelectLesson ? onSelectLesson("marine-biology", "new") : onGoToSeas()
-                }
-                title="Retake from the beginning"
-              >
-                Retake ↺
-              </button>
-            </div>
+            <button
+              className="text-button"
+              type="button"
+              onClick={() =>
+                onSelectLesson ? onSelectLesson("marine-biology", "resume") : onGoToSeas()
+              }
+            >
+              Resume
+            </button>
           </article>
 
           <button
