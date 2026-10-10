@@ -118,13 +118,17 @@ export function GameplayModule({
     [onNavigateScreen]
   );
 
+  const instancesRef = useRef(instances);
+  instancesRef.current = instances;
+
   const handleSelectLesson = useCallback(
     (lessonId: string, action: "resume" | "new" = "resume") => {
       const lesson = allLessons.find((entry) => entry.id === lessonId);
       if (!lesson || (lesson.isCustom && lessonParts(lesson).some((questions) => questions.length !== 3)))
         return;
       let id = activeInstanceByLesson.get(lessonId);
-      if (action === "new" || !id || !instances.has(id)) {
+      const currentInstances = instancesRef.current;
+      if (action === "new" || !id || !currentInstances.has(id)) {
         id = "PN-" + crypto.randomUUID().slice(0, 8);
         setInstances((previous) => new Map(previous).set(id!, makeInstance(id!, lesson)));
         setActiveInstanceByLesson((previous) => new Map(previous).set(lessonId, id!));
@@ -132,7 +136,7 @@ export function GameplayModule({
       setActiveLessonId(lessonId);
       setActiveInstanceId(id!);
       onUpdateActiveInstanceId?.(id!, lesson.title);
-      const instance = instances.get(id!);
+      const instance = currentInstances.get(id!);
       navigate(
         instance?.state && instance.state !== "active"
           ? "results"
@@ -141,18 +145,21 @@ export function GameplayModule({
           : "descent"
       );
     },
-    [activeInstanceByLesson, allLessons, instances, navigate, onUpdateActiveInstanceId]
+    [activeInstanceByLesson, allLessons, navigate, onUpdateActiveInstanceId]
   );
 
   // Synchronize when parent requests specific lesson selection or retake
   const lastHandledNavKey = useRef<string | null>(null);
   useEffect(() => {
+    if (!enabled || !initialLessonId) return;
     const key = `${initialLessonId}:${initialAction}:${navKey}`;
-    if (initialLessonId && key !== lastHandledNavKey.current) {
+    if (key !== lastHandledNavKey.current) {
       lastHandledNavKey.current = key;
-      handleSelectLesson(initialLessonId, initialAction || "resume");
+      if (initialSubscreen === "descent") {
+        handleSelectLesson(initialLessonId, initialAction || "resume");
+      }
     }
-  }, [initialLessonId, initialAction, navKey, handleSelectLesson]);
+  }, [enabled, initialSubscreen, initialLessonId, initialAction, navKey, handleSelectLesson]);
 
   const handleUpdatePlayer = useCallback(
     (x: number, y: number, facing: "up" | "down" | "left" | "right") => {

@@ -107,15 +107,18 @@ export function DescentMapView({
   const stepDirection = (direction: "up" | "down" | "left" | "right") => {
     if (instance.activeEncounter || pendingNode !== null) return;
     stepMovingUntilRef.current = performance.now() + 450;
-    const impulse = 0.38;
-    if (direction === "left") velRef.current.vx = -impulse;
-    else if (direction === "right") velRef.current.vx = impulse;
-    else if (direction === "up") velRef.current.vy = -impulse;
-    else if (direction === "down") velRef.current.vy = impulse;
-    playerPosRef.current.facing = direction;
+    const player = playerPosRef.current;
+    const step = 0.055;
+    if (direction === "left") player.x = Math.max(0.05, player.x - step);
+    else if (direction === "right") player.x = Math.min(0.95, player.x + step);
+    else if (direction === "up") player.y = Math.max(0.05, player.y - step);
+    else if (direction === "down") player.y = Math.min(0.95, player.y + step);
+    player.facing = direction;
+    velRef.current.vx = direction === "left" ? -0.38 : direction === "right" ? 0.38 : 0;
+    velRef.current.vy = direction === "up" ? -0.38 : direction === "down" ? 0.38 : 0;
     const target = BASE_ROUTE_POINTS[instance.routeNode];
     if (target) {
-      const distance = Math.hypot(playerPosRef.current.x - target.x, playerPosRef.current.y - target.y);
+      const distance = Math.hypot(player.x - target.x, player.y - target.y);
       if (distance < 0.075 && ignoredNode !== instance.routeNode) {
         heldKeysRef.current.clear();
         velRef.current = { vx: 0, vy: 0 };
@@ -199,17 +202,17 @@ export function DescentMapView({
       let targetVx = 0;
       let targetVy = 0;
       if (isKeyMoving) {
-        targetVx = (dx / length) * 0.48;
-        targetVy = (dy / length) * 0.48;
+        targetVx = (dx / length) * 0.52;
+        targetVy = (dy / length) * 0.52;
       }
 
-      // Acceleration when actively steering, exponential water drag when drifting
+      // Snappy agile acceleration and smooth hydrodynamic glide damping
       if (isKeyMoving) {
-        const accel = 14 * dt;
+        const accel = 24 * dt;
         velRef.current.vx += (targetVx - velRef.current.vx) * Math.min(1, accel);
         velRef.current.vy += (targetVy - velRef.current.vy) * Math.min(1, accel);
       } else {
-        const drag = Math.pow(0.85, dt * 60);
+        const drag = Math.pow(0.82, dt * 60);
         velRef.current.vx *= drag;
         velRef.current.vy *= drag;
         if (Math.hypot(velRef.current.vx, velRef.current.vy) < 0.005) {

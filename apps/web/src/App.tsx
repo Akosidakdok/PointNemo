@@ -127,6 +127,7 @@ export function App() {
 
   const handleAuthSuccess = useCallback((user: AuthenticatedUser) => {
     setCurrentUser(user);
+    setCurrentScreen("library");
     if (user.remembered) {
       try {
         localStorage.setItem("point_nemo_explorer", JSON.stringify(user));
@@ -140,6 +141,7 @@ export function App() {
       email: "guest@pointnemo.local",
       remembered: false,
     });
+    setCurrentScreen("library");
   }, []);
 
   const handleLogout = useCallback(() => {
@@ -442,9 +444,9 @@ export function App() {
           )}
 
           {/* Module 3: Gameplay Module (Choose Sea, WASD Map, Combat, Boss, Results) */}
-          {(
+          {["seas", "descent", "boss", "results"].includes(currentScreen) && (
             <GameplayModule
-              enabled={["seas","descent","boss","results"].includes(currentScreen)}
+              enabled={true}
               bundle={bundle}
               customLessons={customLessonRecords}
               navKey={navKey}
