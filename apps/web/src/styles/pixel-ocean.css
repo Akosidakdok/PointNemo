@@ -2,7 +2,7 @@
    Scope tokens and controls to the post-login shell to preserve the entry UI. */
 @font-face {
   font-family: "Nemo Pixel";
-  src: url("../../public/fonts/PixelifySans-Variable.ttf") format("truetype");
+  src: url("/fonts/PixelifySans-Variable.ttf") format("truetype");
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
@@ -76,35 +76,17 @@
   }
 }
 
-/* Integer-sized rectilinear tiles: animated wave drift across repeating grid. */
+/* Ambient background breathes smoothly with OceanAmbientBackground canvas */
 .playground-shell::before {
-  opacity: .32;
-  background: var(--ocean-current);
-  -webkit-mask-image: var(--pixel-waves);
-  mask-image: var(--pixel-waves);
-  -webkit-mask-size: 384px 192px;
-  mask-size: 384px 192px;
-  -webkit-mask-repeat: repeat;
-  mask-repeat: repeat;
-  animation: oceanWaveDrift 24s linear infinite;
-  transition: background-color .2s ease;
+  opacity: .28;
+  transition: opacity .42s ease, background .42s ease;
 }
 
 .playground-shell::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: .22;
-  background: var(--ocean-speck);
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cpath fill='white' d='M20 28h4v4h-4zM68 76h4v4h-4z'/%3E%3C/svg%3E") repeat 0 0 / 96px 96px;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cpath fill='white' d='M20 28h4v4h-4zM68 76h4v4h-4z'/%3E%3C/svg%3E") repeat 0 0 / 96px 96px;
-  animation: oceanSpeckDrift 32s linear infinite;
+  display: none;
 }
 
-.playground-shell[data-reduced-motion="true"]::before,
-.playground-shell[data-reduced-motion="true"]::after {
+.playground-shell[data-reduced-motion="true"]::before {
   animation: none !important;
 }
 

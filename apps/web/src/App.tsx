@@ -26,6 +26,7 @@ import { LibraryHubView } from "./components/library/LibraryHubView";
 import { DocumentIntakeModule } from "./components/intake/DocumentIntakeModule";
 import { GameplayModule } from "./components/gameplay/GameplayModule";
 import { ProfileView } from "./components/profile/ProfileView";
+import { OceanAmbientBackground } from "./components/ambient/OceanAmbientBackground";
 
 const initialStatus: AppStatus = {
   api: { available: false, message: "Checking local API…" },
@@ -62,15 +63,28 @@ export function App() {
     [activeInstanceId]
   );
 
+  // Selected Lesson State from Library Hub
+  const [selectedLessonId, setSelectedLessonId] = useState<string>("marine-biology");
+  const [selectedLessonAction, setSelectedLessonAction] = useState<"resume" | "new">("resume");
+
+  const handleSelectLessonFromLibrary = useCallback(
+    (lessonId: string, action: "resume" | "new") => {
+      setSelectedLessonId(lessonId);
+      setSelectedLessonAction(action);
+      handleNavigate("descent");
+    },
+    [handleNavigate]
+  );
+
   // Theme State (Default to Light Mode)
   const [theme, setTheme] = useState<"dark" | "light">(() => {
-    const saved = localStorage.getItem("point-nemo-theme");
-    return (saved === "dark" || saved === "light") ? saved : "light";
+    const saved = localStorage.getItem("point-nemo-theme-v2");
+    return saved === "dark" ? "dark" : "light";
   });
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    localStorage.setItem("point-nemo-theme", theme);
+    localStorage.setItem("point-nemo-theme-v2", theme);
   }, [theme]);
 
   // App & Run Data from SQLite
@@ -356,6 +370,13 @@ export function App() {
       role="application"
       aria-label="Point Nemo Educational Descent"
     >
+      {/* Full-Screen Ambient Ocean (Diver, Marine Life & Floating Bubbles Swimming Across Whole Background) */}
+      <OceanAmbientBackground
+        bundle={bundle}
+        reducedMotion={reducedMotion}
+        theme={theme}
+      />
+
       <div className="app-frame">
         {/* Top Header Navigation */}
         <AppHeader
@@ -383,6 +404,7 @@ export function App() {
               activeLessonTitle={activeLessonTitle}
               onOpenUpload={() => handleNavigate("upload")}
               onGoToSeas={() => handleNavigate("seas")}
+              onSelectLesson={handleSelectLessonFromLibrary}
               bundle={bundle}
               reducedMotion={reducedMotion}
             />
@@ -417,6 +439,8 @@ export function App() {
               bundle={bundle}
               customLessons={customLessonRecords}
               navKey={navKey}
+              initialLessonId={selectedLessonId}
+              initialAction={selectedLessonAction}
               initialSubscreen={
                 currentScreen === "seas"
                   ? "seas"
