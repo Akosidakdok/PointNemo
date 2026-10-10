@@ -108,14 +108,14 @@ export function DescentMapView({
     if (instance.activeEncounter || pendingNode !== null) return;
     stepMovingUntilRef.current = performance.now() + 450;
     const player = playerPosRef.current;
-    const step = 0.055;
+    const step = 0.085;
     if (direction === "left") player.x = Math.max(0.05, player.x - step);
     else if (direction === "right") player.x = Math.min(0.95, player.x + step);
     else if (direction === "up") player.y = Math.max(0.05, player.y - step);
     else if (direction === "down") player.y = Math.min(0.95, player.y + step);
     player.facing = direction;
-    velRef.current.vx = direction === "left" ? -0.38 : direction === "right" ? 0.38 : 0;
-    velRef.current.vy = direction === "up" ? -0.38 : direction === "down" ? 0.38 : 0;
+    velRef.current.vx = direction === "left" ? -0.55 : direction === "right" ? 0.55 : 0;
+    velRef.current.vy = direction === "up" ? -0.55 : direction === "down" ? 0.55 : 0;
     const target = BASE_ROUTE_POINTS[instance.routeNode];
     if (target) {
       const distance = Math.hypot(player.x - target.x, player.y - target.y);
@@ -199,20 +199,12 @@ export function DescentMapView({
       const isKeyMoving = length > 0 && !instance.activeEncounter && pendingNode === null;
       const now = performance.now();
 
-      let targetVx = 0;
-      let targetVy = 0;
+      const speedLimit = 0.88;
       if (isKeyMoving) {
-        targetVx = (dx / length) * 0.52;
-        targetVy = (dy / length) * 0.52;
-      }
-
-      // Snappy agile acceleration and smooth hydrodynamic glide damping
-      if (isKeyMoving) {
-        const accel = 24 * dt;
-        velRef.current.vx += (targetVx - velRef.current.vx) * Math.min(1, accel);
-        velRef.current.vy += (targetVy - velRef.current.vy) * Math.min(1, accel);
+        velRef.current.vx = (dx / length) * speedLimit;
+        velRef.current.vy = (dy / length) * speedLimit;
       } else {
-        const drag = Math.pow(0.82, dt * 60);
+        const drag = Math.pow(0.72, dt * 60);
         velRef.current.vx *= drag;
         velRef.current.vy *= drag;
         if (Math.hypot(velRef.current.vx, velRef.current.vy) < 0.005) {
@@ -439,14 +431,14 @@ export function DescentMapView({
 
       // Advance synchronized swimming stroke cycle across all directions
       if (!reducedMotion) {
-        const strokeDt = isMoving ? dt * 1.35 : dt * 0.45;
+        const strokeDt = isMoving ? dt * 1.55 : dt * 0.45;
         diverAnims.up.update(strokeDt);
         diverAnims.down.update(strokeDt);
         diverAnims.left.update(strokeDt);
         diverAnims.right.update(strokeDt);
       }
 
-      // 5. Draw Player Diver with hydrodynamic pitch tilt & synchronized strokes
+      // 5. Draw Player Diver with crisp, axis-aligned pixel-art rendering
       const activeDiverAnim = diverAnims[playerPosRef.current.facing];
       const pScale = speciesScale(bundle, "explorer", 64) * (width / 600);
       const idleBob = !reducedMotion && !isMoving ? Math.sin(elapsed * 2.8) * (3.5 * s) : 0;
@@ -494,25 +486,8 @@ export function DescentMapView({
       ctx.fill();
       ctx.restore();
 
-      // Hydrodynamic swimming pitch tilt
-      let swimTilt = 0;
-      if (!reducedMotion) {
-        if (playerPosRef.current.facing === "right") {
-          swimTilt = velRef.current.vy * 0.28 + Math.sin(activeDiverAnim.elapsed * 4.2) * 0.04;
-        } else if (playerPosRef.current.facing === "left") {
-          swimTilt = -velRef.current.vy * 0.28 - Math.sin(activeDiverAnim.elapsed * 4.2) * 0.04;
-        } else if (playerPosRef.current.facing === "up" || playerPosRef.current.facing === "down") {
-          swimTilt = velRef.current.vx * 0.22;
-        }
-      }
-
-      ctx.save();
-      ctx.translate(px, py);
-      if (swimTilt !== 0) {
-        ctx.rotate(swimTilt);
-      }
-      activeDiverAnim.draw(ctx, 0, 0, pScale);
-      ctx.restore();
+      // Draw diver sprite axis-aligned to preserve nearest-neighbor pixel integrity
+      activeDiverAnim.draw(ctx, px, py, pScale);
 
       animId = requestAnimationFrame(render);
     };
