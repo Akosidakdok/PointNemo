@@ -124,15 +124,20 @@ export function DescentMapView({
   const stepDirection=(direction:"up"|"down"|"left"|"right")=>{
     if(instance.activeEncounter || pendingNode!==null || document.hidden || document.querySelector('[role="dialog"][aria-modal="true"]'))return;
     const player=playerPosRef.current;
-    player.x=Math.max(0.05,Math.min(0.95,player.x+(direction==="left"?-0.03:direction==="right"?0.03:0)));
-    player.y=Math.max(0.05,Math.min(0.95,player.y+(direction==="up"?-0.03:direction==="down"?0.03:0)));
+    player.x=Math.max(0.05,Math.min(0.95,player.x+(direction==="left"?-0.055:direction==="right"?0.055:0)));
+    player.y=Math.max(0.05,Math.min(0.95,player.y+(direction==="up"?-0.055:direction==="down"?0.055:0)));
     player.facing=direction;
     onUpdatePlayer(player.x,player.y,direction);
     const target=BASE_ROUTE_POINTS[instance.routeNode];
-    if(target) {
-      const distance=Math.hypot(player.x-target.x,player.y-target.y);
-      if(distance<0.07 && ignoredNode!==instance.routeNode){heldKeysRef.current.clear();virtualKeysRef.current.clear();setPendingNode(instance.routeNode);}
-      else if(distance>0.12 && ignoredNode===instance.routeNode)setIgnoredNode(null);
+    if (target) {
+      const distance = Math.hypot(player.x - target.x, player.y - target.y);
+      if (distance < 0.075 && ignoredNode !== instance.routeNode) {
+        heldKeysRef.current.clear();
+        virtualKeysRef.current.clear();
+        setPendingNode(instance.routeNode);
+      } else if (distance > 0.085 && ignoredNode === instance.routeNode) {
+        setIgnoredNode(null);
+      }
     }
   };
 
@@ -203,7 +208,7 @@ export function DescentMapView({
       if (isMoving) {
         dx /= length;
         dy /= length;
-        const speed = 0.24 * dt;
+        const speed = 0.52 * dt;
         playerPosRef.current.x = Math.max(0.05, Math.min(0.95, playerPosRef.current.x + dx * speed));
         playerPosRef.current.y = Math.max(0.05, Math.min(0.95, playerPosRef.current.y + dy * speed));
 
@@ -223,13 +228,13 @@ export function DescentMapView({
         const target = BASE_ROUTE_POINTS[instance.routeNode];
         if (target && !instance.activeEncounter && pendingNode === null) {
           const dist = Math.hypot(playerPosRef.current.x - target.x, playerPosRef.current.y - target.y);
-          if (dist < 0.07) {
+          if (dist < 0.075) {
             if (ignoredNode !== instance.routeNode) {
               heldKeysRef.current.clear();
               virtualKeysRef.current.clear();
               setPendingNode(instance.routeNode);
             }
-          } else if (dist > 0.12) {
+          } else if (dist > 0.085) {
             if (ignoredNode === instance.routeNode) {
               setIgnoredNode(null);
             }
@@ -237,11 +242,30 @@ export function DescentMapView({
         }
       }
 
-      // 2. Draw Animated Water Waves Background (identical to login scene)
+      // 2. Draw Animated Water Waves Background (layered over world map)
       ctx.imageSmoothingEnabled = false;
       const waterImg = bundle?.images[bundle.manifest.world.waterAtlas] || bundle?.images?.water;
       if (mapImageRef.current) {
-        ctx.drawImage(mapImageRef.current,0,0,width,height);
+        ctx.drawImage(mapImageRef.current, 0, 0, width, height);
+        if (waterImg && !reducedMotion) {
+          ctx.save();
+          ctx.globalAlpha = 0.22;
+          const current = elapsed * 24;
+          drawWater(ctx, waterImg, width, height, 320, current, -current * 0.35);
+          ctx.restore();
+        }
+        // Ambient floating marine snow particles
+        for (const p of particles) {
+          if (!reducedMotion) p.y -= p.speedY * dt * 60;
+          if (p.y < 0) {
+            p.y = height + 10;
+            p.x = Math.random() * width;
+          }
+          ctx.globalAlpha = p.opacity;
+          ctx.fillStyle = "#8ec5ec";
+          ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size);
+        }
+        ctx.globalAlpha = 1;
       } else if (waterImg) {
         const current = elapsed * 20;
         drawWater(ctx, waterImg, width, height, 320, current, -current * 0.35);
@@ -418,6 +442,24 @@ export function DescentMapView({
     return () => cancelAnimationFrame(animId);
   }, [bundle, mapLoaded, instance.id, instance.routeNode, instance.activeEncounter, pendingNode, ignoredNode, lesson, reducedMotion]);
 
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (pendingNode !== null || instance.activeEncounter) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const clickX = (e.clientX - rect.left) / rect.width;
+    const clickY = (e.clientY - rect.top) / rect.height;
+    const target = BASE_ROUTE_POINTS[instance.routeNode];
+    if (target) {
+      const dist = Math.hypot(clickX - target.x, clickY - target.y);
+      if (dist < 0.12) {
+        heldKeysRef.current.clear();
+        setIgnoredNode(null);
+        setPendingNode(instance.routeNode);
+      }
+    }
+  };
+
   const activeTopic = lesson.topics[instance.routeNode] || "Encounter";
 
   return (
@@ -442,6 +484,7 @@ export function DescentMapView({
           width={650}
           height={650}
           className="pixel-scene"
+          onClick={handleCanvasClick}
           aria-label="Interactive study map. Use W, A, S, D to move to the highlighted quiz marker."
           tabIndex={0}
           onPointerDown={() => canvasRef.current?.focus({ preventScroll: true })}
@@ -489,6 +532,7 @@ export function DescentMapView({
                     heldKeysRef.current.clear();
                     setIgnoredNode(pendingNode);
                     setPendingNode(null);
+                    setTimeout(() => setIgnoredNode(null), 1200);
                   }}
                 >
                   Not Yet
