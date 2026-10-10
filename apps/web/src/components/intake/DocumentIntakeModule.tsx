@@ -35,7 +35,7 @@ export function DocumentIntakeModule({
   onStartRealProcessing,
   onRetryGeneration,
   processingJob,
-  modelName = "qwen2.5:3b",
+  modelName: _modelName = "qwen2.5:3b",
   onProcessingFinished,
   onCancel,
   realExtractionStatus,
@@ -143,9 +143,6 @@ export function DocumentIntakeModule({
               <h1 id="intake-title">Add a study PDF</h1>
               <p>Upload an English PDF to automatically generate a 9-question study quiz.</p>
             </div>
-            <p className="model-info">
-              Offline AI: <b>Local &amp; Private</b><span className="sr-only"> · {modelName}</span>
-            </p>
           </div>
 
           <div className="panel upload-panel" style={{ maxWidth: "680px", margin: "0 auto" }}>
