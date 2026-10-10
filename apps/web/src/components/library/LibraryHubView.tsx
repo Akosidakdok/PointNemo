@@ -81,17 +81,17 @@ export function LibraryHubView({
 
   return (
     <section className="library-hub-view" aria-labelledby="library-title">
-      <div className="eyebrow">MODULE 01 · LOCAL STUDY LIBRARY</div>
+      <div className="eyebrow">STEP 01 · STUDY LIBRARY</div>
       <div className="page-heading">
         <div>
           <h1 id="library-title">Your library</h1>
-          <p>Local study lessons and autonomous descent routes processed on this machine.</p>
+          <p>Interactive study lessons and practice quizzes saved privately on your device.</p>
         </div>
       </div>
 
-      <section className="art-banner" aria-label="Underwater descent preview banner">
+      <section className="art-banner" aria-label="Interactive lesson preview banner">
         <canvas ref={canvasRef} width={800} height={180} className="pixel-scene" />
-        <span className="depth-mark">DESCENT PREVIEW · BENTHIC ZONE</span>
+        <span className="depth-mark">INTERACTIVE LESSON PREVIEW</span>
       </section>
 
       <div className="library-grid">
@@ -99,7 +99,7 @@ export function LibraryHubView({
           <div className="panel-heading">
             <div>
               <h2 id="upload-box-title">Add a study PDF</h2>
-              <p>English, text-based documents · Local extraction &amp; AI validation</p>
+              <p>English text documents · Automatic AI quiz generation</p>
             </div>
           </div>
 
@@ -116,12 +116,12 @@ export function LibraryHubView({
               ↑
             </span>
             <strong>Upload a study PDF</strong>
-            <span>No file-size or page limit · Processed locally</span>
-            <span className="choose-button">Open file intake</span>
+            <span>Private offline processing · No data leaves your computer</span>
+            <span className="choose-button">Select PDF File</span>
           </div>
 
           <p className="file-status">
-            Upload a document to generate an authentic 9-question ocean descent.
+            Upload your study guide or lecture notes to create a 9-question practice quiz.
           </p>
         </section>
 
@@ -142,9 +142,9 @@ export function LibraryHubView({
                       ? qs.documentName
                       : "filename" in qs && qs.filename ? qs.filename : "title" in (qs as Record<string, unknown>)
                       ? String((qs as Record<string, unknown>).title)
-                      : "Study Expedition"}
+                      : "Study Lesson"}
                   </strong>
-                  <span>9 questions · Local AI Ready</span>
+                  <span>9 questions · Ready to practice</span>
                 </div>
                 <span className="ready-dot" aria-label="Ready" />
               </article>
@@ -167,7 +167,7 @@ export function LibraryHubView({
               <span>{activeLessonTitle}</span>
             </div>
             <button className="text-button" type="button" onClick={onGoToSeas}>
-              Choose sea
+              Resume Lesson
             </button>
           </article>
 
@@ -176,7 +176,7 @@ export function LibraryHubView({
             type="button"
             onClick={onGoToSeas}
           >
-            Choose a sea <span>→</span>
+            Choose a lesson <span>→</span>
           </button>
 
           <button
@@ -184,7 +184,7 @@ export function LibraryHubView({
             type="button"
             onClick={onOpenUpload}
           >
-            Upload study PDF <span>→</span>
+            Upload study notes <span>→</span>
           </button>
         </aside>
       </div>

@@ -1,5 +1,6 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { type QuestionSet, type GenerationJob } from "@point-nemo/shared";
+import { PdfSafetyGate } from "./PdfSafetyGate";
 
 interface DocumentIntakeModuleProps {
   onStartRealProcessing?: (file: File, reuseSaved?: boolean) => Promise<QuestionSet | void>;
@@ -44,43 +45,10 @@ export function DocumentIntakeModule({
   isOllamaOffline,
 }: DocumentIntakeModuleProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [fileError, setFileError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [reuseSaved, setReuseSaved] = useState(true);
   const [isStarting, setIsStarting] = useState(false);
   const [simulatedStage, setSimulatedStage] = useState(0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setFileError(null);
-
-    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-    if (!isPdf) {
-      setFileError("Please choose a valid PDF file. Point Nemo requires an English text-based PDF.");
-      setSelectedFile(null);
-      return;
-    }
-
-    setSelectedFile(file);
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
-    setFileError(null);
-
-    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
-    if (!isPdf) {
-      setFileError("Please choose a valid PDF file.");
-      setSelectedFile(null);
-      return;
-    }
-
-    setSelectedFile(file);
-  };
 
   const handleBeginCalibration = useCallback(async () => {
     if (!selectedFile || isStarting) return;
@@ -169,68 +137,35 @@ export function DocumentIntakeModule({
     <section className="document-intake-module" aria-labelledby="intake-title">
       {!isProcessing ? (
         <div className="intake-selection-view">
-          <div className="eyebrow">MODULE 01 · DOCUMENT INTAKE</div>
+          <div className="eyebrow">STEP 02 · CREATE LESSON FROM PDF</div>
           <div className="page-heading">
             <div>
               <h1 id="intake-title">Add a study PDF</h1>
-              <p>Upload an English text-based PDF to generate your local 9-question ocean descent.</p>
+              <p>Upload an English PDF to automatically generate a 9-question study quiz.</p>
             </div>
             <p className="model-info">
-              Inference model: <b>{modelName} (Local Ollama)</b>
+              Offline AI: <b>Local &amp; Private</b><span className="sr-only"> · {modelName}</span>
             </p>
           </div>
 
           <div className="panel upload-panel" style={{ maxWidth: "680px", margin: "0 auto" }}>
             <div className="panel-heading">
               <div>
-                <h2>Document selection</h2>
-                <p>No upper page or file-size limit · Min 300 characters extracted locally</p>
+                <h2>Select Document</h2>
+                <p>One text-based PDF · max 5 MiB · at least 300 readable characters</p>
               </div>
             </div>
 
-            <label
-              className="dropzone"
-              htmlFor="pdf-file-upload"
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleDrop}
-            >
-              <span className="upload-icon" aria-hidden="true">
-                ↑
-              </span>
-              <strong>{selectedFile ? selectedFile.name : "Choose a PDF file or drag it here"}</strong>
-              <span>
-                {selectedFile
-                  ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MiB · Ready for sonar extraction`
-                  : "English, text-based documents only. Password-required and image-only PDFs need an unlocked text copy."}
-              </span>
-              <span className="choose-button">
-                {selectedFile ? "Replace file" : "Browse files"}
-              </span>
-            </label>
+            <PdfSafetyGate onFileChange={setSelectedFile} />
 
-            <input
-              id="pdf-file-upload"
-              ref={fileInputRef}
-              type="file"
-              accept="application/pdf,.pdf"
-              style={{ display: "none" }}
-              onChange={handleFileChange}
-            />
-
-            {fileError && (
-              <p className="file-status error-text" role="alert">
-                ⚠ {fileError}
-              </p>
-            )}
-
-            {selectedFile && !fileError && (
+            {selectedFile && (
               <label className="saved-reuse-option">
                 <input type="checkbox" checked={reuseSaved} onChange={(event) => setReuseSaved(event.target.checked)} />
                 Use saved questions if this exact PDF has a compatible lesson. Uncheck to generate a fresh set.
               </label>
             )}
 
-            {selectedFile && !fileError && (
+            {selectedFile && (
               <div style={{ marginTop: "20px", display: "flex", justifyContent: "flex-end", gap: "10px" }}>
                 <button type="button" className="secondary-button" onClick={onCancel}>
                   Cancel
@@ -241,7 +176,7 @@ export function DocumentIntakeModule({
                   onClick={handleBeginCalibration}
                   disabled={isStarting}
                 >
-                  Start Sonar Processing <span>→</span>
+                  Create Study Quiz <span>→</span>
                 </button>
               </div>
             )}
@@ -322,7 +257,7 @@ export function DocumentIntakeModule({
                     type="button"
                     className="primary-button"
                     style={{ fontSize: "11px", padding: "6px 12px" }}
-                    onClick={onRetryGeneration ? handleRetryGeneration : handleBeginCalibration}
+                    onClick={onRetryGeneration ? handleRetryGeneration : ()=>setIsProcessing(false)}
                     disabled={isStarting}
                   >
                     {onRetryGeneration ? "Try again →" : "Choose PDF and try again →"}

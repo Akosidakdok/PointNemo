@@ -95,6 +95,17 @@ test("planner rejects reusing the same focus fact in multiple slots", () => {
   assert.throws(()=>parseQuestionPlan({topics},new Set(ids),focuses),{code:"INVALID_MODEL_OUTPUT"});
 });
 
+test("planner allows repeated generic goal wording when each slot has a different source fact", () => {
+  const ids = Array.from({ length: 9 }, (_,index)=>`p1s${index+1}`);
+  const topics = ["IP Addressing", "DNS", "HTTP"].map((name,topicIndex)=>({
+    name,
+    objectives: ids.slice(topicIndex*3,topicIndex*3+3).map((evidenceId)=>({evidenceId,goal:"Explain the source fact."})),
+  }));
+  const focuses = new Map(ids.map((id,index)=>[id,`Unique source fact ${index+1}.`]));
+  const plan = parseQuestionPlan({topics},new Set(ids),focuses);
+  assert.equal(plan.slots.length,9);
+});
+
 function mockExtractor(result: ExtractedDocument): DocumentExtractor {
   return { extractText: async (_file: UploadedDocument) => result };
 }

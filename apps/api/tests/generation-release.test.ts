@@ -16,14 +16,32 @@ import { checkTokenBudget, localTokenizer, TOKENIZER_DIGEST, chatTemplate } from
 import { generationMetadata, isCompatibleMetadata } from "../src/services/generation-metadata.js";
 
 const config: ApiConfig = { port:0,databasePath:"",ollamaBaseUrl:"http://127.0.0.1:11434",ollamaModel:"qwen2.5:1.5b",ollamaNumCtx:8192,ollamaMaxInputTokens:4096,ollamaMaxOutputTokens:3072,inferenceTimeoutMs:1000,jobTimeoutMs:2000 };
-const quote = "IPv4 uses 32 bits and IPv6 uses 128 bits for routing data packets.";
+const fixtureFacts = [
+  ["IPv4 addresses use 32 bits.","How many bits do IPv4 addresses use?","32 bits"],
+  ["IPv6 addresses use 128 bits.","How many bits do IPv6 addresses use?","128 bits"],
+  ["IPv4 addresses use dotted decimal notation.","How are IPv4 addresses written?","dotted decimal notation"],
+  ["DNS translates domain names into IP addresses.","What does DNS translate domain names into?","IP addresses"],
+  ["A resolver queries DNS servers for records.","Which servers does a resolver query?","DNS servers"],
+  ["DNS records map names to addresses.","What do DNS records do?","map names to addresses"],
+  ["HTTP uses methods to describe requests.","What does HTTP use to describe requests?","methods"],
+  ["GET requests retrieve a resource.","What does a GET request do?","retrieve a resource"],
+  ["POST requests send data to a server.","Which method sends data to a server?","POST"],
+] as const;
+const quote=fixtureFacts.map(([text])=>text).join(" ");
 const source: ExtractedDocument = { sha256:"unused-mock",pageCount:1,normalizedCharCount:quote.length,pagesJson:JSON.stringify([{pageNumber:1,chunkId:"chunk-1",text:quote}]) };
 const upload = (marker="demo") => ({originalName:`${marker}.pdf`,mimeType:"application/pdf",buffer:Buffer.from(`%PDF-1.7\n${marker}\n%%EOF`)});
 const sleep = (ms:number) => new Promise<void>(resolve => setTimeout(resolve,ms));
 const status = async () => ({ available:true,model:config.ollamaModel,digest:"fixture-model-digest",message:"test double only",tokenizerReady:true,tokenizerDigest:TOKENIZER_DIGEST });
-const output = (support=quote): AIQuestionSetOutput => ({ status:"ready",topics:[{name:"IP"},{name:"DNS"},{name:"HTTP"}],questions:["IP","DNS","HTTP"].flatMap(topicName => (["easy","medium","hard"] as const).map(difficulty => ({topicName,difficulty,prompt:`${topicName} ${difficulty} question?`,options:["Correct","Alternative one","Alternative two","Alternative three"],answerIndex:0,explanation:"Source supports the correct answer.",evidence:[{pageNumber:1,chunkId:"chunk-1",quote:support}]}))) });
+const output = (support=quote): AIQuestionSetOutput => ({ status:"ready",topics:[{name:"IP"},{name:"DNS"},{name:"HTTP"}],questions:fixtureFacts.map(([text,prompt,answer],index)=>({topicName:["IP","DNS","HTTP"][Math.floor(index/3)]!,difficulty:(["easy","medium","hard"] as const)[index%3]!,prompt,options:[answer,"Gamma rays","Ocean currents","Volcanic ash"],answerIndex:0,explanation:"Source supports the correct answer.",evidence:[{pageNumber:1,chunkId:"chunk-1",quote:support===quote?text:support}]})) });
 const extractor: DocumentExtractor = {extractText:async()=>source};
-function model(generate: OllamaService["generateQuestions"]): OllamaService { return {generateQuestions:generate,getStatus:status} as OllamaService; }
+function model(generate: OllamaService["generateQuestions"]): OllamaService {
+  return {generateQuestions:async(sourceText,options)=>{
+    const draft=await generate(sourceText,options) as any;
+    return options?.repair && Array.isArray(draft?.questions)
+      ? {questions:Object.fromEntries(options.repair.slots.map((slot)=>[String(slot.index),draft.questions[slot.index]]))}
+      : draft;
+  },getStatus:status} as OllamaService;
+}
 async function terminal(service:GenerationJobService,id:string) { for(let i=0;i<400;i++){const job=service.getJob(id);if(["ready","failed","cancelled"].includes(job.state))return job;await sleep(5);}throw new Error("No terminal state"); }
 async function databaseTest(fn:(db:SqliteDatabase)=>Promise<void>) {const dir=await mkdtemp(join(tmpdir(),"nemo-release-"));const db=initializeDatabase(join(dir,"test.sqlite"));try{await fn(db);}finally{db.close();await rm(dir,{recursive:true,force:true});}}
 function count(db:SqliteDatabase,table:string){return (db.prepare(`SELECT COUNT(*) AS n FROM ${table}`).get() as {n:number}).n;}
@@ -56,9 +74,9 @@ test("source instructions and model role tokens stay inside escaped source data"
   assert.equal(messages.length,2);assert.ok(!messages[1]!.content.includes("<|im_start|>"));assert.ok(messages[0]!.content.includes("untrusted data"));
 });
 test("postvalidation rejects duplicate normalized stems, wrong coverage, options, and foreign quotes",()=>{
-  const duplicate=output();duplicate.questions[1]!.prompt="IP EASY question!";assert.throws(()=>validateGeneratedOutput(duplicate,source.pagesJson),{code:"DUPLICATE_QUESTION"});
+  const duplicate=output();duplicate.questions[1]!.prompt=duplicate.questions[0]!.prompt;assert.throws(()=>validateGeneratedOutput(duplicate,source.pagesJson),{code:"DUPLICATE_QUESTION"});
   const coverage=output();coverage.questions[1]!.difficulty="easy";assert.throws(()=>validateGeneratedOutput(coverage,source.pagesJson),{code:"INVALID_MODEL_OUTPUT"});
-  const options=output();options.questions[0]!.options[1]=" correct ";assert.throws(()=>validateGeneratedOutput(options,source.pagesJson),{code:"INVALID_MODEL_OUTPUT"});
+  const options=output();options.questions[0]!.options[1]=options.questions[0]!.options[0]!;assert.throws(()=>validateGeneratedOutput(options,source.pagesJson),{code:"INVALID_MODEL_OUTPUT"});
   assert.throws(()=>validateGeneratedOutput(output("TCP establishes a connection before data transfer."),source.pagesJson),{code:"SOURCE_EVIDENCE_INVALID"});
   assert.throws(()=>validateGeneratedOutput({status:"insufficient_source",reason:"Only one concept"},source.pagesJson),{code:"INSUFFICIENT_SOURCE"});
 });
@@ -78,9 +96,9 @@ test("inference timeout fails without repair even if the model ignores cancellat
 }));
 test("over-budget source rejects before inference and repair budget is also checked",async()=>databaseTest(async db=>{
   let calls=0;const long:DocumentExtractor={extractText:async()=>({...source,pagesJson:JSON.stringify([{pageNumber:1,chunkId:"chunk-1",text:"1234567890 ".repeat(500)}])})};
-  const service=new GenerationJobService(db,config,long,model(async()=>{calls++;return output();}));const r=await service.enqueue(upload());assert.equal((await terminal(service,r.jobId)).errorCode,"TOKEN_OVERFLOW");assert.equal(calls,0);
-  const initial=checkTokenBudget(generationMessages(`[Page 1 | chunk-1]\n${quote}`),4096);
-  const repair=new GenerationJobService(db,{...config,ollamaMaxInputTokens:initial},extractor,model(async()=>{calls++;throw new BadRequestError("OLLAMA_INVALID_JSON","Malformed output.");}));
+  const service=new GenerationJobService(db,{...config,ollamaMaxInputTokens:1},long,model(async()=>{calls++;return output();}));const r=await service.enqueue(upload());assert.equal((await terminal(service,r.jobId)).errorCode,"TOKEN_OVERFLOW");assert.equal(calls,0);
+  const counter={digest:TOKENIZER_DIGEST,count:(text:string)=>text.includes("Validation feedback")?5000:10};
+  const repair=new GenerationJobService(db,config,extractor,model(async()=>{calls++;throw new BadRequestError("OLLAMA_INVALID_JSON","Malformed output.");}),counter);
   const second=await repair.enqueue(upload("repair"));assert.equal((await terminal(repair,second.jobId)).errorCode,"TOKEN_OVERFLOW");assert.equal(calls,1);
 }));
 test("cancel is idempotent during extraction and generation; late model data cannot commit",async()=>databaseTest(async db=>{

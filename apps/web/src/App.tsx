@@ -26,7 +26,6 @@ import { LibraryHubView } from "./components/library/LibraryHubView";
 import { DocumentIntakeModule } from "./components/intake/DocumentIntakeModule";
 import { GameplayModule } from "./components/gameplay/GameplayModule";
 import { ProfileView } from "./components/profile/ProfileView";
-import { LeaderboardView } from "./components/leaderboard/LeaderboardView";
 
 const initialStatus: AppStatus = {
   api: { available: false, message: "Checking local API…" },
@@ -48,23 +47,30 @@ export function App() {
   const [activeLessonTitle,setActiveLessonTitle]=useState("Introduction to Marine Biology (sample)");
   const [bossUnlocked, setBossUnlocked] = useState(false);
   const [resultsUnlocked, setResultsUnlocked] = useState(false);
+  const [maxUnlockedStep,setMaxUnlockedStep]=useState(1);
   const handleUpdateProgress = useCallback((boss: boolean, results: boolean)=>{
     setBossUnlocked(boss);setResultsUnlocked(results);
   },[]);
 
   const handleNavigate = useCallback(
     (screen: AppNavScreen) => {
+      const steps: Record<AppNavScreen,number>={library:1,upload:2,sonar:2,seas:3,descent:4,boss:4,results:5,profile:1};
+      setMaxUnlockedStep((previous)=>Math.max(previous,steps[screen]));
       setCurrentScreen(screen);
       setNavKey((k) => k + 1);
     },
     [activeInstanceId]
   );
 
-  // Theme State
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  // Theme State (Default to Light Mode)
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    const saved = localStorage.getItem("point-nemo-theme");
+    return (saved === "dark" || saved === "light") ? saved : "light";
+  });
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
+    localStorage.setItem("point-nemo-theme", theme);
   }, [theme]);
 
   // App & Run Data from SQLite
@@ -346,6 +352,7 @@ export function App() {
   return (
     <div
       className="playground-shell"
+      data-reduced-motion={reducedMotion ? "true" : undefined}
       role="application"
       aria-label="Point Nemo Educational Descent"
     >
@@ -362,6 +369,7 @@ export function App() {
           activeInstanceId={activeInstanceId}
           bossUnlocked={bossUnlocked}
           resultsUnlocked={resultsUnlocked}
+          maxUnlockedStep={maxUnlockedStep}
         />
 
         {/* Active Screen Content */}
@@ -432,18 +440,15 @@ export function App() {
               currentUser={currentUser}
               bundle={bundle}
               reducedMotion={reducedMotion}
+              onBack={() => handleNavigate("library")}
             />
           )}
 
-          {/* Standalone Extra: Leaderboard */}
-          {currentScreen === "leaderboard" && (
-            <LeaderboardView currentUser={currentUser} />
-          )}
         </main>
 
         <footer className="playground-footer">
-          <span>POINT NEMO · OCEAN EXPEDITION</span>
-          <span>LOCAL FIRST · OFFLINE PWA</span>
+          <span>POINT NEMO · STUDY ADVENTURE</span>
+          <span>PRIVATE &amp; OFFLINE · RUNS ON YOUR DEVICE</span>
         </footer>
       </div>
 

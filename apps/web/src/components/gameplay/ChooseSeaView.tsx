@@ -15,11 +15,11 @@ export function ChooseSeaView({
 }: ChooseSeaViewProps) {
   return (
     <section className="choose-sea-view" aria-labelledby="seas-title">
-      <div className="eyebrow">MODULE 03 · CHOOSE A SEA</div>
+      <div className="eyebrow">STEP 03 · CHOOSE A LESSON</div>
       <div className="page-heading">
         <div>
-          <h1 id="seas-title">Choose your sea</h1>
-          <p>Each lesson opens its own map route, isolated descent run, and enemy encounters.</p>
+          <h1 id="seas-title">Choose your lesson</h1>
+          <p>Pick a study guide to begin your interactive quiz map.</p>
         </div>
         <button
           type="button"
@@ -46,15 +46,20 @@ export function ChooseSeaView({
                   {lesson.isCustom ? "CUSTOM PDF LESSON · 3 TOPICS · 9 QUESTIONS" : "SAMPLE · 3 TOPICS · 3 QUESTIONS"}
                 </p>
                 <h2>{lesson.title}</h2>
-                <p>
+                <div className="sea-topic-list" aria-label="Lesson topics">
                   {lesson.topics
                     .filter((t) => t && t !== "Lesson boss")
-                    .join(" · ")}
-                </p>
+                    .map((topic, tIdx) => (
+                      <span key={tIdx} className="sea-topic-pill">
+                        <span className="topic-num">{tIdx + 1}</span>
+                        <span className="topic-text">{topic}</span>
+                      </span>
+                    ))}
+                </div>
                 <small>
                   {hasActiveInstance
-                    ? `Active descent · ${activeInstanceId}`
-                    : "No active descent instance"}
+                    ? `In-progress lesson · ${activeInstanceId}`
+                    : "Ready to start"}
                 </small>
               </div>
               <div className="sea-card-actions">
@@ -63,9 +68,9 @@ export function ChooseSeaView({
                   className="secondary-button"
                   disabled={!hasActiveInstance}
                   onClick={() => onSelectLesson(lesson.id, "resume")}
-                  aria-label={`Resume active descent for ${lesson.title}`}
+                  aria-label={`Resume lesson for ${lesson.title}`}
                 >
-                  Resume
+                  Resume Lesson
                 </button>
                 <button
                   type="button"
@@ -74,7 +79,7 @@ export function ChooseSeaView({
                   disabled={lesson.isCustom && lessonParts(lesson).some((part)=>part.length!==3)}
                   aria-label={`Start new descent for ${lesson.title}`}
                 >
-                  Start new descent <span>→</span>
+                  Start Lesson <span>→</span>
                 </button>
               </div>
             </article>

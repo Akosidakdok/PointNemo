@@ -54,7 +54,7 @@ See [the local AI pipeline guide](docs/LOCAL_AI_PIPELINE.md) for token budgets, 
 
 ## What is included
 
-- **Local Document Intake**: Accepts English text-based PDFs with at least 300 non-whitespace characters. Scans require readable text; figures and tables are not interpreted. Large documents are sampled across pages within a token budget. `POST /api/documents` admits the file, `GET /api/jobs/:id` reports processing phases, and `GET /api/question-sets/:id` returns the saved 3-topic/9-question set with exact source passages. Compatible saved lessons can be reused; failed generation can retry from extracted text.
+- **Local Document Intake**: The browser accepts one PDF up to 5 MiB. The API requires English text with at least 300 non-whitespace characters. Scans require readable text; figures and tables are not interpreted. Large documents are sampled across pages within a token budget. `POST /api/documents` admits the file, `GET /api/jobs/:id` reports processing phases, and `GET /api/question-sets/:id` returns the saved 3-topic/9-question set with exact source passages. Compatible saved lessons can be reused; failed generation can retry from extracted text.
 - **Authoritative Game Run Backend**:
   - `POST /api/runs`: Creates an authoritative run from a ready question set with 18 fixed, persisted slots.
     - 3 easy questions (Surface: Clownfish)
@@ -69,9 +69,9 @@ See [the local AI pipeline guide](docs/LOCAL_AI_PIPELINE.md) for token budgets, 
 - **Connected Web Interface**:
   - Retro Submersible UI with 2D Ocean Viewport (`OceanCanvas`), `LocalLibrary`, `UploadDialog`, 3-stage `SonarProcessing` (`extracting` -> `generating` -> `validating` -> `ready`), 16-bit `DescentEncounter` combat canvas, and `ResultsScreen`.
   - Classic Expedition Map dashboard view with interactive waypoints, battle card, and document intake.
-  - "Begin descent run" starts the authoritative game run via the API.
-  - Authoritative combat interface displays creature threats, depth zones, live player HP and enemy HP bars, XP, combo, question options, feedback explanations, and source-text quotes with page numbers.
-  - Automatic resume: Saved runs continue seamlessly across page refreshes.
+  - The main study map groups each saved topic into a three-question part, followed by a shuffled final review of all nine questions.
+  - Combat displays player HP, enemy HP, XP, feedback explanations, and source-text quotes with page numbers.
+  - Study map progress survives navigation between app tabs within the current page session. Refreshing resets that frontend run; integration with the separate persisted API run engine remains pending.
   - Results screen with "Descent Complete" badge upon boss victory, or mistake review with supporting source evidence upon failure.
 - **Offline & Local Architecture**: SQLite via `better-sqlite3` with transactional migrations, Zod schema validation across backend and web client, and full offline test coverage.
 - **Art and asset generation**: Bundled image sheets, prompts, and asset-generation CLI documented in [the asset guide](docs/assets/README.md).

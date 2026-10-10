@@ -1,4 +1,5 @@
 import { drawFrame, drawWater, loadAssetBundle, speciesScale, SpriteAnimation } from "../../../src/assets/sprites.js";
+import "../src/styles/pixel-ocean.css";
 
 import oceanMapUrl from "../../../assets/maps/point-nemo-abyss-ocean.png";
 

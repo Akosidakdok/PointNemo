@@ -8,9 +8,9 @@ The playground is a frontend-only preview at `apps/web/ui-playground`. It helps 
 
 ## Integration status
 
-This PR retains main's API, SQLite migrations, shared contracts, and React login flow unchanged. Earlier competing backend implementations and their API documentation have been excluded. Approved playground screens must be integrated into React in a separate change; running the main app does not display this preview after signup.
+The standalone playground remains a sample preview. The main React app now integrates the library, intake, map, encounters, and final review with saved question sets from the local API. Its map progression remains in React memory rather than the SQLite run engine. Local AI pipeline changes and their migrations are documented in `docs/LOCAL_AI_PIPELINE.md`; the existing local login and guest flow is preserved.
 
-PDF selection in the standalone preview checks the extension/type only and does not read or upload file contents. The integrated app accepts PDFs up to 5 MiB and 3 pages, with 300–8,000 extracted characters. Its upload dialog checks file size before upload; page and extracted-text limits are checked by the API. This preview cannot validate extracted text or language. Sonar stages, questions, Profile, Leaderboard, and Results use sample content; instance progress lasts only until reload.
+PDF selection in the standalone preview checks the extension/type only and does not read or upload file contents. The integrated safety gate checks PDF signatures and limits files to 5 MiB before upload. The API requires at least 300 non-whitespace characters and samples larger documents within a token budget; it has no fixed three-page or 8,000-character limit. This preview cannot validate extracted text or language. Its Sonar stages, questions, Profile, Leaderboard, and Results use sample content; instance progress lasts only until reload. Leaderboard navigation remains removed from the main app.
 
 ## Module order
 
@@ -53,7 +53,7 @@ Each real uploaded lesson/question set must have its own descent instance and is
 
 ## Visual direction
 
-The current playground uses translucent glass panels over a blue water backdrop. Light mode uses white and pale blue. Dark mode uses deep navy with blue/cyan highlights and a smooth theme transition. Existing pixel art should remain crisp and visible. Do not add authentication or backend calls to the standalone preview pages.
+The playground and main React app share the post-login pixel-ocean finish in `apps/web/src/styles/pixel-ocean.css`. The background uses a seamless 384 × 192 stepped-wave tile and sparse four-pixel water particles. Dark mode uses deep navy, solid blue panels, and teal highlights; light mode uses pale ocean blue, solid pale panels, and dark teal highlights. Panels and controls use crisp borders and offset pixel shadows without decorative glass blur. Pixelify Sans carries headings and short controls; body copy stays in a readable system sans-serif. Navigation scrolls horizontally on narrow screens, while library panels stack. Principal controls have at least 44-pixel tap heights, keyboard focus stays visible, and a stable scrollbar gutter prevents content-width shifts. Existing pixel art remains crisp and visible. Do not add authentication or backend calls to the standalone preview pages.
 
 System reduced-motion preferences freeze decorative sprite animation and suppress hit effects while keeping WASD movement available.
 

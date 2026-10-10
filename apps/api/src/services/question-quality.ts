@@ -40,16 +40,18 @@ export function parseQuestionPlan(output: unknown, validEvidenceIds: Set<string>
     throw new BadRequestError("INVALID_MODEL_OUTPUT", "Plan three distinct topics with three learning objectives each.");
   }
   if (new Set(topics.map((topic:any)=>normalize(topic.name))).size!==3) throw new BadRequestError("INVALID_MODEL_OUTPUT", "Plan distinct topics; do not repeat a topic.");
-  const slots: QuestionPlan["slots"] = [], goals = new Set<string>(), assignedEvidenceIds = new Set<string>(), assignedFocusFacts = new Set<string>();
+  const slots: QuestionPlan["slots"] = [], assignedEvidenceIds = new Set<string>(), assignedFocusFacts = new Set<string>();
   for (const [topicIndex,topic] of topics.entries()) {
     for (const [index,objective] of topic.objectives.entries()) {
-      if (typeof objective?.goal!=="string" || !objective.goal.trim() || objective.goal.length>120 || !validEvidenceIds.has(objective.evidenceId) || goals.has(normalize(objective.goal))) {
-        throw new BadRequestError("INVALID_MODEL_OUTPUT", "Each planned objective must be distinct and cite one of the provided passage IDs.");
+      if (typeof objective?.goal!=="string" || !objective.goal.trim() || objective.goal.length>120) {
+        throw new BadRequestError("INVALID_MODEL_OUTPUT", "Each planned objective needs a short learning goal.");
+      }
+      if (typeof objective.evidenceId!=="string" || !validEvidenceIds.has(objective.evidenceId)) {
+        throw new BadRequestError("INVALID_MODEL_OUTPUT", "Each planned objective must cite a passage from the selected PDF.");
       }
       if (assignedEvidenceIds.has(objective.evidenceId)) throw new BadRequestError("INVALID_MODEL_OUTPUT", "Each question must use a different source passage so the quiz covers nine distinct facts.");
       const focusFact = focusByEvidenceId?.get(objective.evidenceId);
       if (focusFact && assignedFocusFacts.has(normalize(focusFact))) throw new BadRequestError("INVALID_MODEL_OUTPUT", "Each question must test a different source fact, not a repeated statement from another passage.");
-      goals.add(normalize(objective.goal));
       assignedEvidenceIds.add(objective.evidenceId);
       if (focusFact) assignedFocusFacts.add(normalize(focusFact));
       slots.push({index:topicIndex*3+index,topicName:topic.name,difficulty:(["easy","medium","hard"] as const)[index]!,goal:objective.goal,evidenceId:objective.evidenceId});
@@ -116,7 +118,9 @@ export function inspectQuestions(output: unknown, pagesJson: string): { issues: 
       const currentFocusFacts = q.evidence.map((e)=>focusByCitation.get(JSON.stringify([e.pageNumber,e.chunkId,e.quote])));
       const previousFocusFacts = new Set(previous.question.evidence.map((e)=>focusByCitation.get(JSON.stringify([e.pageNumber,e.chunkId,e.quote]))).filter(Boolean));
       const sameFocusFact = currentFocusFacts.some((fact)=>Boolean(fact && previousFocusFacts.has(fact)));
-      const similarStems = intersection >= 3 && union > 0 && intersection / union >= 0.6;
+      // Similar wording can compare different facts (for example IPv4's bit
+      // count versus IPv6's). Shared wording alone is not a repeated fact.
+      const similarStems = sameAnswer && intersection >= 3 && union > 0 && intersection / union >= 0.6;
       const repeatedFact = sameFocusFact || similarStems || (sameAnswer && intersection >= 2 && union > 0 && intersection / union >= 0.5);
       if (sameStem || repeatedFact) add(index, "DUPLICATE_QUESTION", `Question ${index + 1} repeats question ${previous.index + 1}. Test a different source-supported fact or application, not a rewording.`);
     }

@@ -102,11 +102,11 @@ export function LessonBossView({
 
   return (
     <section className="lesson-boss-view" aria-labelledby="boss-title">
-      <div className="eyebrow">MODULE 04 · LESSON BOSS REVIEW</div>
+      <div className="eyebrow">FINAL CHALLENGE · MASTER REVIEW QUIZ</div>
 
       <div className="boss-hero panel">
         <div className="boss-copy">
-          <h1 id="boss-title">Apex Challenge</h1>
+          <h1 id="boss-title">Final Review Quiz</h1>
           <p>
             The Hadal Apex Goblin Shark guards the Point Nemo boundary. Review all
             lesson concepts to complete the expedition. Mixed-topic review: previously encountered questions.
@@ -128,7 +128,7 @@ export function LessonBossView({
                 className="secondary-button"
                 onClick={onReturnToDescent}
               >
-                ← Return to descent
+                ← Return to Study Map
               </button>
               <button
                 type="button"
@@ -136,12 +136,12 @@ export function LessonBossView({
                 onClick={onStart}
                 disabled={!totalQuestions}
               >
-                Engage Boss Review <span>→</span>
+                Start Final Quiz <span>→</span>
               </button>
             </div>
           ) : (
             <span className="eyebrow" style={{ color: "var(--accent)" }}>
-              COMBAT REVIEW IN PROGRESS: {currentQIndex + 1} / {totalQuestions}
+              QUIZ IN PROGRESS: Question {currentQIndex + 1} of {totalQuestions}
             </span>
           )}
         </div>
@@ -194,10 +194,10 @@ export function LessonBossView({
               style={{ marginTop: "16px" }}
             >
               {selectedOption === currentQuestion.correct ? (
-                <>✓ <b>Direct hit!</b> Concept confirmed.</>
+                <>✓ <b>Correct!</b> Excellent work.</>
               ) : (
                 <>
-                  ✕ <b>Deflection!</b> Correct answer: <b>{currentQuestion.answer}</b>.
+                  ✕ <b>Incorrect.</b> The correct answer was <b>{currentQuestion.answer}</b>.
                   <p style={{ margin: "6px 0 0", fontSize: "12px", color: "var(--muted)" }}>
                     Review the explanation and source passage below.
                   </p>

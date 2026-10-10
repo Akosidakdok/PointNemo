@@ -44,7 +44,7 @@ function seedQuestionSet(database: SqliteDatabase): SeedData {
   database.prepare(`
     INSERT INTO question_sets (id, document_id, model_tag, model_digest, settings_hash,
       extractor_version, prompt_version, schema_version, tokenizer_digest, document_hash)
-    VALUES (?, ?, 'qwen2.5:1.5b', 'digest-1', 'settings-1', 'test-extractor', 'test-prompt', 'test-schema', 'test-tokenizer', 'hash-test')
+    VALUES (?, ?, 'qwen2.5:1.5b', 'digest-1', 'settings-1', 'test-extractor', 'test-prompt', 'point-nemo-questions-v2', 'test-tokenizer', 'hash-test')
   `).run(questionSetId, documentId);
 
   const insertTopic = database.prepare(`
