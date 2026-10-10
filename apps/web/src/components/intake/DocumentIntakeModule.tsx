@@ -1,6 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { type QuestionSet, type GenerationJob } from "@point-nemo/shared";
 import { PdfSafetyGate } from "./PdfSafetyGate";
+import { calibrationErrorHelp } from "./calibrationErrors";
 
 interface DocumentIntakeModuleProps {
   onStartRealProcessing?: (file: File, reuseSaved?: boolean) => Promise<QuestionSet | void>;
@@ -13,6 +14,7 @@ interface DocumentIntakeModuleProps {
   realGenerationStatus?: "waiting" | "active" | "complete" | "failed";
   realValidationStatus?: "waiting" | "active" | "complete" | "failed";
   realError?: string | null;
+  realErrorCode?: string;
   isOllamaOffline?: boolean;
 }
 
@@ -42,13 +44,17 @@ export function DocumentIntakeModule({
   realGenerationStatus,
   realValidationStatus,
   realError,
+  realErrorCode,
   isOllamaOffline,
 }: DocumentIntakeModuleProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(() => Boolean(processingJob && processingJob.state !== "ready" && processingJob.state !== "cancelled"));
   const [reuseSaved, setReuseSaved] = useState(true);
   const [isStarting, setIsStarting] = useState(false);
   const [simulatedStage, setSimulatedStage] = useState(0);
+  useEffect(() => {
+    if (processingJob && ["extracting","generating","validating"].includes(processingJob.state)) setIsProcessing(true);
+  }, [processingJob?.id, processingJob?.state]);
 
   const handleBeginCalibration = useCallback(async () => {
     if (!selectedFile || isStarting) return;
@@ -91,29 +97,9 @@ export function DocumentIntakeModule({
   const repairProgress = repairedQuestionCount === undefined
     ? "I’m fixing a few questions, then I’ll check the quiz again."
     : `Fixing ${repairedQuestionCount} ${repairedQuestionCount === 1 ? "question" : "questions"}. I’ll check the quiz again when they’re fixed.`;
-  const wasInterrupted = processingJob?.errorCode === "INTERRUPTED_JOB";
-  const normalizedRealError = realError?.toLowerCase() ?? "";
-  const errorMessage = wasInterrupted
-    ? onRetryGeneration
-      ? "Processing stopped early. Your PDF text is saved, so you can try again."
-      : "Processing stopped early. Choose your PDF again to try once more."
-    : processingJob?.errorCode === "DUPLICATE_QUESTION"
-    ? "Some questions tested the same idea. Try again for a fresh set."
-    : processingJob?.errorCode === "SOURCE_EVIDENCE_INVALID"
-    ? "Some answers didn’t match the text in your PDF. Try again."
-    : processingJob?.errorCode === "INSUFFICIENT_SOURCE"
-    ? "Your PDF may not include enough different facts for nine questions. Choose a longer or more detailed section."
-    : processingJob?.errorCode === "INVALID_MODEL_OUTPUT"
-    ? "Some questions or answer choices need fixing. Try again."
-    : normalizedRealError.includes("insufficient_source") || normalizedRealError.includes("not support three topics")
-    ? "Your PDF may not include enough different facts for nine questions. Choose a longer or more detailed section."
-    : normalizedRealError.includes("duplicate_question") || normalizedRealError.includes("repeats question")
-    ? "Some questions tested the same idea. Try again for a fresh set."
-    : normalizedRealError.includes("answer_choices") || normalizedRealError.includes("short exact phrase")
-    ? "Some questions or answers didn’t match your PDF. Try again."
-    : realError
-    ? "We couldn’t finish making your quiz. Try again."
-    : undefined;
+  const errorHelp = calibrationErrorHelp(realErrorCode ?? processingJob?.errorCode, processingJob?.errorMessage ?? realError ?? "");
+  const canRetrySaved = Boolean(errorHelp.retry && onRetryGeneration);
+  const chooseAnotherPdf = () => { setSelectedFile(null); setIsProcessing(false); };
 
   const handleAdvanceSimulatedStage = () => {
     if (simulatedStage >= STAGES.length - 1) {
@@ -134,7 +120,7 @@ export function DocumentIntakeModule({
     : simulatedStage;
 
   return (
-    <section className="document-intake-module" aria-labelledby="intake-title">
+    <section className="document-intake-module" aria-labelledby={isProcessing ? "sonar-title" : "intake-title"}>
       {!isProcessing ? (
         <div className="intake-selection-view">
           <div className="eyebrow">STEP 02 · CREATE LESSON FROM PDF</div>
@@ -246,22 +232,23 @@ export function DocumentIntakeModule({
                 }}
                 role="alert"
               >
-                <b>What happened:</b> {errorMessage}
+                <b>What happened:</b> {errorHelp.message}
                 {isOllamaOffline && (
                   <p style={{ margin: "6px 0 0", fontSize: "11px", color: "var(--text)" }}>
                     Check that the local question service is running, then try again.
                   </p>
                 )}
-                <div style={{ marginTop: "12px", display: "flex", gap: "10px" }}>
+                <div style={{ marginTop: "12px", display: "flex", flexWrap: "wrap", gap: "10px" }}>
                   <button
                     type="button"
                     className="primary-button"
-                    style={{ fontSize: "11px", padding: "6px 12px" }}
-                    onClick={onRetryGeneration ? handleRetryGeneration : ()=>setIsProcessing(false)}
+                    style={{ fontSize: "14px", minHeight: "44px", padding: "8px 12px" }}
+                    onClick={canRetrySaved ? handleRetryGeneration : chooseAnotherPdf}
                     disabled={isStarting}
                   >
-                    {onRetryGeneration ? "Try again →" : "Choose PDF and try again →"}
+                    {canRetrySaved ? errorHelp.retryLabel ?? "Retry saved PDF text →" : "Choose another PDF →"}
                   </button>
+                  {canRetrySaved && <button type="button" className="secondary-button" onClick={chooseAnotherPdf} disabled={isStarting}>{errorHelp.alternateLabel ?? "Choose another PDF"}</button>}
                 </div>
               </div>
             )}

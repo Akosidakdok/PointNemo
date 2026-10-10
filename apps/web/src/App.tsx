@@ -6,6 +6,7 @@ import {
 } from "@point-nemo/shared";
 import {
   getAppStatus,
+  ApiRequestError,
   uploadDocument,
   retryDocument,
   cancelGenerationJob,
@@ -97,6 +98,7 @@ export function App() {
   const [generationStatus, setGenerationStatus] = useState<"waiting" | "active" | "complete" | "failed">("waiting");
   const [validationStatus, setValidationStatus] = useState<"waiting" | "active" | "complete" | "failed">("waiting");
   const [processingError, setProcessingError] = useState<string | null>(null);
+  const [processingErrorCode, setProcessingErrorCode] = useState<string | undefined>();
   const [isOllamaOffline, setIsOllamaOffline] = useState(false);
   const [processingJob, setProcessingJob] = useState<GenerationJob | null>(null);
   const [savedNotice, setSavedNotice] = useState<string | null>(null);
@@ -105,16 +107,15 @@ export function App() {
   const cancelProcessing = useCallback(() => {
     const session = processingSession.current;
     session?.controller.abort();
-    if (session?.jobId) void cancelGenerationJob(session.jobId).catch((error) => {
+    if (session?.jobId) void cancelGenerationJob(session.jobId).then((job) => {
+      if (processingSession.current === null) setProcessingJob(job);
+    }).catch((error) => {
       setProcessingError(`Could not confirm cancellation: ${error.message}. Check the local API.`);
     });
     processingSession.current = null;
   }, []);
 
   useEffect(() => () => cancelProcessing(), [cancelProcessing]);
-  useEffect(() => {
-    if (currentScreen !== "upload" && currentScreen !== "sonar") cancelProcessing();
-  }, [currentScreen, cancelProcessing]);
 
   // User Authentication State
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(() => {
@@ -143,12 +144,13 @@ export function App() {
   }, []);
 
   const handleLogout = useCallback(() => {
+    cancelProcessing();
     setCurrentUser(null);
     try {
       localStorage.removeItem("point_nemo_explorer");
     } catch {}
     setCurrentScreen("library");
-  }, []);
+  }, [cancelProcessing]);
 
   // Preferences
   const [reducedMotion, setReducedMotion] = useState(() => {
@@ -207,14 +209,15 @@ export function App() {
       setGenerationStatus("waiting");
       setValidationStatus("waiting");
       setProcessingError(null);
+      setProcessingErrorCode(undefined);
       setIsOllamaOffline(false);
-      setProcessingJob(null);
       setSavedNotice(null);
       let processingStage: "extracting" | "generating" | "validating" = "extracting";
 
       try {
         // 1. Upload to /api/documents
         const uploadResult = await start(session.controller.signal);
+        setProcessingJob(null);
         const jobId = uploadResult.jobId;
         session.jobId = jobId;
         if (session.controller.signal.aborted) {
@@ -267,7 +270,7 @@ export function App() {
         if (job?.state === "failed") {
           processingStage = job.errorStage ?? processingStage;
           const errMessage = job.errorMessage || job.errorCode || "Document processing failed.";
-          throw new Error(errMessage);
+          throw new ApiRequestError(errMessage, job.errorCode);
         }
         if (job?.state === "cancelled") throw new Error("Processing was cancelled. Select the PDF again to retry.");
 
@@ -291,6 +294,7 @@ export function App() {
           : err?.message || "Document processing failed.";
         console.error("Processing error:", err);
         setProcessingError(msg);
+        setProcessingErrorCode(isFetchFail ? "NETWORK_ERROR" : err?.code);
 
         setExtractionStatus(processingStage === "extracting" ? "failed" : "complete");
         setGenerationStatus(processingStage === "generating" ? "failed" : processingStage === "validating" ? "complete" : "waiting");
@@ -307,9 +311,11 @@ export function App() {
     [cancelProcessing, refreshLibraryData]
   );
 
-  const handleStartProcessing = useCallback((file: File, reuseSaved = false) =>
+  const handleStartProcessing = useCallback((file: File, reuseSaved = false) => {
+    setProcessingJob(null);
     // Keep the start response readable after Cancel so its job ID can be cancelled.
-    processDocument(() => uploadDocument(file, reuseSaved)), [processDocument]);
+    return processDocument(() => uploadDocument(file, reuseSaved));
+  }, [processDocument]);
   const handleRetryProcessing = useCallback(() => {
     if (!processingJob?.canRetry) return Promise.resolve();
     return processDocument(() => retryDocument(processingJob.documentId));
@@ -428,6 +434,7 @@ export function App() {
               realGenerationStatus={generationStatus}
               realValidationStatus={validationStatus}
               realError={processingError}
+              realErrorCode={processingErrorCode}
               isOllamaOffline={isOllamaOffline}
             />
           )}
