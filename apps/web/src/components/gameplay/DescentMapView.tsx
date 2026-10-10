@@ -37,6 +37,15 @@ export function DescentMapView({
   const [mapLoaded, setMapLoaded] = useState(false);
   const [pendingNode, setPendingNode] = useState<number | null>(null);
   const [ignoredNode, setIgnoredNode] = useState<number | null>(null);
+  const stepMovingUntilRef = useRef<number>(0);
+  const diverAnimsRef = useRef<{
+    up: SpriteAnimation;
+    down: SpriteAnimation;
+    left: SpriteAnimation;
+    right: SpriteAnimation;
+  } | null>(null);
+  const creaturesRef = useRef<SpriteAnimation[] | null>(null);
+  const velRef = useRef({ vx: 0, vy: 0 });
 
   // Synchronize internal ref with external instance player state
   useEffect(() => {
@@ -95,20 +104,26 @@ export function DescentMapView({
     };
   }, [pendingNode]);
 
-  const stepDirection=(direction:"up"|"down"|"left"|"right")=>{
-    if(instance.activeEncounter || pendingNode!==null)return;
-    const player=playerPosRef.current;
-    player.x=Math.max(0.05,Math.min(0.95,player.x+(direction==="left"?-0.055:direction==="right"?0.055:0)));
-    player.y=Math.max(0.05,Math.min(0.95,player.y+(direction==="up"?-0.055:direction==="down"?0.055:0)));
-    player.facing=direction;
-    onUpdatePlayer(player.x,player.y,direction);
-    const target=BASE_ROUTE_POINTS[instance.routeNode];
-    if(target) {
-      const distance=Math.hypot(player.x-target.x,player.y-target.y);
-      if(distance<0.075 && ignoredNode!==instance.routeNode){
+  const stepDirection = (direction: "up" | "down" | "left" | "right") => {
+    if (instance.activeEncounter || pendingNode !== null) return;
+    stepMovingUntilRef.current = performance.now() + 450;
+    const player = playerPosRef.current;
+    const step = 0.085;
+    if (direction === "left") player.x = Math.max(0.05, player.x - step);
+    else if (direction === "right") player.x = Math.min(0.95, player.x + step);
+    else if (direction === "up") player.y = Math.max(0.05, player.y - step);
+    else if (direction === "down") player.y = Math.min(0.95, player.y + step);
+    player.facing = direction;
+    velRef.current.vx = direction === "left" ? -0.55 : direction === "right" ? 0.55 : 0;
+    velRef.current.vy = direction === "up" ? -0.55 : direction === "down" ? 0.55 : 0;
+    const target = BASE_ROUTE_POINTS[instance.routeNode];
+    if (target) {
+      const distance = Math.hypot(player.x - target.x, player.y - target.y);
+      if (distance < 0.075 && ignoredNode !== instance.routeNode) {
         heldKeysRef.current.clear();
+        velRef.current = { vx: 0, vy: 0 };
         setPendingNode(instance.routeNode);
-      } else if(distance>0.085 && ignoredNode===instance.routeNode) {
+      } else if (distance > 0.085 && ignoredNode === instance.routeNode) {
         setIgnoredNode(null);
       }
     }
@@ -141,25 +156,38 @@ export function DescentMapView({
     let prevTime: number | null = null;
     let elapsed=0;
     const particles=Array.from({length:24},()=>({x:Math.random()*650,y:Math.random()*650,speedY:0.25+Math.random()*0.45,size:Math.random()>0.7?2:1,opacity:0.15+Math.random()*0.35}));
+    const diverBubbles: Array<{ x: number; y: number; radius: number; speedY: number; alpha: number; phase: number }> = [];
 
-    // Creature animations
-    const creatures = [
-      new SpriteAnimation(bundle, "barreleye.swim"),
-      new SpriteAnimation(bundle, "gulper.swim"),
-      new SpriteAnimation(bundle, "fringehead.swim"),
-      new SpriteAnimation(bundle, "goblin.idle.profile"),
-    ];
-    const playerAnim = new SpriteAnimation(bundle, "explorer.idle.up");
+    // Persistent Creature & Player animations
+    if (!creaturesRef.current) {
+      creaturesRef.current = [
+        new SpriteAnimation(bundle, "barreleye.swim"),
+        new SpriteAnimation(bundle, "gulper.swim"),
+        new SpriteAnimation(bundle, "fringehead.swim"),
+        new SpriteAnimation(bundle, "goblin.idle.profile"),
+      ];
+    }
+    const creatures = creaturesRef.current;
+
+    if (!diverAnimsRef.current) {
+      diverAnimsRef.current = {
+        up: new SpriteAnimation(bundle, "explorer.swim.up"),
+        down: new SpriteAnimation(bundle, "explorer.swim.down"),
+        left: new SpriteAnimation(bundle, "explorer.swim.left"),
+        right: new SpriteAnimation(bundle, "explorer.swim.right"),
+      };
+    }
+    const diverAnims = diverAnimsRef.current;
 
     const render = (time: number) => {
       const dt = frameDeltaSeconds(time, prevTime);
       prevTime = time;
-      if(!reducedMotion)elapsed += dt;
+      if (!reducedMotion) elapsed += dt;
 
       const width = canvas.width;
       const height = canvas.height;
 
-      // 1. Process Player Movement
+      // 1. Process Fluid Player Movement & Inertia
       let dx =
         Number(heldKeysRef.current.has("KeyD") || heldKeysRef.current.has("ArrowRight")) -
         Number(heldKeysRef.current.has("KeyA") || heldKeysRef.current.has("ArrowLeft"));
@@ -168,40 +196,50 @@ export function DescentMapView({
         Number(heldKeysRef.current.has("KeyW") || heldKeysRef.current.has("ArrowUp"));
 
       const length = Math.hypot(dx, dy);
-      const isMoving = length > 0 && !instance.activeEncounter && pendingNode===null;
+      const isKeyMoving = length > 0 && !instance.activeEncounter && pendingNode === null;
+      const now = performance.now();
 
-      if (isMoving) {
-        dx /= length;
-        dy /= length;
-        const speed = 0.52 * dt;
-        playerPosRef.current.x = Math.max(0.05, Math.min(0.95, playerPosRef.current.x + dx * speed));
-        playerPosRef.current.y = Math.max(0.05, Math.min(0.95, playerPosRef.current.y + dy * speed));
-
-        if (Math.abs(dx) > Math.abs(dy)) {
-          playerPosRef.current.facing = dx < 0 ? "left" : "right";
-        } else {
-          playerPosRef.current.facing = dy < 0 ? "up" : "down";
+      const speedLimit = 0.88;
+      if (isKeyMoving) {
+        velRef.current.vx = (dx / length) * speedLimit;
+        velRef.current.vy = (dy / length) * speedLimit;
+      } else {
+        const drag = Math.pow(0.72, dt * 60);
+        velRef.current.vx *= drag;
+        velRef.current.vy *= drag;
+        if (Math.hypot(velRef.current.vx, velRef.current.vy) < 0.005) {
+          velRef.current.vx = 0;
+          velRef.current.vy = 0;
         }
+      }
 
-        onUpdatePlayer(
-          playerPosRef.current.x,
-          playerPosRef.current.y,
-          playerPosRef.current.facing
-        );
+      const speed = Math.hypot(velRef.current.vx, velRef.current.vy);
+      const isMoving = speed > 0.02 || (stepMovingUntilRef.current > now && !instance.activeEncounter && pendingNode === null);
 
-        // Check distance to target node
-        const target = BASE_ROUTE_POINTS[instance.routeNode];
-        if (target && !instance.activeEncounter && pendingNode === null) {
-          const dist = Math.hypot(playerPosRef.current.x - target.x, playerPosRef.current.y - target.y);
-          if (dist < 0.075) {
-            if (ignoredNode !== instance.routeNode) {
-              heldKeysRef.current.clear();
-              setPendingNode(instance.routeNode);
-            }
-          } else if (dist > 0.085) {
-            if (ignoredNode === instance.routeNode) {
-              setIgnoredNode(null);
-            }
+      if (speed > 0.01) {
+        playerPosRef.current.x = Math.max(0.05, Math.min(0.95, playerPosRef.current.x + velRef.current.vx * dt));
+        playerPosRef.current.y = Math.max(0.05, Math.min(0.95, playerPosRef.current.y + velRef.current.vy * dt));
+
+        if (Math.abs(velRef.current.vx) > Math.abs(velRef.current.vy) * 0.8) {
+          playerPosRef.current.facing = velRef.current.vx < 0 ? "left" : "right";
+        } else {
+          playerPosRef.current.facing = velRef.current.vy < 0 ? "up" : "down";
+        }
+      }
+
+      // Check distance to target node (evaluated continuously every frame)
+      const target = BASE_ROUTE_POINTS[instance.routeNode];
+      if (target && !instance.activeEncounter && pendingNode === null) {
+        const dist = Math.hypot(playerPosRef.current.x - target.x, playerPosRef.current.y - target.y);
+        if (dist < 0.075) {
+          if (ignoredNode !== instance.routeNode) {
+            heldKeysRef.current.clear();
+            velRef.current = { vx: 0, vy: 0 };
+            setPendingNode(instance.routeNode);
+          }
+        } else if (dist > 0.085) {
+          if (ignoredNode === instance.routeNode) {
+            setIgnoredNode(null);
           }
         }
       }
@@ -359,13 +397,15 @@ export function DescentMapView({
 
         const isCurrent = m === instance.routeNode;
         const isPast = m < instance.routeNode;
+        const markerSway = !reducedMotion ? Math.sin(elapsed * 2.2 + m * 1.5) * (3.5 * s) : 0;
+        const markerY = marker.y + markerSway;
 
         ctx.save();
         ctx.globalAlpha = isPast ? 0.45 : 1.0;
 
         // Glowing circle under marker
         ctx.beginPath();
-        ctx.arc(marker.x, marker.y, Math.max(24, width * 0.05), 0, Math.PI * 2);
+        ctx.arc(marker.x, markerY, Math.max(24, width * 0.05), 0, Math.PI * 2);
         ctx.fillStyle = isCurrent ? "rgba(48, 214, 242, 0.35)" : "rgba(6, 20, 38, 0.45)";
         ctx.strokeStyle = isCurrent ? "#d7f6ff" : "rgba(48, 214, 242, 0.4)";
         ctx.lineWidth = isCurrent ? 3 : 1;
@@ -376,7 +416,7 @@ export function DescentMapView({
         const creatureSpecies =
           m === 1 ? "barreleye" : m === 2 ? "gulper" : m === 3 ? "fringehead" : "goblin";
         const creatureScale = speciesScale(bundle, creatureSpecies, 58) * (width / 600);
-        drawFrame(ctx, bundle, creature.frameName, marker.x, marker.y, creatureScale);
+        drawFrame(ctx, bundle, creature.frameName, marker.x, markerY, creatureScale);
 
         // Marker label
         ctx.font = "bold 9px monospace";
@@ -385,25 +425,82 @@ export function DescentMapView({
         ctx.fillStyle = isCurrent ? "#30d6f2" : "#7ea0b8";
         const rawLabel = lesson.topics[m] || BASE_ROUTE_POINTS[m].label;
         const stopLabel = isPast ? `✓ ${rawLabel.toUpperCase()}` : rawLabel.toUpperCase();
-        ctx.fillText(stopLabel, marker.x, marker.y + width * 0.058);
+        ctx.fillText(stopLabel, marker.x, markerY + width * 0.058);
         ctx.restore();
       }
 
-      // 5. Draw Player Diver
-      const playerAnimName = `explorer.${isMoving && !reducedMotion ? "swim" : "idle"}.${playerPosRef.current.facing}`;
-      playerAnim.play(playerAnimName);
-      if (!reducedMotion) playerAnim.update(dt);
+      // Advance synchronized swimming stroke cycle across all directions
+      if (!reducedMotion) {
+        const strokeDt = isMoving ? dt * 1.55 : dt * 0.45;
+        diverAnims.up.update(strokeDt);
+        diverAnims.down.update(strokeDt);
+        diverAnims.left.update(strokeDt);
+        diverAnims.right.update(strokeDt);
+      }
 
+      // 5. Draw Player Diver with crisp, axis-aligned pixel-art rendering
+      const activeDiverAnim = diverAnims[playerPosRef.current.facing];
       const pScale = speciesScale(bundle, "explorer", 64) * (width / 600);
+      const idleBob = !reducedMotion && !isMoving ? Math.sin(elapsed * 2.8) * (3.5 * s) : 0;
       const px = Math.round(playerPosRef.current.x * width);
-      const py = Math.round(playerPosRef.current.y * height);
-      playerAnim.draw(ctx, px, py, pScale);
+      const py = Math.round(playerPosRef.current.y * height + idleBob);
+
+      // Scuba regulator bubble exhalations with momentum drift
+      if (!reducedMotion) {
+        if (Math.random() < (isMoving ? 0.09 : 0.035) && diverBubbles.length < 16) {
+          diverBubbles.push({
+            x: px + (Math.random() * 8 - 4) * s - velRef.current.vx * 15 * s,
+            y: py - 12 * s,
+            radius: (1.2 + Math.random() * 1.8) * s,
+            speedY: (20 + Math.random() * 25) * s,
+            alpha: 0.75 + Math.random() * 0.2,
+            phase: Math.random() * Math.PI * 2,
+          });
+        }
+        for (let b = diverBubbles.length - 1; b >= 0; b--) {
+          const bub = diverBubbles[b];
+          bub.y -= bub.speedY * dt;
+          bub.x += Math.sin(elapsed * 4 + bub.phase) * (6 * dt * s);
+          bub.alpha -= dt * 0.4;
+          if (bub.alpha <= 0 || bub.y < 0) {
+            diverBubbles.splice(b, 1);
+            continue;
+          }
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(bub.x, bub.y, bub.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(180, 240, 255, ${Math.max(0, bub.alpha * 0.6)})`;
+          ctx.strokeStyle = `rgba(215, 246, 255, ${Math.max(0, bub.alpha)})`;
+          ctx.lineWidth = 1;
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      // Visor cyan glow halo
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(px, py - 4 * s, 12 * s, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(48, 214, 242, ${0.12 + Math.sin(elapsed * 3) * 0.06})`;
+      ctx.fill();
+      ctx.restore();
+
+      // Draw diver sprite axis-aligned to preserve nearest-neighbor pixel integrity
+      activeDiverAnim.draw(ctx, px, py, pScale);
 
       animId = requestAnimationFrame(render);
     };
 
     animId = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(animId);
+    return () => {
+      cancelAnimationFrame(animId);
+      onUpdatePlayer(
+        playerPosRef.current.x,
+        playerPosRef.current.y,
+        playerPosRef.current.facing
+      );
+    };
   }, [bundle, mapLoaded, instance.routeNode, instance.activeEncounter, pendingNode, ignoredNode, lesson, reducedMotion, onReachTarget, onUpdatePlayer]);
 
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -468,6 +565,11 @@ export function DescentMapView({
                   className="primary-button"
                   onClick={() => {
                     heldKeysRef.current.clear();
+                    onUpdatePlayer(
+                      playerPosRef.current.x,
+                      playerPosRef.current.y,
+                      playerPosRef.current.facing
+                    );
                     onReachTarget(pendingNode);
                     setPendingNode(null);
                   }}
